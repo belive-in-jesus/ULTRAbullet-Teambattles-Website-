@@ -80,10 +80,12 @@ def main() -> int:
         )
     if not matches:
         print(
-            "WARNING: no completed tournaments matched the current filter. "
-            "Check the Lichess username and NAME_FILTERS input.",
+            "ERROR: no completed tournaments matched the current filter. "
+            "Check the Lichess username and NAME_FILTERS input. "
+            "Stopping before aggregation so an existing leaderboard is not overwritten with empty data.",
             file=sys.stderr,
         )
+        return 2
     return 0
 
 
