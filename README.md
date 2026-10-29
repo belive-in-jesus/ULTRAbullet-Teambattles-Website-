@@ -7,13 +7,15 @@ A standalone website for the recurring UltraBullet team battles organised by **N
 ## Features
 
 - Combined team and individual points across matching finished UltraBullet tournaments
-- Searchable team/player standings and per-entry statistics
+- Searchable team/player standings with sort controls and CSV export
+- Detailed competitor profiles with cumulative performance metrics and recent battle history
+- Searchable battle archive linking back to the original Lichess tournaments
 - Daily automated refresh through GitHub Actions
 - Public, static frontend; no Lichess token is exposed to website visitors
 
 ## Repository layout
 
-- `docs/` — GitHub Pages website and generated JSON data
+- `docs/` — esports-style GitHub Pages dashboard and generated JSON data (`battle_history.json`, team/player leaderboards and metadata)
 - `scripts/discover.py` — finds matching finished tournaments created by the configured Lichess account
 - `scripts/fetch_worker.py` — fetches each tournament's individual and team results
 - `scripts/aggregate.py` — combines scores and calculates statistics
