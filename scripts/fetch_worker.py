@@ -149,6 +149,13 @@ def main() -> int:
 
     output = {
         "worker": CHUNK_INDEX,
+        "tournament_records": [{
+            "id": t.get("id"),
+            "name": t.get("fullName") or t.get("name") or t.get("id"),
+            "startsAt": t.get("startsAt"),
+            "nbPlayers": t.get("nbPlayers"),
+            "url": f"https://lichess.org/tournament/{t.get('id')}",
+        } for t in assigned],
         "processed": len(assigned),
         "player_points": player_points,
         "player_records": player_records,
