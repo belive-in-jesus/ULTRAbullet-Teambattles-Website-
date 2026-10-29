@@ -56,11 +56,15 @@ def main() -> int:
     team_totals, team_names, team_records = {}, {}, {}
     tournaments_processed = 0
     all_errors = []
+    battle_history = {}
 
     for filename in files:
         with open(filename, encoding="utf-8") as handle:
             data = json.load(handle)
         tournaments_processed += int(data.get("processed", 0))
+        for battle in data.get("tournament_records", []):
+            if battle.get("id"):
+                battle_history[battle["id"]] = battle
         for username, points in data.get("player_points", {}).items():
             player_totals[username] = player_totals.get(username, 0) + points
         for username, records in data.get("player_records", {}).items():
@@ -82,6 +86,7 @@ def main() -> int:
         "username": username,
         "points": points,
         **compute_stats(player_records.get(username, [])),
+        "history": sorted(player_records.get(username, []), key=lambda row: row.get("startsAt") or "", reverse=True),
     } for index, (username, points) in enumerate(player_rank)]
     teams = [{
         "rank": index + 1,
@@ -89,6 +94,7 @@ def main() -> int:
         "team_name": team_names.get(team_id, team_id),
         "points": points,
         **compute_stats(team_records.get(team_id, [])),
+        "history": sorted(team_records.get(team_id, []), key=lambda row: row.get("startsAt") or "", reverse=True),
     } for index, (team_id, points) in enumerate(team_rank)]
 
     meta = {
@@ -103,6 +109,7 @@ def main() -> int:
         ("leaderboard_players.json", players),
         ("leaderboard_teams.json", teams),
         ("meta.json", meta),
+        ("battle_history.json", sorted(battle_history.values(), key=lambda row: row.get("startsAt") or "", reverse=True)),
     ):
         with open(os.path.join(OUTPUT_DIR, filename), "w", encoding="utf-8") as handle:
             json.dump(payload, handle, indent=2, ensure_ascii=False)
