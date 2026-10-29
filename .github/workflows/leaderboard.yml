@@ -1,0 +1,130 @@
+name: UltraBullet Team Battles Leaderboard
+
+on:
+  workflow_dispatch:
+    inputs:
+      lichess_user:
+        description: "Lichess username that created the battles"
+        required: false
+        default: "Nathanael01"
+      name_filters:
+        description: "Comma-separated name filters (case-insensitive)"
+        required: false
+        default: "ultrabullet"
+      num_workers:
+        description: "Parallel workers (start with 8)"
+        required: false
+        default: "8"
+      request_delay:
+        description: "Delay in seconds between API calls per worker"
+        required: false
+        default: "0.5"
+  schedule:
+    - cron: "0 3 * * *" # Daily at 03:00 UTC
+
+permissions:
+  contents: write
+
+concurrency:
+  group: leaderboard-refresh
+  cancel-in-progress: false
+
+jobs:
+  discover:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: \${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependency
+        run: python -m pip install -r requirements.txt
+      - name: Find finished matching tournaments
+        env:
+          LICHESS_USER: \${{ inputs.lichess_user || vars.LICHESS_USER || 'Nathanael01' }}
+          NAME_FILTERS: \${{ inputs.name_filters || vars.NAME_FILTERS || 'ultrabullet' }}
+          DISCOVER_NB: \${{ vars.DISCOVER_NB || '6000' }}
+          LICHESS_TOKEN: \${{ secrets.LICHESS_TOKEN }}
+        run: python scripts/discover.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: tournaments
+          path: tournaments.json
+          if-no-files-found: error
+          retention-days: 1
+      - id: set-matrix
+        name: Prepare parallel worker matrix
+        env:
+          NUM_WORKERS: \${{ inputs.num_workers || '8' }}
+        run: |
+          python -c "import json,os; print('matrix=' + json.dumps(list(range(max(1, min(int(os.environ['NUM_WORKERS']), 20))))))" >> "$GITHUB_OUTPUT"
+
+  fetch:
+    needs: discover
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        chunk: \${{ fromJson(needs.discover.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependency
+        run: python -m pip install -r requirements.txt
+      - uses: actions/download-artifact@v4
+        with:
+          name: tournaments
+      - name: Fetch results (worker \${{ matrix.chunk }})
+        env:
+          LICHESS_TOKEN: \${{ secrets.LICHESS_TOKEN }}
+          CHUNK_INDEX: \${{ matrix.chunk }}
+          NUM_WORKERS: \${{ inputs.num_workers || '8' }}
+          REQUEST_DELAY: \${{ inputs.request_delay || '0.5' }}
+        run: python scripts/fetch_worker.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: partial-\${{ matrix.chunk }}
+          path: partial_\${{ matrix.chunk }}.json
+          if-no-files-found: error
+          retention-days: 1
+
+  aggregate:
+    needs: fetch
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Download worker results
+        uses: actions/download-artifact@v4
+        with:
+          pattern: partial-*
+          path: artifacts
+          merge-multiple: true
+      - name: Build cumulative leaderboards
+        env:
+          NAME_FILTERS: \${{ inputs.name_filters || vars.NAME_FILTERS || 'ultrabullet' }}
+        run: python scripts/aggregate.py
+      - name: Upload processing report
+        uses: actions/upload-artifact@v4
+        with:
+          name: leaderboard-report
+          path: |
+            docs/data/leaderboard_players.json
+            docs/data/leaderboard_teams.json
+            docs/data/meta.json
+            errors.json
+          if-no-files-found: error
+          retention-days: 7
+      - name: Commit refreshed website data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add docs/data
+          git diff --cached --quiet || git commit -m "Refresh UltraBullet leaderboard data"
+          git push
