@@ -1,8 +1,8 @@
 {
-  "generated_at": null,
-  "tournaments_processed": 0,
-  "teams_count": 0,
-  "players_count": 0,
-  "errors_count": 0,
+  "generated_at": "2026-10-29T18:37:11.692677+00:00",
+  "tournaments_processed": 654,
+  "teams_count": 817,
+  "players_count": 13474,
+  "errors_count": 1,
   "name_filters": "ultrabullet"
 }
