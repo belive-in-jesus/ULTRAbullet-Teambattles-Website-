@@ -435,7 +435,7 @@ function renderDashboard(){
   const team=state.teams[0],player=state.players[0];
   if(team){
     $("leader-team-link").textContent=team.team_name||"Unknown team";
-    $("leader-team-link").href=team.team_id?"https://lichess.org/team/"+encodeURIComponent(team.team_id):"#leaderboard";
+    $("leader-team-link").href=team.team_id?profileUrl(team):"#leaderboard";
     $("leader-team-points").textContent=num(team.points)+" pts";
   }else{
     $("leader-team-link").textContent="Not available";
@@ -444,7 +444,7 @@ function renderDashboard(){
   }
   if(player){
     $("leader-player-link").textContent=player.username||"Unknown player";
-    $("leader-player-link").href=player.username?"https://lichess.org/@/"+encodeURIComponent(player.username):"#leaderboard";
+    $("leader-player-link").href=player.username?profileUrl(player):"#leaderboard";
     $("leader-player-points").textContent=num(player.points)+" pts";
   }else{
     $("leader-player-link").textContent="Not available";
