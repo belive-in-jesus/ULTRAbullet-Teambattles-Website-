@@ -13,7 +13,6 @@ A standalone website for the recurring UltraBullet team battles organised by **N
 - Hall of Fame with season champions, podiums and automatically updated career records
 - Dedicated shareable team and player profile pages with cumulative metrics, period filters, recent-form charts and paginated battle history
 - Compact first-character profile lookup indexes to resolve direct profile URLs without downloading the full leaderboard
-- Competitor profiles with cumulative metrics, recent-form charts and lazily loaded battle history
 - Searchable battle archive linking back to the original Lichess tournaments
 - Information page explaining eligibility, ranking periods, points and data refreshes
 - Refined responsive design, consistent typography and enlarged brand logo
