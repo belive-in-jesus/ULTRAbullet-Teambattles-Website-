@@ -1,8 +1,1 @@
-{
-  "generated_at": "2026-10-30T03:41:55.383291+00:00",
-  "tournaments_processed": 654,
-  "teams_count": 817,
-  "players_count": 13474,
-  "errors_count": 1,
-  "name_filters": "ultrabullet"
-}
+{"generated_at":"2026-10-30T14:51:02.410056+00:00","tournaments_processed":638,"teams_count":817,"players_count":13345,"errors_count":0,"selection_rule":"Numbered regular ULTRAbullet Team Battles only; special and unnumbered events excluded.","profile_shard_size":200,"profiles_shards":72,"season_size":50,"season_count":13,"month_count":24,"max_battle_number":642,"excluded_events_count":0}
