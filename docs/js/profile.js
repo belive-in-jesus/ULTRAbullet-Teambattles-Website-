@@ -39,6 +39,17 @@ function filteredHistory(){
   const query=state.query.trim().toLocaleLowerCase();
   return filteredHistoryForStats().filter(record=>!query||String(record.name||"").toLocaleLowerCase().includes(query));
 }
+function longestPodiumStreak(rows){
+  const byBattle=new Map();
+  rows.forEach(row=>{const n=battleNumber(row),rank=Number(row.rank);if(n&&Number.isFinite(rank))byBattle.set(n,rank);});
+  if(!byBattle.size)return 0;
+  let current=0,longest=0;
+  for(let n=Math.min(...byBattle.keys());n<=Math.max(...byBattle.keys());n++){
+    const rank=byBattle.get(n);
+    if(rank!==undefined&&rank>=1&&rank<=3){current++;longest=Math.max(longest,current);}else current=0;
+  }
+  return longest;
+}
 function metrics(rows){
   const points=rows.reduce((sum,row)=>sum+(Number(row.score)||0),0);
   const ranks=rows.map(row=>Number(row.rank)).filter(value=>Number.isFinite(value)&&value>0);
@@ -51,11 +62,12 @@ function metrics(rows){
     top3_rate:ranks.length?podiums/ranks.length:0,
     best_finish:ranks.length?Math.min(...ranks):null,
     avg_finish:ranks.length?ranks.reduce((sum,value)=>sum+value,0)/ranks.length:null,
-    active_since:rows.length?Math.min(...rows.map(row=>Number(row.startsAt)||Infinity)):null
+    active_since:rows.length?Math.min(...rows.map(row=>Number(row.startsAt)||Infinity)):null,
+    longest_podium_streak:longestPodiumStreak(rows)
   };
 }
 function renderStats(){
-  const m=state.period==="all"?state.entry:metrics(filteredHistoryForStats());
+  const m=metrics(filteredHistoryForStats());
   $("stat-points").textContent=number(m.points);
   $("stat-battles").textContent=number(m.tournaments_played);
   $("stat-average").textContent=number(m.avg_points);
@@ -69,6 +81,7 @@ function renderStats(){
     ["Average finish",m.avg_finish==null?"—":"#"+number(m.avg_finish),"Across recorded finishes"],
     ["First places",m.first_places,"Tournament wins"],
     ["Podium rate",((Number(m.top3_rate)||0)*100).toFixed(1)+"%","Top-three finishes"],
+    ["Longest podium streak",number(m.longest_podium_streak),"Consecutive numbered battles with a top-three finish"],
     ["Active since",formatDate(m.active_since),"First recorded result"]
   ];
   $("profile-records").innerHTML=fields.map(([label,value,caption])=>'<article class="profile-record"><span>'+escapeHtml(label)+'</span><strong>'+escapeHtml(value??"—")+'</strong><small>'+escapeHtml(caption)+'</small></article>').join("");
