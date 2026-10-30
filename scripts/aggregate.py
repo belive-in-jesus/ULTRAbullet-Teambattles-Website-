@@ -27,6 +27,32 @@ def season_number_for_battle(battle_number: int) -> int:
     return (battle_number - 1) // SEASON_SIZE + 1
 
 
+def longest_podium_streak(records: list) -> int:
+    """Count podium finishes in consecutive official numbered battles."""
+    ranks_by_number = {}
+    for row in records:
+        number = parse_battle_number(row.get("name"))
+        rank = row.get("rank")
+        if number is None or rank is None:
+            continue
+        try:
+            ranks_by_number[number] = int(rank)
+        except (TypeError, ValueError):
+            continue
+    if not ranks_by_number:
+        return 0
+
+    current = longest = 0
+    for number in range(min(ranks_by_number), max(ranks_by_number) + 1):
+        rank = ranks_by_number.get(number)
+        if rank is not None and 1 <= rank <= 3:
+            current += 1
+            longest = max(longest, current)
+        else:
+            current = 0
+    return longest
+
+
 def compute_stats(records: list) -> dict:
     if not records:
         return {}
@@ -42,6 +68,7 @@ def compute_stats(records: list) -> dict:
         "avg_points": round(sum(scores) / len(scores), 1) if scores else None,
         "active_since": records[0].get("startsAt"),
         "last_played": records[-1].get("startsAt"),
+        "longest_podium_streak": longest_podium_streak(records),
     }
     if ranks:
         podiums = sum(rank <= 3 for rank in ranks)
@@ -108,6 +135,7 @@ def build_record_holders(rows: list, kind: str) -> list:
         ("most_podiums", "Most podium finishes", "podiums", "podiums", 1),
         ("most_first_places", "Most first places", "first_places", "wins", 1),
         ("highest_single_battle", "Highest single-battle score", "highest_points", "points", 1),
+        ("longest_podium_streak", "Longest consecutive podium streak", "longest_podium_streak", "consecutive battles", 1),
         ("highest_average", "Highest average points (25+ battles)", "avg_points", "points / battle", 25),
     ]
     records = []
