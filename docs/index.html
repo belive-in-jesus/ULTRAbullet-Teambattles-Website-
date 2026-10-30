@@ -318,16 +318,50 @@ function render(){
   body.innerHTML=visibleList.map((r,i)=>{const absoluteIndex=start+i;const rank=sort==="rank"?Number(r.rank||absoluteIndex+1):absoluteIndex+1;const n=name(r)||"Unknown";return '<tr tabindex="0" role="button" aria-label="Show details for '+esc(n)+'" data-index="'+i+'"><td class="rank '+(rank<=3?"top":"")+'">'+String(rank).padStart(2,"0")+'</td><td><div class="entity"><span class="mini-mark" aria-hidden="true">'+esc(String(n||"?").trim().slice(0,1).toUpperCase())+'</span><span>'+esc(n)+'</span></div></td><td class="optional-col secondary">'+(r.tournaments_played==null?"—":num(r.tournaments_played))+'</td><td class="points">'+num(r.points)+'</td><td class="optional-col points">'+(r.avg_points==null?"—":num(r.avg_points))+'</td></tr>';}).join("");
   Array.from(body.querySelectorAll("tr[data-index]")).forEach(tr=>{const open=()=>details(visibleList[Number(tr.dataset.index)]);tr.addEventListener("click",open);tr.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();open();}});});
 }
-function renderProfileHistory(history){$("modal-history-list").innerHTML=history.length?history.slice(0,12).map(b=>'<li><span>'+esc(b.name||"UltraBullet battle")+'<br><small>'+esc(date(b.startsAt))+'</small></span><strong>'+esc(num(b.score))+' pts</strong></li>').join(""):'<li>No detailed battle records are available for this competitor.</li>';}
+function renderProfileHistory(history){
+  const recent=history.slice(0,10).reverse();
+  const maxScore=Math.max(1,...recent.map(b=>Number(b.score)||0));
+  $("modal-form-count").textContent=recent.length?recent.length+" RECENT BATTLES":"NO RECENT DATA";
+  $("modal-form-chart").innerHTML=recent.length?recent.map(b=>{
+    const score=Number(b.score)||0;
+    const height=Math.max(5,Math.round(score/maxScore*100));
+    const match=String(b.name||"").match(/(\d+)(?:st|nd|rd|th)\b/i);
+    const label=match?"#"+match[1]:date(b.startsAt);
+    return '<div class="form-column"><div class="form-bar-wrap" title="'+esc((b.name||"Battle")+" · "+num(score)+" points")+'"><i style="height:'+height+'%"></i></div><span>'+esc(label)+'</span></div>';
+  }).join(""):'<span class="form-chart-empty">No battle history is available for this competitor.</span>';
+  $("modal-history-list").innerHTML=history.length?history.slice(0,12).map(b=>'<li><span>'+esc(b.name||"UltraBullet battle")+'<br><small>'+esc(date(b.startsAt))+'</small></span><strong>'+esc(num(b.score))+' pts</strong></li>').join(""):'<li>No detailed battle records are available for this competitor.</li>';
+}
 async function profileHistory(r){if(Array.isArray(r.history))return r.history;if(!r.profile_file||!r.profile_key)return[];const file=r.profile_file;if(!state.profileCache[file])state.profileCache[file]=load("./data/"+file).catch(error=>{delete state.profileCache[file];throw error;});const shard=await state.profileCache[file];const profile=shard[r.profile_key];return profile&&Array.isArray(profile.history)?profile.history:[];}
 function details(r){
-  if(!r)return;const token=++state.profileRequest;$("modal-title").textContent=name(r)||"Competitor";
-  const periodLabel=state.periodData?state.periodData.label+" · ":"";$("modal-points").textContent=periodLabel+num(r.points)+" points · rank #"+num(r.rank);
+  if(!r)return;
+  const token=++state.profileRequest;
+  $("modal-title").textContent=name(r)||"Competitor";
+  const periodLabel=state.periodData?state.periodData.label+" · ":"";
+  $("modal-points").textContent=periodLabel+num(r.points)+" points · rank #"+num(r.rank);
   const cards=stats.filter(([k])=>r[k]!==undefined&&r[k]!==null&&r[k]!=="").map(([k,label,fmt])=>'<div class="detail-item"><span>'+esc(label)+'</span><strong>'+esc(fmt(r[k]))+'</strong></div>');
   $("modal-stats").innerHTML=cards.length?cards.join(""):'<div class="detail-item"><span>Statistics</span><strong>Not available yet</strong></div>';
-  const a=$("modal-link");a.href=link(r)||"#";a.style.display=a.href&&a.getAttribute("href")!=="#"?"inline-flex":"none";
-  $("modal-history-list").innerHTML='<li>Loading battle history…</li>';$("modal-backdrop").classList.add("open");$("modal-close").focus();
-  profileHistory(r).then(history=>{if(token===state.profileRequest){if(state.periodData&&Array.isArray(state.periodData.battle_ids)){const ids=new Set(state.periodData.battle_ids.map(String));history=history.filter(b=>ids.has(String(b.id)));}renderProfileHistory(history);}}).catch(error=>{console.error("Could not load competitor history",error);if(token===state.profileRequest)$("modal-history-list").innerHTML='<li>Battle history could not be loaded. Please try opening this profile again.</li>';});
+  const a=$("modal-link");
+  a.href=link(r)||"#";
+  a.style.display=a.href&&a.getAttribute("href")!=="# "&&a.getAttribute("href")!=="# "?"inline-flex":"none";
+  $("modal-history-list").innerHTML='<li>Loading battle history…</li>';
+  $("modal-form-chart").innerHTML='<span class="form-chart-empty">Loading recent battle history…</span>';
+  $("modal-form-count").textContent="LOADING";
+  $("modal-backdrop").classList.add("open");
+  $("modal-close").focus();
+  profileHistory(r).then(history=>{
+    if(token!==state.profileRequest)return;
+    if(state.periodData&&Array.isArray(state.periodData.battle_ids)){
+      const ids=new Set(state.periodData.battle_ids.map(String));
+      history=history.filter(b=>ids.has(String(b.id)));
+    }
+    renderProfileHistory(history);
+  }).catch(error=>{
+    console.error("Could not load competitor history",error);
+    if(token===state.profileRequest){
+      renderProfileHistory([]);
+      $("modal-history-list").innerHTML='<li>Battle history could not be loaded. Please try opening this profile again.</li>';
+    }
+  });
 }
 function renderDashboard(){
   const seasons=state.periodsIndex&&Array.isArray(state.periodsIndex.seasons)?state.periodsIndex.seasons:[];
