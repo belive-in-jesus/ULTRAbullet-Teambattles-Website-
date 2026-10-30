@@ -22,3 +22,9 @@ jobs:
           python -m py_compile scripts/discover.py scripts/fetch_worker.py scripts/aggregate.py scripts/tests/test_aggregate.py
       - name: Run aggregation tests
         run: python -m unittest discover -s scripts/tests -v
+      - name: Check browser JavaScript syntax
+        run: |
+          node --check docs/js/analytics.js
+          node --check docs/js/profile.js
+      - name: Run analytics regression tests
+        run: node --test scripts/tests/test_analytics.js
