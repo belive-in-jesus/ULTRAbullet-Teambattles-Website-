@@ -119,8 +119,6 @@ jobs:
       - name: Build cumulative leaderboards
         env:
           NAME_FILTERS: ${{ inputs.name_filters || vars.NAME_FILTERS || 'ultrabullet' }}
-          EXTRA_NAME_FILTERS: ${{ inputs.extra_name_filters || vars.EXTRA_NAME_FILTERS || '' }}
-          INCLUDE_TOURNAMENT_IDS: ${{ inputs.include_tournament_ids || vars.INCLUDE_TOURNAMENT_IDS || '' }}
         run: python scripts/aggregate.py
       - name: Upload processing report
         uses: actions/upload-artifact@v4
