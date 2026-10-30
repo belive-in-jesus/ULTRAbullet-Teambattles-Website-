@@ -21,7 +21,7 @@ A standalone website for the recurring UltraBullet team battles organised by **N
 - `scripts/aggregate.py` — combines scores and calculates statistics
 - `.github/workflows/leaderboard.yml` — daily and manual update workflow
 - `.github/workflows/validate.yml` — pull-request checks and aggregation tests
-- `scripts/tests/test_aggregate.py` — regression tests for chronological 50-battle seasons and monthly groupings
+- `scripts/tests/test_aggregate.py` — regression tests for official-number 50-battle seasons, missing numbers, special-event exclusion and monthly groupings
 
 ## Publish the website
 
