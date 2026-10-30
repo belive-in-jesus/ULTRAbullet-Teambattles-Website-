@@ -84,6 +84,77 @@ def build_period_ranking(records_by_key, names_by_key, period_ids, display_field
     return ranked
 
 
+def compact_leader(row: dict, kind: str) -> dict:
+    name_field = "team_name" if kind == "teams" else "username"
+    id_field = "team_id" if kind == "teams" else "username"
+    fields = (
+        "rank", "points", "tournaments_played", "avg_points",
+        "podiums", "first_places", "best_finish",
+        "highest_points", "best_tournament",
+    )
+    return {
+        "name": row.get(name_field),
+        "id": row.get(id_field),
+        **{field: row.get(field) for field in fields},
+    }
+
+
+def build_record_holders(rows: list, kind: str) -> list:
+    name_field = "team_name" if kind == "teams" else "username"
+    id_field = "team_id" if kind == "teams" else "username"
+    definitions = [
+        ("most_points", "Most career points", "points", "points", 1),
+        ("most_battles", "Most battles played", "tournaments_played", "battles", 1),
+        ("most_podiums", "Most podium finishes", "podiums", "podiums", 1),
+        ("most_first_places", "Most first places", "first_places", "wins", 1),
+        ("highest_single_battle", "Highest single-battle score", "highest_points", "points", 1),
+        ("highest_average", "Highest average points (25+ battles)", "avg_points", "points / battle", 25),
+    ]
+    records = []
+    for key, label, field, unit, minimum_battles in definitions:
+        eligible = [
+            row for row in rows
+            if row.get(field) is not None
+            and int(row.get("tournaments_played") or 0) >= minimum_battles
+        ]
+        if not eligible:
+            continue
+        holder = max(eligible, key=lambda row: (float(row.get(field) or 0), str(row.get(name_field) or "").lower()))
+        records.append({
+            "key": key,
+            "label": label,
+            "holder": holder.get(name_field),
+            "holder_id": holder.get(id_field),
+            "value": holder.get(field),
+            "unit": unit,
+            "detail": holder.get("best_tournament") if field == "highest_points" else None,
+            "battles_required": minimum_battles if minimum_battles > 1 else None,
+        })
+    return records
+
+
+def build_hall_of_fame(teams: list, players: list, seasons: list, generated_at: str) -> dict:
+    """Build a compact, refreshable history page from the ranking outputs."""
+    return {
+        "generated_at": generated_at,
+        "totals": {
+            "numbered_battles": 0,
+            "teams": len(teams),
+            "players": len(players),
+            "completed_seasons": sum(bool(season.get("complete")) for season in seasons),
+        },
+        "all_time": {
+            "teams": [compact_leader(row, "teams") for row in teams[:5]],
+            "players": [compact_leader(row, "players") for row in players[:5]],
+        },
+        "records": {
+            "teams": build_record_holders(teams, "teams"),
+            "players": build_record_holders(players, "players"),
+        },
+        "seasons": seasons,
+    }
+
+
 def main() -> int:
     pattern = os.path.join(PARTIALS_DIR, "**", "partial_*.json")
     files = sorted(glob.glob(pattern, recursive=True))
@@ -242,6 +313,7 @@ def main() -> int:
         seasons_by_number[season_number_for_battle(int(battle["battle_number"]))].append(battle)
 
     season_index = []
+    season_hall = []
     season_count = season_number_for_battle(max_battle_number) if max_battle_number else 0
     for season_number in range(1, season_count + 1):
         battles = seasons_by_number.get(season_number, [])
@@ -276,6 +348,26 @@ def main() -> int:
             "data_file": data_file,
         })
 
+        season_hall.append({
+            "key": season_key,
+            "season_number": season_number,
+            "label": label,
+            "battle_count": len(battles),
+            "expected_battles": SEASON_SIZE,
+            "missing_battle_numbers": missing_numbers,
+            "first_battle": first_battle,
+            "last_battle": last_battle,
+            "complete": complete,
+            "in_progress": in_progress,
+            "status": "complete" if complete else ("in_progress" if in_progress else "upcoming"),
+            "start_at": min(dated) if dated else None,
+            "end_at": max(dated) if dated else None,
+            "team_podium": [compact_leader(row, "teams") for row in payload["teams"][:3]],
+            "player_podium": [compact_leader(row, "players") for row in payload["players"][:3]],
+            "team_champion": compact_leader(payload["teams"][0], "teams") if complete and payload["teams"] else None,
+            "player_champion": compact_leader(payload["players"][0], "players") if complete and payload["players"] else None,
+        })
+
     generated_at = datetime.now(timezone.utc).isoformat()
     period_index = {
         "generated_at": generated_at,
@@ -288,6 +380,10 @@ def main() -> int:
     }
     write_json(os.path.join(OUTPUT_DIR, "periods_index.json"), period_index)
 
+    hall_of_fame = build_hall_of_fame(teams, players, list(reversed(season_hall)), generated_at)
+    hall_of_fame["totals"]["numbered_battles"] = len(numbered_battles)
+    write_json(os.path.join(OUTPUT_DIR, "hall_of_fame.json"), hall_of_fame)
+
     meta = {
         "generated_at": generated_at,
         "tournaments_processed": len(numbered_battles),
@@ -299,6 +395,7 @@ def main() -> int:
         "profiles_shards": sum(len(shards) for shards in profile_shards.values()),
         "season_size": SEASON_SIZE,
         "season_count": len(season_index),
+        "hall_of_fame_seasons": len(season_hall),
         "month_count": len(month_index),
         "max_battle_number": max_battle_number,
         "excluded_events_count": len(battle_history) - len(regular_battles),
