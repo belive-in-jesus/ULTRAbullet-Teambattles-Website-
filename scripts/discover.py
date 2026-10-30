@@ -58,12 +58,17 @@ def fetch_explicit_tournament(tournament_id: str) -> dict:
     tournament = response.json()
     if not tournament.get("id"):
         raise ValueError(f"Tournament ID {tournament_id!r} returned no tournament record")
-    if ONLY_FINISHED and tournament.get("status") != FINISHED_STATUS:
+    is_finished = tournament.get("isFinished") is True or tournament.get("status") == FINISHED_STATUS
+    if ONLY_FINISHED and not is_finished:
         raise ValueError(
             f"Explicit tournament {tournament_id!r} is not finished "
-            f"(status={tournament.get('status')!r}); refusing to include it."
+            f"(isFinished={tournament.get('isFinished')!r}, status={tournament.get('status')!r}); "
+            "refusing to include it."
         )
-    return normalize_tournament(tournament)
+    record = normalize_tournament(tournament)
+    if is_finished:
+        record["status"] = FINISHED_STATUS
+    return record
 
 
 def main() -> int:
