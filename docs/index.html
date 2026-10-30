@@ -114,8 +114,8 @@
       </article>
       <article class="dashboard-card leaders-card">
         <div class="dashboard-card-head"><span class="info-kicker">ALL-TIME LEADERS</span><span class="dashboard-status">CUMULATIVE</span></div>
-        <div class="leader-entry"><span>Leading team</span><a id="leader-team-link" href="#leaderboard">—</a><strong id="leader-team-points">—</strong></div>
-        <div class="leader-entry"><span>Leading player</span><a id="leader-player-link" href="#leaderboard">—</a><strong id="leader-player-points">—</strong></div>
+        <div class="leader-entry"><span>Leading team</span><a id="leader-team-link" href="#leaderboard" target="_blank" rel="noopener noreferrer">—</a><strong id="leader-team-points">—</strong></div>
+        <div class="leader-entry"><span>Leading player</span><a id="leader-player-link" href="#leaderboard" target="_blank" rel="noopener noreferrer">—</a><strong id="leader-player-points">—</strong></div>
         <a class="dashboard-link" href="#leaderboard">Explore full leaderboard ↓</a>
       </article>
     </section>
@@ -291,7 +291,7 @@ function renderDashboard(){
   const team=state.teams[0],player=state.players[0];
   if(team){
     $("leader-team-link").textContent=team.team_name||"Unknown team";
-    $("leader-team-link").href=link(team)||"#leaderboard";
+    $("leader-team-link").href=team.team_id?"https://lichess.org/team/"+encodeURIComponent(team.team_id):"#leaderboard";
     $("leader-team-points").textContent=num(team.points)+" pts";
   }else{
     $("leader-team-link").textContent="Not available";
@@ -300,7 +300,7 @@ function renderDashboard(){
   }
   if(player){
     $("leader-player-link").textContent=player.username||"Unknown player";
-    $("leader-player-link").href=link(player)||"#leaderboard";
+    $("leader-player-link").href=player.username?"https://lichess.org/@/"+encodeURIComponent(player.username):"#leaderboard";
     $("leader-player-points").textContent=num(player.points)+" pts";
   }else{
     $("leader-player-link").textContent="Not available";
