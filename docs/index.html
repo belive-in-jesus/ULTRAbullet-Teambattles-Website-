@@ -150,7 +150,7 @@ function details(r){
   $("modal-stats").innerHTML=cards.length?cards.join(""):'<div class="detail-item"><span>Statistics</span><strong>Not available yet</strong></div>';
   const a=$("modal-link");a.href=link(r)||"#";a.style.display=a.href&&a.getAttribute("href")!=="#"?"inline-flex":"none";
   $("modal-history-list").innerHTML='<li>Loading battle history…</li>';$("modal-backdrop").classList.add("open");$("modal-close").focus();
-  profileHistory(r).then(history=>{if(token===state.profileRequest)renderProfileHistory(history);}).catch(error=>{console.error("Could not load competitor history",error);if(token===state.profileRequest)$("modal-history-list").innerHTML='<li>Battle history could not be loaded. Please try opening this profile again.</li>';});
+  profileHistory(r).then(history=>{if(token===state.profileRequest){if(state.periodData&&Array.isArray(state.periodData.battle_ids)){const ids=new Set(state.periodData.battle_ids.map(String));history=history.filter(b=>ids.has(String(b.id)));}renderProfileHistory(history);}}).catch(error=>{console.error("Could not load competitor history",error);if(token===state.profileRequest)$("modal-history-list").innerHTML='<li>Battle history could not be loaded. Please try opening this profile again.</li>';});
 }
 function renderHistory(){
   const q=state.historyQuery.trim().toLocaleLowerCase(),filtered=state.history.filter(b=>String(b.name||"").toLocaleLowerCase().includes(q));
