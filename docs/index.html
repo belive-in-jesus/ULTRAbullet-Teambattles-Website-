@@ -46,6 +46,7 @@
 @media(max-width:760px){.dashboard-grid{grid-template-columns:1fr}.leaders-card{grid-column:auto}.dashboard-card{padding:18px}.pagination{align-items:flex-start}.pagination-actions{width:100%;justify-content:space-between}}
 @media(max-width:480px){.pagination-actions{gap:6px}.page-button{padding:8px}.page-indicator{font-size:.61rem}}
 
+.compare-profile-links{display:flex;flex-wrap:wrap;gap:9px;margin:12px 0 20px}.compare-profile-links .profile-link{margin-top:0}
 </style>
   <link href="css/design-system.css" rel="stylesheet">
   <link href="css/design-refresh.css" rel="stylesheet">
@@ -305,7 +306,7 @@ function renderCompare(){
     };
     return '<div class="compare-metric"><div class="compare-metric-head"><strong>'+metric.label+'</strong><span><b>'+esc(metric.format(first[metric.key]))+'</b><i>vs</i><b>'+esc(metric.format(second[metric.key]))+'</b></span></div><div class="compare-bar-stack"><div class="compare-bar-line"><span class="compare-bar-tag">A</span><div class="compare-track"><i class="compare-fill fill-a" style="width:'+width(a)+'%"></i></div></div><div class="compare-bar-line"><span class="compare-bar-tag">B</span><div class="compare-track"><i class="compare-fill fill-b" style="width:'+width(b)+'%"></i></div></div></div></div>';
   }).join("");
-  $("compare-results").innerHTML='<div class="compare-summary"><span class="compare-summary-label">HEAD-TO-HEAD RESULT</span><strong>'+esc(leader)+'</strong><span>'+esc(name(first))+' vs '+esc(name(second))+'</span></div><div class="compare-metrics">'+metricHtml+'</div><p class="compare-footnote">Bars are scaled within each statistic. For best finish, a lower number is better.</p>';
+  $("compare-results").innerHTML='<div class="compare-summary"><span class="compare-summary-label">HEAD-TO-HEAD RESULT</span><strong>'+esc(leader)+'</strong><span>'+esc(name(first))+' vs '+esc(name(second))+'</span></div><div class="compare-profile-links"><a class="profile-link" href="'+esc(profileUrl(first))+'">Open '+esc(name(first))+' profile ↗</a><a class="profile-link" href="'+esc(profileUrl(second))+'">Open '+esc(name(second))+' profile ↗</a></div><div class="compare-metrics">'+metricHtml+'</div><p class="compare-footnote">Bars are scaled within each statistic. For best finish, a lower number is better.</p>';
 }
 function render(){
   renderCompare();
