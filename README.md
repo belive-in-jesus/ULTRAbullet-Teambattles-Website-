@@ -9,9 +9,11 @@ A standalone website for the recurring UltraBullet team battles organised by **N
 - Combined team and individual points across matching finished UltraBullet tournaments
 - Searchable team/player standings with all-time, monthly and 50-battle seasonal rankings, sort controls, pagination and CSV export
 - Homepage dashboard with current-season progress, latest indexed battle and all-time leaders
-- Detailed competitor profiles with cumulative performance metrics and lazily loaded battle history
+- Head-to-head team/player comparisons with six performance metrics
+- Competitor profiles with cumulative metrics, recent-form charts and lazily loaded battle history
 - Searchable battle archive linking back to the original Lichess tournaments
 - Information page explaining eligibility, ranking periods, points and data refreshes
+- Refined responsive design, consistent typography and enlarged brand logo
 - Daily automated refresh through GitHub Actions
 - Public, static frontend; no Lichess token is exposed to website visitors
 
