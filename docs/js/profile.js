@@ -3,7 +3,7 @@ const $=id=>document.getElementById(id);
 const params=new URLSearchParams(window.location.search);
 const type=params.get("type")==="team"?"team":"player";
 const requestedId=(params.get("id")||"").trim();
-const state={entry:null,history:[],periods:null,period:"all",specific:"",query:"",page:1,pageSize:25,filtered:[]};
+const state={entry:null,history:[],periods:null,period:"all",specific:"",query:"",page:1,pageSize:25,filtered:[],chartRange:25};
 const number=v=>Number(v||0).toLocaleString(undefined,{maximumFractionDigits:1});
 const escapeHtml=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const formatDate=v=>{if(v===null||v===undefined||v==="")return"Not available";const d=new Date(Number(v));return Number.isNaN(d.getTime())?"Not available":d.toLocaleDateString(undefined,{year:"numeric",month:"short",day:"numeric"});};
@@ -87,16 +87,43 @@ function renderStats(){
   $("profile-records").innerHTML=fields.map(([label,value,caption])=>'<article class="profile-record"><span>'+escapeHtml(label)+'</span><strong>'+escapeHtml(value??"—")+'</strong><small>'+escapeHtml(caption)+'</small></article>').join("");
 }
 function renderChart(){
-  const rows=filteredHistoryForStats().slice(0,20).reverse();
-  const max=Math.max(1,...rows.map(row=>Number(row.score)||0));
-  $("chart-caption").textContent=rows.length?"Latest "+rows.length+" recorded battles":"No results in this period";
-  $("chart-range").textContent=rows.length?formatDate(rows[0].startsAt)+" – "+formatDate(rows[rows.length-1].startsAt):"No data";
-  if(!rows.length){$("profile-chart").innerHTML='<div class="profile-empty">No battle results are available for this period.</div>';return;}
-  $("profile-chart").innerHTML=rows.map(row=>{
-    const score=Math.max(0,Number(row.score)||0),height=Math.max(3,Math.round(score/max*100));
-    const n=battleNumber(row),label=n?"#"+n:formatDate(row.startsAt);
-    return '<div class="chart-column" title="'+escapeHtml((row.name||"Battle")+" · "+number(score)+" points")+'"><span class="bar-value">'+escapeHtml(number(score))+'</span><div class="chart-bar-track"><i class="chart-bar" style="height:'+height+'%"></i></div><span class="chart-label">'+escapeHtml(label)+'</span></div>';
+  const analytics=window.UBTAnalytics;
+  if(!analytics){$("profile-chart").innerHTML='<div class="profile-empty">The analytics module could not be loaded.</div>';return;}
+  const rows=analytics.chronological(filteredHistoryForStats());
+  const limit=state.chartRange==="all"?null:Number(state.chartRange)||25;
+  const visible=limit?rows.slice(-limit):rows;
+  $("chart-caption").textContent=visible.length?"Showing "+number(visible.length)+" of "+number(rows.length)+" recorded battles":"No results in this period";
+  $("chart-range").textContent=visible.length?formatDate(visible[0].startsAt)+" – "+formatDate(visible[visible.length-1].startsAt):"No data";
+  $("profile-chart").innerHTML=analytics.buildScoreTrendSvg(rows,limit);
+}
+function renderAnalytics(){
+  const analytics=window.UBTAnalytics;
+  if(!analytics)return;
+  const rows=filteredHistoryForStats();
+  const summary=analytics.summarize(rows);
+  $("analytics-period-label").textContent=state.period==="all"?"ALL-TIME DATA":($("history-period").selectedOptions[0]?.textContent||"SELECTED PERIOD").toLocaleUpperCase();
+  $("analytics-recent-average").textContent=summary.recentBattles?number(summary.recentAverage):"—";
+  if(summary.recentBattles&&summary.avgPoints){
+    const delta=summary.recentAverageDelta,verb=delta>0.005?"above":delta< -0.005?"below":"in line with";
+    const prefix=delta>0?"+":"";
+    $("analytics-average-delta").textContent=prefix+(delta*100).toFixed(1)+"% "+verb+" the selected-period average";
+  }else $("analytics-average-delta").textContent="Not enough results for a comparison";
+  $("analytics-recent-podium-rate").textContent=summary.recentRankedBattles?(summary.recentPodiumRate*100).toFixed(1)+"%":"—";
+  $("analytics-recent-podium-caption").textContent=summary.recentRankedBattles?number(summary.recentPodiums)+" podiums from "+number(summary.recentRankedBattles)+" ranked battles":"No placement data in the latest results";
+  $("analytics-latest-streak").textContent=summary.latestPodiumRun?number(summary.latestPodiumRun)+" battles":"—";
+  $("analytics-ranked-count").textContent=number(summary.rankedBattles)+" ranked battles";
+  $("analytics-donut").innerHTML=analytics.buildFinishDonutSvg(summary);
+  const total=summary.rankedBattles;
+  $("analytics-donut-legend").innerHTML=summary.rankCounts.map(item=>{
+    const percentage=total?(item.count/total*100).toFixed(1)+"%":"0%";
+    return '<div class="analytics-legend-row"><i style="--legend-color:'+item.color+'"></i><span>'+escapeHtml(item.label)+'</span><strong>'+number(item.count)+'</strong><small>'+percentage+'</small></div>';
   }).join("");
+  $("analytics-monthly-chart").innerHTML=analytics.buildMonthlySvg(summary.months);
+  $("analytics-monthly-summary").textContent=summary.bestMonth
+    ?"Top month: "+summary.bestMonth.label+" · "+number(summary.bestMonth.points)+" points · "+number(summary.bestMonth.battles)+" battles"
+    :"No monthly breakdown available";
+  $("analytics-heatmap").innerHTML=analytics.buildActivityHeatmapSvg(rows);
+  $("analytics-season-rows").innerHTML=analytics.buildSeasonRows(summary.seasons);
 }
 function renderHistory(){
   const rows=filteredHistory();state.filtered=rows;
@@ -124,7 +151,7 @@ function renderPeriodOptions(){
   if(select.options.length){state.specific=select.options[0].value;select.value=state.specific;$("specific-period-wrap").classList.remove("hidden");}
   else{$("specific-period-wrap").classList.add("hidden");state.specific="";}
 }
-function renderAll(){renderStats();renderChart();renderHistory();}
+function renderAll(){renderStats();renderChart();renderAnalytics();renderHistory();}
 async function init(){
   if(!requestedId){$("profile-name").textContent="Profile not found";$("profile-description").textContent="This profile URL is missing its competitor identifier.";return;}
   $("profile-kind").textContent=type==="team"?"TEAM PROFILE":"PLAYER PROFILE";
@@ -149,6 +176,7 @@ async function init(){
   if(!profile||!Array.isArray(profile.history))throw new Error("The competitor's detailed history is not present in the published profile shard.");
   state.history=[...profile.history].sort((a,b)=>(Number(b.startsAt)||0)-(Number(a.startsAt)||0));
   state.periods=periods;
+  $("trend-range").addEventListener("change",()=>{state.chartRange=$("trend-range").value;renderChart();});
   $("history-period").addEventListener("change",()=>{
     state.period=$("history-period").value;state.page=1;
     if(state.period==="month"||state.period==="season")renderPeriodOptions();
