@@ -189,7 +189,7 @@
 
   <script>
 (()=>{"use strict";
-const state={view:"teams",teams:[],players:[],meta:{},history:[],query:"",historyQuery:"",showAllHistory:false,page:1,pageSize:50,periodsIndex:null,periodData:null,periodType:"all",periodKey:"",periodCache:{},periodRequest:0,periodLoading:false,periodError:"",profileCache:{},profileRequest:0};
+const state={view:"teams",teams:[],players:[],meta:{},history:[],query:"",historyQuery:"",showAllHistory:false,page:1,pageSize:50,compareA:"",compareB:"",compareQueryA:"",compareQueryB:"",periodsIndex:null,periodData:null,periodType:"all",periodKey:"",periodCache:{},periodRequest:0,periodLoading:false,periodError:"",profileCache:{},profileRequest:0};
 const $=id=>document.getElementById(id);
 const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const num=v=>Number(v||0).toLocaleString();
@@ -198,7 +198,83 @@ const rows=()=>state.periodData?(state.periodData[state.view]||[]):(state.view==
 const name=r=>state.view==="teams"?r.team_name:r.username;
 const link=r=>state.view==="teams"?(r.team_id?"https://lichess.org/team/"+encodeURIComponent(r.team_id):""):(r.username?"https://lichess.org/@/"+encodeURIComponent(r.username):"");
 const stats=[["tournaments_played","Battles played",num],["best_tournament","Best battle",v=>String(v)],["best_tournament_score","Best battle score",num],["best_finish","Best finish",v=>"#"+num(v)],["worst_finish","Lowest finish",v=>"#"+num(v)],["avg_finish","Average finish",v=>"#"+v],["avg_points","Average points",num],["highest_points","Highest battle score",num],["podiums","Podium finishes",num],["first_places","First places",num],["top3_rate","Podium rate",v=>(Number(v)*100).toFixed(1)+"%"],["active_since","First recorded battle",date],["last_played","Last played",date]];
+const competitorKey=r=>state.view==="teams"?String(r.team_id||""):String(r.username||"");
+function renderCompareSuggestions(side){
+  const suffix=side.toLowerCase();
+  const query=(side==="A"?state.compareQueryA:state.compareQueryB).trim().toLocaleLowerCase();
+  const target=$("compare-suggestions-"+suffix);
+  if(!query||query.length<2){
+    target.innerHTML='<p>Type at least two characters to search '+(state.view==="teams"?"teams":"players")+'.</p>';
+    return;
+  }
+  const matches=rows().filter(r=>String(name(r)||"").toLocaleLowerCase().includes(query)).slice(0,7);
+  if(!matches.length){target.innerHTML='<p>No matching competitors found.</p>';return;}
+  target.innerHTML=matches.map(r=>'<button type="button" class="compare-option" role="option" aria-selected="false" data-compare-side="'+suffix+'" data-compare-key="'+esc(competitorKey(r))+'"><span>'+esc(name(r))+'</span><small>'+num(r.points)+' pts · #'+num(r.rank)+'</small></button>').join("");
+}
+function renderCompare(){
+  const period=$("compare-period-label");
+  if(!period)return;
+  period.textContent=state.periodData?state.periodData.label.toUpperCase():state.periodType==="all"?"ALL-TIME":state.periodType==="month"?"MONTHLY":"SEASONAL";
+  if(state.periodLoading){$("compare-results").innerHTML='<div class="compare-empty">Loading the selected ranking period…</div>';return;}
+  const available=rows();
+  const previousA=state.compareA,previousB=state.compareB;
+  if(!available.some(r=>competitorKey(r)===state.compareA))state.compareA=available[0]?competitorKey(available[0]):"";
+  if(!available.some(r=>competitorKey(r)===state.compareB)||state.compareB===state.compareA){
+    const alternative=available.find(r=>competitorKey(r)!==state.compareA);
+    state.compareB=alternative?competitorKey(alternative):"";
+  }
+  const first=available.find(r=>competitorKey(r)===state.compareA);
+  const second=available.find(r=>competitorKey(r)===state.compareB);
+  if(previousA!==state.compareA&&first)$("compare-search-a").value=name(first);
+  if(previousB!==state.compareB&&second)$("compare-search-b").value=name(second);
+  renderCompareSuggestions("A");
+  renderCompareSuggestions("B");
+  function picked(side,row){
+    const letter=side;
+    const id=side.toLowerCase();
+    $("compare-picked-"+id).innerHTML=row
+      ?'<span class="compare-picked-mark '+(side==="A"?"letter-a":"letter-b")+'">'+letter+'</span><span class="compare-picked-copy"><strong>'+esc(name(row))+'</strong><small>Rank #'+num(row.rank)+' · '+num(row.points)+' points</small></span>'
+      :'<span class="compare-empty-mark">'+letter+'</span><span>No competitor selected</span>';
+  }
+  picked("A",first);
+  picked("B",second);
+  if(!first||!second){
+    $("compare-results").innerHTML='<div class="compare-empty">At least two competitors need to be available in this ranking period.</div>';
+    return;
+  }
+  const firstPoints=Number(first.points)||0;
+  const secondPoints=Number(second.points)||0;
+  const delta=Math.abs(firstPoints-secondPoints);
+  const leader=firstPoints===secondPoints
+    ?"Both competitors are level on points"
+    :(firstPoints>secondPoints?name(first):name(second))+" leads by "+num(delta)+" points";
+  const metrics=[
+    {label:"Total points",key:"points",format:num},
+    {label:"Average points / battle",key:"avg_points",format:v=>v==null?"—":Number(v).toLocaleString(undefined,{maximumFractionDigits:1})},
+    {label:"Battles played",key:"tournaments_played",format:v=>v==null?"—":num(v)},
+    {label:"Podium finishes",key:"podiums",format:v=>v==null?"—":num(v)},
+    {label:"First places",key:"first_places",format:v=>v==null?"—":num(v)},
+    {label:"Best finish",key:"best_finish",lower:true,format:v=>v==null?"—":"#"+num(v)}
+  ];
+  const metricHtml=metrics.map(metric=>{
+    const a=Number(first[metric.key]);
+    const b=Number(second[metric.key]);
+    const validA=Number.isFinite(a);
+    const validB=Number.isFinite(b);
+    const max=Math.max(validA?a:0,validB?b:0);
+    const positives=[a,b].filter(v=>Number.isFinite(v)&&v>0);
+    const minPositive=positives.length?Math.min(...positives):0;
+    const width=value=>{
+      if(!Number.isFinite(value)||value<=0||max===0)return 0;
+      const scaled=metric.lower&&minPositive>0?minPositive/value*100:value/max*100;
+      return Math.max(3,Math.min(100,scaled));
+    };
+    return '<div class="compare-metric"><div class="compare-metric-head"><strong>'+metric.label+'</strong><span><b>'+esc(metric.format(first[metric.key]))+'</b><i>vs</i><b>'+esc(metric.format(second[metric.key]))+'</b></span></div><div class="compare-bar-stack"><div class="compare-bar-line"><span class="compare-bar-tag">A</span><div class="compare-track"><i class="compare-fill fill-a" style="width:'+width(a)+'%"></i></div></div><div class="compare-bar-line"><span class="compare-bar-tag">B</span><div class="compare-track"><i class="compare-fill fill-b" style="width:'+width(b)+'%"></i></div></div></div></div>';
+  }).join("");
+  $("compare-results").innerHTML='<div class="compare-summary"><span class="compare-summary-label">HEAD-TO-HEAD RESULT</span><strong>'+esc(leader)+'</strong><span>'+esc(name(first))+' vs '+esc(name(second))+'</span></div><div class="compare-metrics">'+metricHtml+'</div><p class="compare-footnote">Bars are scaled within each statistic. For best finish, a lower number is better.</p>';
+}
 function render(){
+  renderCompare();
   const teams=state.view==="teams";
   $("teams-btn").classList.toggle("active",teams);$("players-btn").classList.toggle("active",!teams);
   $("teams-btn").setAttribute("aria-pressed",String(teams));$("players-btn").setAttribute("aria-pressed",String(!teams));
