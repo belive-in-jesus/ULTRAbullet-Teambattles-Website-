@@ -465,10 +465,10 @@ function populateHistoryPeriodFilter(){
   const months=new Set(),seasons=new Set();
   state.history.forEach(b=>{
     if(b.startsAt){const dateValue=new Date(Number(b.startsAt));if(!Number.isNaN(dateValue.getTime()))months.add(dateValue.toISOString().slice(0,7));}
-    const number=Number(b.battle_number)||Number((String(b.name||"").match(/^\\s*(\\d+)(?:st|nd|rd|th)\\s+ultrabullet\\s+/i)||[])[1]);
+    const number=Number(b.battle_number)||Number((String(b.name||"").match(/^\s*(\d+)(?:st|nd|rd|th)\s+ultrabullet\s+/i)||[])[1]);
     if(number>0)seasons.add(Math.floor((number-1)/50)+1);
   });
-  select.innerHTML="<option value=\\"all\\">All battles</option>";
+  select.innerHTML='<option value="all">All battles</option>';
   if(months.size){
     const group=document.createElement("optgroup");group.label="Months";
     [...months].sort((a,b)=>b.localeCompare(a)).forEach(key=>{const option=document.createElement("option");option.value="month:"+key;const [year,month]=key.split("-").map(Number);option.textContent=new Date(Date.UTC(year,month-1,1)).toLocaleDateString(undefined,{month:"long",year:"numeric",timeZone:"UTC"});group.appendChild(option);});
@@ -487,7 +487,7 @@ function renderHistory(){
     const selected=state.historyPeriodFilter;
     if(selected.startsWith("month:"))return b.startsAt&&new Date(Number(b.startsAt)).toISOString().slice(0,7)===selected.slice(6);
     if(selected.startsWith("season:")){
-      const number=Number(b.battle_number)||Number((String(b.name||"").match(/^\\s*(\\d+)(?:st|nd|rd|th)\\s+ultrabullet\\s+/i)||[])[1]);
+      const number=Number(b.battle_number)||Number((String(b.name||"").match(/^\s*(\d+)(?:st|nd|rd|th)\s+ultrabullet\s+/i)||[])[1]);
       return number&&Math.floor((number-1)/50)+1===Number(selected.slice(7));
     }
     return true;
