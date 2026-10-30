@@ -16,7 +16,7 @@ EXTRA_NAME_FILTERS = os.environ.get("EXTRA_NAME_FILTERS", "")
 INCLUDE_TOURNAMENT_IDS = os.environ.get("INCLUDE_TOURNAMENT_IDS", "")
 PROFILE_SHARD_SIZE = 200
 SEASON_SIZE = 50
-BATTLE_NAME_PATTERN = re.compile(r"^\\s*(?P<number>\\d+)(?:st|nd|rd|th)\\s+ultrabullet\\s+(?:team\\s+battle|teambattle\\s+team\\s+battle)\\s*$", re.IGNORECASE)
+BATTLE_NAME_PATTERN = re.compile(r"^\s*(?P<number>\d+)(?:st|nd|rd|th)\s+ultrabullet\s+(?:team\s+battle|teambattle\s+team\s+battle)\s*$", re.IGNORECASE)
 
 
 def parse_battle_number(name: str):
