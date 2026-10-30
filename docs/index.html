@@ -53,7 +53,7 @@
   <main class="shell">
     <nav class="masthead" aria-label="Site navigation">
       <a class="brand" href="./" aria-label="UltraBullet Team Battles home">
-        <img class="brand-logo" src="https://i.imgur.com/Zo7BRdZ.gif" alt="UB logo" width="58" height="58" loading="eager" decoding="async" onerror="this.hidden=true">
+        <span class="brand-emblem"><img class="brand-logo" src="https://i.imgur.com/Zo7BRdZ.gif" alt="UltraBullet Team Battles logo" width="84" height="84" loading="eager" decoding="async" onerror="this.hidden=true"></span>
         <span class="brand-copy"><strong>ULTRAbullet</strong><small>TEAM BATTLES</small></span>
       </a>
       <div class="mast-actions">
@@ -120,6 +120,28 @@
       </article>
     </section>
 
+<section class="compare-section" id="compare" aria-labelledby="compare-title">
+  <div class="section-heading compare-heading">
+    <div><span class="eyebrow">HEAD-TO-HEAD</span><h2 id="compare-title">Compare competitors</h2><p>Compare two competitors using the selected ranking period.</p></div>
+    <span class="pill" id="compare-period-label">ALL-TIME</span>
+  </div>
+  <div class="compare-pickers">
+    <div class="compare-picker">
+      <label class="compare-label" for="compare-search-a"><span class="compare-letter letter-a">A</span> Competitor A</label>
+      <input id="compare-search-a" class="compare-input" type="search" autocomplete="off" placeholder="Search a team or player…" aria-label="Search competitor A">
+      <div class="compare-suggestions" id="compare-suggestions-a" role="listbox" aria-label="Competitor A search results"><p>Search for a competitor to compare.</p></div>
+      <div class="compare-picked" id="compare-picked-a"><span class="compare-empty-mark">A</span><span>Leading competitor</span></div>
+    </div>
+    <div class="compare-picker">
+      <label class="compare-label" for="compare-search-b"><span class="compare-letter letter-b">B</span> Competitor B</label>
+      <input id="compare-search-b" class="compare-input" type="search" autocomplete="off" placeholder="Search a team or player…" aria-label="Search competitor B">
+      <div class="compare-suggestions" id="compare-suggestions-b" role="listbox" aria-label="Competitor B search results"><p>Search for a competitor to compare.</p></div>
+      <div class="compare-picked" id="compare-picked-b"><span class="compare-empty-mark">B</span><span>Second competitor</span></div>
+    </div>
+  </div>
+  <div class="compare-results" id="compare-results" aria-live="polite"><div class="compare-empty">Choose two competitors to compare their statistics.</div></div>
+</section>
+
     <section class="board" id="leaderboard" aria-label="Leaderboard">
       <div class="board-head">
         <div>
@@ -183,6 +205,10 @@
       <p class="modal-points" id="modal-points"></p>
       <div class="detail-grid" id="modal-stats"></div>
       <a class="profile-link" id="modal-link" href="#" target="_blank" rel="noopener noreferrer">Open on Lichess ↗</a>
+      <div class="modal-form">
+        <div class="modal-section-heading"><h3>Recent form</h3><span id="modal-form-count">LAST 10 BATTLES</span></div>
+        <div class="form-chart" id="modal-form-chart"><span class="form-chart-empty">Battle history will appear here.</span></div>
+      </div>
       <div class="modal-history"><h3>Recent battle history</h3><ul id="modal-history-list"></ul></div>
     </section>
   </div>
@@ -342,7 +368,7 @@ function details(r){
   $("modal-stats").innerHTML=cards.length?cards.join(""):'<div class="detail-item"><span>Statistics</span><strong>Not available yet</strong></div>';
   const a=$("modal-link");
   a.href=link(r)||"#";
-  a.style.display=a.href&&a.getAttribute("href")!=="# "&&a.getAttribute("href")!=="# "?"inline-flex":"none";
+  a.style.display=a.getAttribute("href")!=="#"?"inline-flex":"none";
   $("modal-history-list").innerHTML='<li>Loading battle history…</li>';
   $("modal-form-chart").innerHTML='<span class="form-chart-empty">Loading recent battle history…</span>';
   $("modal-form-count").textContent="LOADING";
@@ -463,6 +489,28 @@ async function init(){
   $("period-type").title=state.periodsIndex?"Choose all-time, monthly or 50-battle seasonal rankings":"Period rankings will become available after the V1.2 data refresh";
   render();renderHistory();renderDashboard();
 }
+$("compare-search-a").addEventListener("input",e=>{state.compareQueryA=e.target.value;renderCompareSuggestions("A");});
+$("compare-search-b").addEventListener("input",e=>{state.compareQueryB=e.target.value;renderCompareSuggestions("B");});
+$("compare-suggestions-a").addEventListener("click",e=>{
+  const option=e.target.closest("button[data-compare-key]");
+  if(!option)return;
+  const competitor=rows().find(r=>competitorKey(r)===option.dataset.compareKey);
+  if(!competitor)return;
+  state.compareA=competitorKey(competitor);
+  state.compareQueryA="";
+  $("compare-search-a").value=name(competitor);
+  renderCompare();
+});
+$("compare-suggestions-b").addEventListener("click",e=>{
+  const option=e.target.closest("button[data-compare-key]");
+  if(!option)return;
+  const competitor=rows().find(r=>competitorKey(r)===option.dataset.compareKey);
+  if(!competitor)return;
+  state.compareB=competitorKey(competitor);
+  state.compareQueryB="";
+  $("compare-search-b").value=name(competitor);
+  renderCompare();
+});
 $("teams-btn").addEventListener("click",()=>{state.view="teams";state.page=1;render();});
 $("players-btn").addEventListener("click",()=>{state.view="players";state.page=1;render();});
 $("period-type").addEventListener("change",loadSelectedPeriod);
