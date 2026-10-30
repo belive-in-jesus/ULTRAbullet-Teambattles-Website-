@@ -213,6 +213,16 @@ class AggregatePeriodTests(unittest.TestCase):
         self.assertEqual(aggregate.season_number_for_battle(301), 7)
         self.assertEqual(aggregate.season_number_for_battle(642), 13)
 
+    def test_longest_podium_streak_breaks_on_missing_battles_and_non_podium_finishes(self):
+        records = [
+            {"name": "100th ULTRAbullet Team Battle", "rank": 1},
+            {"name": "101st ULTRAbullet Team Battle", "rank": 3},
+            {"name": "103rd ULTRAbullet Team Battle", "rank": 2},
+            {"name": "104th ULTRAbullet Team Battle", "rank": 4},
+        ]
+        self.assertEqual(aggregate.longest_podium_streak(records), 2)
+        self.assertEqual(aggregate.longest_podium_streak([]), 0)
+
     def test_compute_stats_uses_only_the_supplied_period_records(self):
         stats = aggregate.compute_stats([
             {"startsAt": 2000, "score": 10, "rank": 2},
