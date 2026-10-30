@@ -165,8 +165,11 @@
         </select>
         <select id="period-select" class="select-input hidden" aria-label="Select month or season" style="width:auto;min-width:190px"></select>
         <label class="search"><input id="search" type="search" autocomplete="off" placeholder="Search teams or players…" aria-label="Search leaderboard"></label>
+        <select id="min-battles-select" class="select-input" aria-label="Minimum battles" style="width:auto;min-width:145px">
+          <option value="0">Any activity</option><option value="5">5+ battles</option><option value="25">25+ battles</option><option value="50">50+ battles</option><option value="100">100+ battles</option>
+        </select>
         <select id="sort-select" class="select-input" aria-label="Sort leaderboard" style="width:auto;min-width:155px">
-          <option value="rank">Sort: Rank</option><option value="points">Sort: Points</option><option value="avg_points">Sort: Average points</option><option value="battles">Sort: Battles</option><option value="podiums">Sort: Podiums</option>
+          <option value="rank">Sort: Rank</option><option value="points">Sort: Points</option><option value="avg_points">Sort: Average points</option><option value="battles">Sort: Battles</option><option value="podiums">Sort: Podiums</option><option value="first_places">Sort: First places</option><option value="best_finish">Sort: Best finish</option><option value="last_played">Sort: Recent activity</option>
         </select>
         <button id="export-btn" class="filter-button" type="button">Export CSV ↗</button>
       </div>
@@ -322,12 +325,16 @@ function render(){
   if(state.periodLoading){$("result-count").textContent="Loading";body.innerHTML='<tr><td colspan="5"><div class="empty"><strong>Loading period ranking…</strong>Fetching the selected month or season.</div></td></tr>';return;}
   if(state.periodError){$("result-count").textContent="Unavailable";body.innerHTML='<tr><td colspan="5"><div class="empty"><strong>Period ranking unavailable</strong>'+esc(state.periodError)+'</div></td></tr>';return;}
   const q=state.query.trim().toLocaleLowerCase();
-  let list=rows().filter(r=>String(name(r)||"").toLocaleLowerCase().includes(q));
+  const minimumBattles=Number($("min-battles-select").value)||0;
+  let list=rows().filter(r=>String(name(r)||"").toLocaleLowerCase().includes(q)&&(Number(r.tournaments_played)||0)>=minimumBattles);
   const sort=$("sort-select").value;
   if(sort==="points")list=[...list].sort((a,b)=>(Number(b.points)||0)-(Number(a.points)||0));
   if(sort==="avg_points")list=[...list].sort((a,b)=>(Number(b.avg_points)||0)-(Number(a.avg_points)||0));
   if(sort==="battles")list=[...list].sort((a,b)=>(Number(b.tournaments_played)||0)-(Number(a.tournaments_played)||0));
   if(sort==="podiums")list=[...list].sort((a,b)=>(Number(b.podiums)||0)-(Number(a.podiums)||0));
+  if(sort==="first_places")list=[...list].sort((a,b)=>(Number(b.first_places)||0)-(Number(a.first_places)||0));
+  if(sort==="best_finish")list=[...list].sort((a,b)=>(Number(a.best_finish)||Infinity)-(Number(b.best_finish)||Infinity));
+  if(sort==="last_played")list=[...list].sort((a,b)=>(Number(b.last_played)||0)-(Number(a.last_played)||0));
   if(!list.length){
     $("result-count").textContent="0 shown";
     $("page-summary").textContent="Showing 0 entries";
@@ -524,7 +531,8 @@ $("players-btn").addEventListener("click",()=>{state.view="players";state.page=1
 $("period-type").addEventListener("change",loadSelectedPeriod);
 $("period-select").addEventListener("change",loadSelectedPeriod);
 $("search").addEventListener("input",e=>{state.query=e.target.value;state.page=1;render();});
-$("sort-select").addEventListener("change",()=>{state.page=1;render();});$("export-btn").addEventListener("click",csv);
+$("sort-select").addEventListener("change",()=>{state.page=1;render();});
+$("min-battles-select").addEventListener("change",()=>{state.page=1;render();});$("export-btn").addEventListener("click",csv);
 $("page-prev").addEventListener("click",()=>{if(state.page>1){state.page--;render();}});
 $("page-next").addEventListener("click",()=>{state.page++;render();});
 $("page-size").addEventListener("change",e=>{const size=Number(e.target.value);if([25,50,100].includes(size)){state.pageSize=size;state.page=1;render();}});
