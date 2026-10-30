@@ -155,6 +155,41 @@ def build_hall_of_fame(teams: list, players: list, seasons: list, generated_at: 
     }
 
 
+
+def profile_index_bucket(identifier: str) -> str:
+    """Return the one-character bucket shared by the profile page lookup."""
+    first = str(identifier or "").strip().lower()[:1]
+    return re.sub(r"[^a-z0-9]", "_", first) or "_"
+
+
+def write_profile_lookup_indexes(profiles_dir: str, players: list, teams: list) -> int:
+    """Write small bucketed indexes so direct profile URLs avoid full leaderboard downloads."""
+    index_dir = os.path.join(profiles_dir, "index")
+    if os.path.isdir(index_dir):
+        shutil.rmtree(index_dir)
+    os.makedirs(index_dir, exist_ok=True)
+    total_shards = 0
+    for kind, rows, id_field in (
+        ("players", players, "username"),
+        ("teams", teams, "team_id"),
+    ):
+        buckets = defaultdict(dict)
+        for row in rows:
+            identifier = str(row.get(id_field) or "").strip()
+            lookup_key = identifier.lower()
+            if not lookup_key:
+                continue
+            bucket = profile_index_bucket(identifier)
+            entry = dict(row)
+            entry["id"] = identifier
+            entry["name"] = row.get("username") if kind == "players" else row.get("team_name", identifier)
+            buckets[bucket][lookup_key] = entry
+        for bucket, payload in buckets.items():
+            write_json(os.path.join(index_dir, f"{kind}-{bucket}.json"), payload)
+            total_shards += 1
+    return total_shards
+
+
 def main() -> int:
     pattern = os.path.join(PARTIALS_DIR, "**", "partial_*.json")
     files = sorted(glob.glob(pattern, recursive=True))
@@ -267,6 +302,8 @@ def main() -> int:
     for shards in profile_shards.values():
         for filename, payload in shards.items():
             write_json(os.path.join(profiles_dir, filename), payload)
+
+    profile_lookup_shards = write_profile_lookup_indexes(profiles_dir, players, teams)
 
     # Monthly tables use regular numbered battles only. Seasons are fixed to
     # official battle-number ranges, not the count/order of available records.
@@ -393,6 +430,7 @@ def main() -> int:
         "selection_rule": "Numbered regular ULTRAbullet Team Battles only; special and unnumbered events excluded.",
         "profile_shard_size": PROFILE_SHARD_SIZE,
         "profiles_shards": sum(len(shards) for shards in profile_shards.values()),
+        "profile_lookup_shards": profile_lookup_shards,
         "season_size": SEASON_SIZE,
         "season_count": len(season_index),
         "hall_of_fame_seasons": len(season_hall),
