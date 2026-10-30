@@ -195,6 +195,7 @@ def main() -> int:
             "key": month_key,
             "label": f"{calendar.month_name[month]} {year}",
             "battle_count": len(battles),
+            "battle_ids": [str(row["id"]) for row in battles],
             "teams": build_period_ranking(team_records, team_names, ids, "team_name", team_profile_refs),
             "players": build_period_ranking(player_records, {key: key for key in player_records}, ids, "username", player_profile_refs),
         }
