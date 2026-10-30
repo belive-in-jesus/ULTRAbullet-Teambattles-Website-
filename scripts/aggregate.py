@@ -242,8 +242,9 @@ def main() -> int:
         seasons_by_number[season_number_for_battle(int(battle["battle_number"]))].append(battle)
 
     season_index = []
-    for season_number in sorted(seasons_by_number):
-        battles = seasons_by_number[season_number]
+    season_count = season_number_for_battle(max_battle_number) if max_battle_number else 0
+    for season_number in range(1, season_count + 1):
+        battles = seasons_by_number.get(season_number, [])
         first_battle = (season_number - 1) * SEASON_SIZE + 1
         last_battle = season_number * SEASON_SIZE
         season_key = f"season-{season_number:02d}"
