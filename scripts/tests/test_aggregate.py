@@ -103,7 +103,9 @@ class AggregatePeriodTests(unittest.TestCase):
             self.assertEqual(index["max_battle_number"], 301)
 
             seasons = {item["key"]: item for item in index["seasons"]}
-            self.assertEqual(set(seasons), {"season-05", "season-06", "season-07"})
+            self.assertEqual(len(seasons), 7)
+            self.assertEqual(seasons["season-01"]["battle_count"], 0)
+            self.assertEqual(len(seasons["season-01"]["missing_battle_numbers"]), 50)
             self.assertEqual(
                 (seasons["season-06"]["first_battle"], seasons["season-06"]["last_battle"]),
                 (251, 300),
