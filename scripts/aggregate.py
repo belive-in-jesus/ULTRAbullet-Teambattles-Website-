@@ -11,9 +11,6 @@ from datetime import datetime, timezone
 
 PARTIALS_DIR = os.environ.get("PARTIALS_DIR", "artifacts")
 OUTPUT_DIR = os.environ.get("OUTPUT_DIR", "docs/data")
-NAME_FILTERS = os.environ.get("NAME_FILTERS", "ultrabullet")
-EXTRA_NAME_FILTERS = os.environ.get("EXTRA_NAME_FILTERS", "")
-INCLUDE_TOURNAMENT_IDS = os.environ.get("INCLUDE_TOURNAMENT_IDS", "")
 PROFILE_SHARD_SIZE = 200
 SEASON_SIZE = 50
 BATTLE_NAME_PATTERN = re.compile(r"^\s*(?P<number>\d+)(?:st|nd|rd|th)\s+ultrabullet\s+(?:team\s+battle|teambattle\s+team\s+battle)\s*$", re.IGNORECASE)
@@ -253,7 +250,8 @@ def main() -> int:
         data_file = f"periods/seasons/{season_key}.json"
         ids = {str(row["id"]) for row in battles}
         recorded_numbers = {int(row["battle_number"]) for row in battles}
-        missing_numbers = sorted(set(range(first_battle, last_battle + 1)) - recorded_numbers)
+        observed_through = min(last_battle, max_battle_number)
+        missing_numbers = sorted(set(range(first_battle, observed_through + 1)) - recorded_numbers)
         complete = max_battle_number >= last_battle
         in_progress = max_battle_number >= first_battle and not complete
         label = f"Season {season_number} · Battles {first_battle}–{last_battle}"
