@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#080e17">
+  <meta name="description" content="How the UltraBullet Team Battles leaderboard collects tournaments and calculates rankings.">
+  <title>Information — UltraBullet Team Battles</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="css/design-system.css" rel="stylesheet">
+  <style>
+    .info-main{padding-bottom:30px}
+    .info-hero{max-width:850px;margin:38px 0 34px}
+    .info-hero h1{margin:18px 0;font-size:clamp(2.8rem,6vw,5.2rem);line-height:.98;letter-spacing:-.065em}
+    .info-hero h1 em{font-style:normal;color:transparent;background:linear-gradient(100deg,#58d9e7,#7aa3ff 75%,#9b9bff);background-clip:text;-webkit-background-clip:text}
+    .info-hero p{max-width:760px;color:#a8b9ca;font-size:1rem;line-height:1.85}
+    .info-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+    .info-card{padding:24px;border:1px solid rgba(91,126,159,.3);border-radius:17px;background:linear-gradient(145deg,rgba(21,39,59,.84),rgba(13,24,39,.9));box-shadow:0 18px 48px rgba(0,0,0,.16)}
+    .info-card h2{margin:8px 0 11px;font-size:1.18rem;letter-spacing:-.03em}
+    .info-card p,.info-card li{color:#a8b9ca;font-size:.87rem;line-height:1.8}
+    .info-card p{margin:0}
+    .info-card ul{margin:10px 0 0;padding-left:19px}
+    .info-card li+li{margin-top:5px}
+    .info-kicker{color:var(--cyan);font-family:"DM Mono",monospace;font-size:.62rem;letter-spacing:.15em;text-transform:uppercase}
+    .info-wide{grid-column:1/-1}
+    .period-list{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:16px}
+    .period-item{padding:13px;border:1px solid rgba(111,148,182,.22);border-radius:11px;background:rgba(255,255,255,.025)}
+    .period-item strong{display:block;color:#eef6fc;font-size:.86rem}
+    .period-item span{display:block;margin-top:5px;color:#93aabd;font-size:.74rem;line-height:1.6}
+    .info-callout{margin-top:18px;padding:17px 19px;border-left:2px solid var(--cyan);border-radius:0 11px 11px 0;background:rgba(72,214,231,.055);color:#b5c7d5;font-size:.83rem;line-height:1.75}
+    .info-callout strong{color:#eff8fc}
+    .info-card a,.info-footer a{color:#72d9e6;text-underline-offset:3px}
+    .info-footer{margin-top:30px;padding-top:18px;border-top:1px solid rgba(112,149,180,.17);color:#8299ad;font-size:.75rem;line-height:1.8}
+    @media(max-width:760px){.info-grid{grid-template-columns:1fr}.info-wide{grid-column:auto}.period-list{grid-template-columns:1fr}.info-hero{margin-top:24px}.info-card{padding:20px}}
+  </style>
+</head>
+<body>
+  <main class="shell info-main">
+    <nav class="masthead" aria-label="Site navigation">
+      <a class="brand" href="./index.html" aria-label="UltraBullet Team Battles home">
+        <img class="brand-logo" src="https://i.imgur.com/Zo7BRdZ.gif" alt="UB logo" width="54" height="54" loading="eager" decoding="async" onerror="this.hidden=true">
+        <span class="brand-copy"><strong>ULTRAbullet</strong><small>TEAM BATTLES</small></span>
+      </a>
+      <div class="mast-actions">
+        <a class="nav-link" href="./index.html#leaderboard">Leaderboard</a>
+        <span class="nav-link upcoming" aria-disabled="true" title="Planned for a future update">Special Events</span>
+        <a class="nav-link active" href="./information.html" aria-current="page">Information</a>
+      </div>
+    </nav>
+
+    <section class="info-hero">
+      <span class="eyebrow">THE COMPETITIVE ULTRABULLET COMMUNITY</span>
+      <h1>Understand the <em>leaderboard.</em></h1>
+      <p>This page explains which tournaments are included, how the rankings are grouped and what the statistics mean. The aim is to keep the results consistent and easy to verify.</p>
+    </section>
+
+    <section class="info-grid" aria-label="Leaderboard information">
+      <article class="info-card">
+        <span class="info-kicker">01 / Eligibility</span>
+        <h2>Which battles count?</h2>
+        <p>The regular standings include completed, numbered ULTRAbullet Team Battles created by the configured tournament organiser. A tournament must match the regular battle-title pattern and have a finished Lichess status.</p>
+        <ul>
+          <li>Regular numbered Team Battles are included.</li>
+          <li>Unnumbered and special events are excluded.</li>
+          <li>Alliance, qualification, Christmas, Daily Arena and restarted events do not add points to the regular rankings.</li>
+        </ul>
+      </article>
+
+      <article class="info-card">
+        <span class="info-kicker">02 / Points</span>
+        <h2>How are points counted?</h2>
+        <p>Points are accumulated from the published Lichess tournament results. Team standings use the team results; individual standings use each player's individual result. All eligible battles contribute to the all-time totals.</p>
+        <ul>
+          <li><strong>Battles played:</strong> eligible tournaments with a recorded result.</li>
+          <li><strong>Average points:</strong> points divided by recorded battles played.</li>
+          <li><strong>Podiums:</strong> finishes in the top three; first places are counted separately.</li>
+        </ul>
+      </article>
+
+      <article class="info-card info-wide">
+        <span class="info-kicker">03 / Ranking periods</span>
+        <h2>All-time, monthly and seasonal rankings</h2>
+        <p>The same underlying results can be viewed across three time ranges. Monthly rankings use UTC calendar months. Seasons are tied to official battle numbers, not to how many records happen to be available.</p>
+        <div class="period-list">
+          <div class="period-item"><strong>All-time</strong><span>Every eligible numbered battle in the collected archive.</span></div>
+          <div class="period-item"><strong>Monthly</strong><span>Eligible battles grouped by calendar month in UTC.</span></div>
+          <div class="period-item"><strong>Seasonal</strong><span>Fixed blocks of 50 official battle numbers: Season 1 = 1–50, Season 2 = 51–100, and so on.</span></div>
+        </div>
+        <div class="info-callout"><strong>Important:</strong> A missing official battle number does not shift later battles into a different season. Any gaps remain attached to their original number range.</div>
+      </article>
+
+      <article class="info-card">
+        <span class="info-kicker">04 / Updates</span>
+        <h2>When is the data refreshed?</h2>
+        <p>The leaderboard data is refreshed automatically once per day through GitHub Actions, with a scheduled run at 03:00 UTC. The homepage displays the timestamp of the latest successful data generation.</p>
+        <p style="margin-top:10px">The site is a public, static frontend. No Lichess API token is placed in the website files or exposed to visitors.</p>
+      </article>
+
+      <article class="info-card">
+        <span class="info-kicker">05 / Data quality</span>
+        <h2>How should gaps be understood?</h2>
+        <p>Only tournaments that can be discovered and whose results can be collected are available for the calculations. The current season view identifies missing official battle numbers where applicable. A missing record should not be interpreted as a zero-point result.</p>
+      </article>
+
+      <article class="info-card info-wide">
+        <span class="info-kicker">06 / Project</span>
+        <h2>About this leaderboard</h2>
+        <p>This independent community dashboard brings recurring Lichess UltraBullet Team Battles together in one searchable archive. It is designed for exploring long-term team and player performance, not as an official Lichess rating or title system.</p>
+        <p style="margin-top:10px">The battle-result aggregation concept and original processing script are based on <a href="https://lichessbotacc.github.io/Gift-For-Nathanael/" target="_blank" rel="noopener noreferrer">DarkOnCrack's Gift For Nathanael</a>, used with permission. Tournament play and results remain on <a href="https://lichess.org/" target="_blank" rel="noopener noreferrer">Lichess.org</a>.</p>
+        <div class="info-callout">For the latest standings and the full tournament archive, return to the <a href="./index.html">Leaderboard</a>.</div>
+      </article>
+    </section>
+
+    <footer class="info-footer">
+      UltraBullet Team Battles · Community statistics dashboard · Rankings are calculated from recorded eligible tournament results.
+    </footer>
+  </main>
+</body>
+</html>
