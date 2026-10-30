@@ -70,16 +70,53 @@
     </section>
 
     <section class="profile-section">
-      <div class="profile-section-heading">
-        <div><span class="eyebrow">RECENT FORM</span><h2>Performance over time</h2></div>
-        <span class="profile-section-note" id="chart-caption">Latest recorded battles</span>
+      <div class="profile-section-heading analytics-heading">
+        <div><span class="eyebrow">PERFORMANCE TREND</span><h2>Score progression</h2><p class="section-description">Track scoring performance across battles. The dashed line marks the selected period's average.</p></div>
+        <label class="analytics-range-control" for="trend-range"><span>Chart range</span><select id="trend-range" class="select-input"><option value="10">Last 10 battles</option><option value="25" selected>Last 25 battles</option><option value="50">Last 50 battles</option><option value="100">Last 100 battles</option><option value="all">Full selected period</option></select></label>
       </div>
-      <article class="profile-panel">
-        <div class="profile-chart" id="profile-chart" aria-label="Recent battle score chart">
+      <article class="profile-panel analytics-chart-panel">
+        <div class="profile-chart analytics-line-chart" id="profile-chart" aria-label="Recent battle score chart">
           <div class="profile-loading">Loading battle history…</div>
         </div>
-        <div class="chart-legend"><span><i></i> Points scored per battle</span><span id="chart-range">No data</span></div>
+        <div class="chart-legend analytics-legend"><span><i class="analytics-legend-line"></i> Score per battle</span><span><i class="analytics-legend-average"></i> Period average</span><span id="chart-range">No data</span></div>
       </article>
+    </section>
+
+    <section class="profile-section analytics-section" id="performance-analytics" aria-labelledby="analytics-title">
+      <div class="profile-section-heading">
+        <div><span class="eyebrow">ADVANCED ANALYTICS</span><h2 id="analytics-title">Form, consistency & activity</h2><p class="section-description">Deeper statistics calculated from the selected profile period.</p></div>
+        <span class="profile-section-note" id="analytics-period-label">ALL-TIME DATA</span>
+      </div>
+      <div class="analytics-insight-grid" aria-label="Recent performance insights">
+        <article class="analytics-insight insight-cyan"><span>LAST 10 · AVG POINTS</span><strong id="analytics-recent-average">—</strong><small id="analytics-average-delta">Compared with period average</small></article>
+        <article class="analytics-insight insight-violet"><span>LAST 10 · PODIUM RATE</span><strong id="analytics-recent-podium-rate">—</strong><small id="analytics-recent-podium-caption">Top-three finishes</small></article>
+        <article class="analytics-insight insight-gold"><span>LATEST PODIUM RUN</span><strong id="analytics-latest-streak">—</strong><small>Consecutive numbered battles with a top-three finish</small></article>
+      </div>
+
+      <div class="analytics-grid">
+        <article class="profile-panel analytics-card">
+          <div class="analytics-card-heading"><div><span class="analytics-kicker">FINISH DISTRIBUTION</span><h3>Placement breakdown</h3></div><span class="analytics-card-note" id="analytics-ranked-count">—</span></div>
+          <div class="analytics-donut-layout"><div class="analytics-donut-wrap" id="analytics-donut"><div class="profile-loading">Calculating placements…</div></div><div class="analytics-donut-legend" id="analytics-donut-legend"></div></div>
+          <p class="analytics-footnote">Share of recorded tournament finishes in each placement group.</p>
+        </article>
+
+        <article class="profile-panel analytics-card">
+          <div class="analytics-card-heading"><div><span class="analytics-kicker">MONTHLY PERFORMANCE</span><h3>Points by month</h3></div><span class="analytics-card-note">LATEST 12 MONTHS</span></div>
+          <div class="analytics-chart-small" id="analytics-monthly-chart"><div class="profile-loading">Preparing monthly data…</div></div>
+          <div class="analytics-monthly-foot" id="analytics-monthly-summary">—</div>
+        </article>
+
+        <article class="profile-panel analytics-card analytics-wide">
+          <div class="analytics-card-heading"><div><span class="analytics-kicker">PARTICIPATION PATTERN</span><h3>Battle activity calendar</h3><p>Each square represents a UTC date; brighter days indicate more recorded battles.</p></div><span class="analytics-card-note">LAST 52 WEEKS</span></div>
+          <div class="analytics-heatmap-wrap" id="analytics-heatmap"><div class="profile-loading">Preparing activity calendar…</div></div>
+          <div class="analytics-heatmap-legend"><span>Less</span><i class="heat-level-0"></i><i class="heat-level-1"></i><i class="heat-level-2"></i><i class="heat-level-3"></i><i class="heat-level-4"></i><span>More battles</span></div>
+        </article>
+
+        <article class="profile-panel analytics-card analytics-wide">
+          <div class="analytics-card-heading"><div><span class="analytics-kicker">LONG-TERM DEVELOPMENT</span><h3>Season-by-season performance</h3><p>Compare points, average score and podium rate across fixed 50-battle seasons.</p></div><span class="analytics-card-note">LATEST 8 SEASONS</span></div>
+          <div class="analytics-table-wrap"><table class="analytics-season-table"><thead><tr><th>Season</th><th class="number-cell">Battles</th><th class="number-cell">Points</th><th class="number-cell">Avg / battle</th><th class="number-cell">Podiums</th><th class="number-cell">Podium rate</th></tr></thead><tbody id="analytics-season-rows"><tr><td colspan="6" class="profile-loading">Preparing season statistics…</td></tr></tbody></table></div>
+        </article>
+      </div>
     </section>
 
     <section class="profile-section" id="battle-history">
@@ -113,6 +150,7 @@
       <span>Statistics are calculated from recorded eligible numbered battles.</span>
     </footer>
   </main>
+  <script src="js/analytics.js" defer></script>
   <script src="js/profile.js" defer></script>
 </body>
 </html>
