@@ -1,0 +1,158 @@
+(()=>{"use strict";
+const $=id=>document.getElementById(id);
+const params=new URLSearchParams(window.location.search);
+const type=params.get("type")==="team"?"team":"player";
+const requestedId=(params.get("id")||"").trim();
+const state={entry:null,history:[],periods:null,period:"all",specific:"",query:"",page:1,pageSize:25,filtered:[]};
+const number=v=>Number(v||0).toLocaleString(undefined,{maximumFractionDigits:1});
+const escapeHtml=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const formatDate=v=>{if(v===null||v===undefined||v==="")return"Not available";const d=new Date(Number(v));return Number.isNaN(d.getTime())?"Not available":d.toLocaleDateString(undefined,{year:"numeric",month:"short",day:"numeric"});};
+async function load(path){const response=await fetch(path,{cache:"no-cache"});if(!response.ok)throw new Error("Could not load "+path+" ("+response.status+")");return response.json();}
+function profileBucket(id){return String(id).trim().toLowerCase().replace(/[^a-z0-9]/g,"_")[0]||"_";}
+function leaderboardPath(){return type==="team"?"./data/leaderboard_teams.json":"./data/leaderboard_players.json";}
+function idField(){return type==="team"?"team_id":"username";}
+function normalizeId(id){return String(id||"").trim().toLowerCase();}
+async function resolveEntry(){
+  const key=normalizeId(requestedId);
+  if(!key)return null;
+  const bucket=profileBucket(key);
+  try{
+    const directory=await load("./data/profiles/index/"+(type==="team"?"teams":"players")+"-"+bucket+".json");
+    if(directory&&directory[key])return directory[key];
+  }catch(error){console.info("Profile directory not published yet; using compatibility lookup.",error);}
+  const rows=await load(leaderboardPath());
+  return Array.isArray(rows)?rows.find(row=>normalizeId(row[idField()])===key)||null:null;
+}
+function battleNumber(record){
+  const match=String(record.name||"").match(/^\s*(\d+)(?:st|nd|rd|th)\s+ultrabullet\s+/i);
+  return match?Number(match[1]):null;
+}
+function seasonNumber(record){const n=battleNumber(record);return n?Math.floor((n-1)/50)+1:null;}
+function filteredHistoryForStats(){
+  let rows=[...state.history];
+  if(state.period==="month"&&state.specific)rows=rows.filter(record=>record.startsAt&&new Date(Number(record.startsAt)).toISOString().slice(0,7)===state.specific);
+  else if(state.period==="season"&&state.specific)rows=rows.filter(record=>String(seasonNumber(record))===state.specific);
+  else if(state.period.startsWith("last"))rows=rows.slice(0,Number(state.period.slice(4))||10);
+  return rows;
+}
+function filteredHistory(){
+  const query=state.query.trim().toLocaleLowerCase();
+  return filteredHistoryForStats().filter(record=>!query||String(record.name||"").toLocaleLowerCase().includes(query));
+}
+function metrics(rows){
+  const points=rows.reduce((sum,row)=>sum+(Number(row.score)||0),0);
+  const ranks=rows.map(row=>Number(row.rank)).filter(value=>Number.isFinite(value)&&value>0);
+  const podiums=ranks.filter(rank=>rank<=3).length;
+  const best=rows.reduce((winner,row)=>(Number(row.score)||0)>(Number(winner?.score)||0)?row:winner,null);
+  return {
+    tournaments_played:rows.length,points,avg_points:rows.length?points/rows.length:0,
+    best_tournament_score:best?Number(best.score)||0:0,
+    first_places:ranks.filter(rank=>rank===1).length,podiums,
+    top3_rate:ranks.length?podiums/ranks.length:0,
+    best_finish:ranks.length?Math.min(...ranks):null,
+    avg_finish:ranks.length?ranks.reduce((sum,value)=>sum+value,0)/ranks.length:null,
+    active_since:rows.length?Math.min(...rows.map(row=>Number(row.startsAt)||Infinity)):null
+  };
+}
+function renderStats(){
+  const m=state.period==="all"?state.entry:metrics(filteredHistoryForStats());
+  $("stat-points").textContent=number(m.points);
+  $("stat-battles").textContent=number(m.tournaments_played);
+  $("stat-average").textContent=number(m.avg_points);
+  $("stat-podiums").textContent=number(m.podiums);
+  $("stat-podium-caption").textContent=number(m.first_places)+" first places · top-three finishes";
+  $("stat-points-caption").textContent=state.period==="all"?"Cumulative score":"Score in selected period";
+  $("profile-period-caption").textContent=state.period==="all"?"All recorded battles":$("history-period").selectedOptions[0]?.textContent||"Selected period";
+  const fields=[
+    ["Best battle score",m.best_tournament_score??m.best_score,"Points"],
+    ["Best finish",m.best_finish==null?"—":"#"+number(m.best_finish),"Highest recorded tournament finish"],
+    ["Average finish",m.avg_finish==null?"—":"#"+number(m.avg_finish),"Across recorded finishes"],
+    ["First places",m.first_places,"Tournament wins"],
+    ["Podium rate",((Number(m.top3_rate)||0)*100).toFixed(1)+"%","Top-three finishes"],
+    ["Active since",formatDate(m.active_since),"First recorded result"]
+  ];
+  $("profile-records").innerHTML=fields.map(([label,value,caption])=>'<article class="profile-record"><span>'+escapeHtml(label)+'</span><strong>'+escapeHtml(value??"—")+'</strong><small>'+escapeHtml(caption)+'</small></article>').join("");
+}
+function renderChart(){
+  const rows=filteredHistoryForStats().slice(0,20).reverse();
+  const max=Math.max(1,...rows.map(row=>Number(row.score)||0));
+  $("chart-caption").textContent=rows.length?"Latest "+rows.length+" recorded battles":"No results in this period";
+  $("chart-range").textContent=rows.length?formatDate(rows[0].startsAt)+" – "+formatDate(rows[rows.length-1].startsAt):"No data";
+  if(!rows.length){$("profile-chart").innerHTML='<div class="profile-empty">No battle results are available for this period.</div>';return;}
+  $("profile-chart").innerHTML=rows.map(row=>{
+    const score=Math.max(0,Number(row.score)||0),height=Math.max(3,Math.round(score/max*100));
+    const n=battleNumber(row),label=n?"#"+n:formatDate(row.startsAt);
+    return '<div class="chart-column" title="'+escapeHtml((row.name||"Battle")+" · "+number(score)+" points")+'"><span class="bar-value">'+escapeHtml(number(score))+'</span><div class="chart-bar-track"><i class="chart-bar" style="height:'+height+'%"></i></div><span class="chart-label">'+escapeHtml(label)+'</span></div>';
+  }).join("");
+}
+function renderHistory(){
+  const rows=filteredHistory();state.filtered=rows;
+  const total=rows.length,pageCount=Math.max(1,Math.ceil(total/state.pageSize));
+  state.page=Math.max(1,Math.min(state.page,pageCount));
+  const start=(state.page-1)*state.pageSize,visible=rows.slice(start,start+state.pageSize);
+  $("history-summary").textContent=number(total)+" battles · "+(state.period==="all"?"all-time archive":$("history-period").selectedOptions[0]?.textContent||"selected period");
+  $("history-page-summary").textContent=total?("Showing "+number(start+1)+"–"+number(Math.min(start+state.pageSize,total))+" of "+number(total)):"No battles found";
+  $("history-page").textContent="Page "+state.page+" of "+pageCount;
+  $("history-prev").disabled=state.page<=1;$("history-next").disabled=state.page>=pageCount;
+  if(!visible.length){$("history-rows").innerHTML='<tr><td colspan="5" class="profile-empty">'+(state.history.length?"No battles match your search.":"No battle history is available for this competitor.")+'</td></tr>';return;}
+  $("history-rows").innerHTML=visible.map(row=>{
+    const n=battleNumber(row),href="https://lichess.org/tournament/"+encodeURIComponent(String(row.id||""));
+    const finish=row.rank?("#"+number(row.rank)):"—";
+    return '<tr><td><span class="battle-name">'+escapeHtml(row.name||"UltraBullet Team Battle")+'</span><span class="battle-number">'+(n?"Battle "+n:"Unnumbered battle")+'</span></td><td>'+escapeHtml(formatDate(row.startsAt))+'</td><td class="number-cell">'+escapeHtml(finish)+'</td><td class="number-cell">'+escapeHtml(number(row.score))+'</td><td><a href="'+href+'" target="_blank" rel="noopener noreferrer">Open ↗</a></td></tr>';
+  }).join("");
+}
+function renderPeriodOptions(){
+  const select=$("specific-period");select.innerHTML="";
+  if(state.period==="month"){
+    (state.periods?.months||[]).forEach(item=>{const option=document.createElement("option");option.value=item.key;option.textContent=item.label+" · "+number(item.battle_count)+" battles";select.appendChild(option);});
+  }else if(state.period==="season"){
+    (state.periods?.seasons||[]).forEach(item=>{const option=document.createElement("option");option.value=String(item.key).replace("season-","");option.textContent=item.label+(item.complete?"":" · in progress")+(item.missing_battle_numbers?.length?" · "+item.missing_battle_numbers.length+" missing":"");select.appendChild(option);});
+  }
+  if(select.options.length){state.specific=select.options[0].value;select.value=state.specific;$("specific-period-wrap").classList.remove("hidden");}
+  else{$("specific-period-wrap").classList.add("hidden");state.specific="";}
+}
+function renderAll(){renderStats();renderChart();renderHistory();}
+async function init(){
+  if(!requestedId){$("profile-name").textContent="Profile not found";$("profile-description").textContent="This profile URL is missing its competitor identifier.";return;}
+  $("profile-kind").textContent=type==="team"?"TEAM PROFILE":"PLAYER PROFILE";
+  const entry=await resolveEntry();
+  if(!entry){$("profile-name").textContent="Competitor not found";$("profile-description").textContent="No matching competitor exists in the published leaderboard data.";$("profile-records").innerHTML='<div class="profile-empty">Check the profile link or return to the leaderboard.</div>';return;}
+  state.entry=entry;
+  const canonicalId=entry[idField()]||entry.id||requestedId;
+  const displayName=type==="team"?(entry.team_name||entry.name||canonicalId):(entry.username||entry.name||canonicalId);
+  document.title=displayName+" — UltraBullet Team Battles";
+  $("profile-name").textContent=displayName;
+  $("profile-description").textContent=type==="team"?"Historical team performance across the numbered ULTRAbullet Team Battles.":"Individual performance across the numbered ULTRAbullet Team Battles.";
+  $("profile-rank").textContent="#"+number(entry.rank);
+  $("profile-rank-caption").textContent=type==="team"?"All-time team ranking":"All-time player ranking";
+  $("profile-last-active").textContent=formatDate(entry.last_played);
+  $("lichess-profile-link").href=type==="team"?"https://lichess.org/team/"+encodeURIComponent(canonicalId):"https://lichess.org/@/"+encodeURIComponent(canonicalId);
+  $("share-profile").addEventListener("click",async()=>{
+    try{await navigator.clipboard.writeText(window.location.href);$("profile-feedback").textContent="Profile link copied to clipboard.";}
+    catch(error){$("profile-feedback").textContent="Copy is unavailable in this browser. Copy the page address from the address bar.";}
+  });
+  const [shard,periods]=await Promise.all([load("./data/"+entry.profile_file),load("./data/periods_index.json").catch(()=>null)]);
+  const profile=shard&&shard[entry.profile_key];
+  if(!profile||!Array.isArray(profile.history))throw new Error("The competitor's detailed history is not present in the published profile shard.");
+  state.history=[...profile.history].sort((a,b)=>(Number(b.startsAt)||0)-(Number(a.startsAt)||0));
+  state.periods=periods;
+  $("history-period").addEventListener("change",()=>{
+    state.period=$("history-period").value;state.page=1;
+    if(state.period==="month"||state.period==="season")renderPeriodOptions();
+    else{$("specific-period-wrap").classList.add("hidden");state.specific="";}
+    renderAll();
+  });
+  $("specific-period").addEventListener("change",()=>{state.specific=$("specific-period").value;state.page=1;renderAll();});
+  $("history-search").addEventListener("input",()=>{state.query=$("history-search").value;state.page=1;renderHistory();});
+  $("history-prev").addEventListener("click",()=>{if(state.page>1){state.page--;renderHistory();}});
+  $("history-next").addEventListener("click",()=>{if(state.page<Math.ceil(state.filtered.length/state.pageSize)){state.page++;renderHistory();}});
+  renderAll();
+}
+init().catch(error=>{
+  console.error("Could not load profile",error);
+  $("profile-name").textContent="Profile temporarily unavailable";
+  $("profile-description").textContent="The profile data could not be loaded. Please return to the leaderboard and try again.";
+  $("profile-records").innerHTML='<div class="profile-empty">'+escapeHtml(error.message||"An unexpected error occurred.")+'</div>';
+  $("history-rows").innerHTML='<tr><td colspan="5" class="profile-empty">Battle history could not be loaded.</td></tr>';
+});
+})();
