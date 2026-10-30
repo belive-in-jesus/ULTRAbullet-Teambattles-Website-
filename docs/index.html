@@ -59,8 +59,16 @@
           <button id="teams-btn" class="active" type="button" aria-pressed="true">Teams</button>
           <button id="players-btn" type="button" aria-pressed="false">Players</button>
         </div>
+        <select id="period-type" class="select-input" aria-label="Ranking period" style="width:auto;min-width:145px">
+          <option value="all">All-time</option>
+          <option value="month">Monthly</option>
+          <option value="season">Seasonal · 50 battles</option>
+        </select>
+        <select id="period-select" class="select-input hidden" aria-label="Select month or season" style="width:auto;min-width:190px"></select>
         <label class="search"><input id="search" type="search" autocomplete="off" placeholder="Search teams or players…" aria-label="Search leaderboard"></label>
-        <select id="sort-select" class="select-input" aria-label="Sort leaderboard" style="width:auto;min-width:145px"><option value="rank">Sort: Rank</option><option value="points">Sort: Points</option><option value="battles">Sort: Battles</option><option value="podiums">Sort: Podiums</option></select>
+        <select id="sort-select" class="select-input" aria-label="Sort leaderboard" style="width:auto;min-width:155px">
+          <option value="rank">Sort: Rank</option><option value="points">Sort: Points</option><option value="avg_points">Sort: Average points</option><option value="battles">Sort: Battles</option><option value="podiums">Sort: Podiums</option>
+        </select>
         <button id="export-btn" class="filter-button" type="button">Export CSV ↗</button>
       </div>
       <div class="table-scroll">
@@ -98,24 +106,109 @@
 
   <script>
 (()=>{"use strict";
-const state={view:"teams",teams:[],players:[],meta:{},history:[],query:"",historyQuery:"",showAllHistory:false,profileCache:{},profileRequest:0};
+const state={view:"teams",teams:[],players:[],meta:{},history:[],query:"",historyQuery:"",showAllHistory:false,periodsIndex:null,periodData:null,periodType:"all",periodKey:"",periodCache:{},periodRequest:0,periodLoading:false,periodError:"",profileCache:{},profileRequest:0};
 const $=id=>document.getElementById(id);
 const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const num=v=>Number(v||0).toLocaleString();
 const date=v=>{if(!v)return"Not available";const d=new Date(v);return Number.isNaN(d.getTime())?String(v):d.toLocaleString(undefined,{dateStyle:"medium",timeStyle:"short"});};
-const rows=()=>state.view==="teams"?state.teams:state.players;
+const rows=()=>state.periodData?(state.periodData[state.view]||[]):(state.view==="teams"?state.teams:state.players);
 const name=r=>state.view==="teams"?r.team_name:r.username;
 const link=r=>state.view==="teams"?(r.team_id?"https://lichess.org/team/"+encodeURIComponent(r.team_id):""):(r.username?"https://lichess.org/@/"+encodeURIComponent(r.username):"");
 const stats=[["tournaments_played","Battles played",num],["best_tournament","Best battle",v=>String(v)],["best_tournament_score","Best battle score",num],["best_finish","Best finish",v=>"#"+num(v)],["worst_finish","Lowest finish",v=>"#"+num(v)],["avg_finish","Average finish",v=>"#"+v],["avg_points","Average points",num],["highest_points","Highest battle score",num],["podiums","Podium finishes",num],["first_places","First places",num],["top3_rate","Podium rate",v=>(Number(v)*100).toFixed(1)+"%"],["active_since","First recorded battle",date],["last_played","Last played",date]];
-function render(){const teams=state.view==="teams";$("teams-btn").classList.toggle("active",teams);$("players-btn").classList.toggle("active",!teams);$("teams-btn").setAttribute("aria-pressed",String(teams));$("players-btn").setAttribute("aria-pressed",String(!teams));$("board-title").textContent=teams?"Team standings":"Player standings";$("board-sub").textContent=teams?"Club rankings · cumulative team points":"Individual rankings · cumulative player points";$("search").placeholder=teams?"Search teams…":"Search players…";const q=state.query.trim().toLocaleLowerCase();let list=rows().filter(r=>String(name(r)||"").toLocaleLowerCase().includes(q));const sort=$("sort-select").value;if(sort==="points")list=[...list].sort((a,b)=>(Number(b.points)||0)-(Number(a.points)||0));if(sort==="battles")list=[...list].sort((a,b)=>(Number(b.tournaments_played)||0)-(Number(a.tournaments_played)||0));if(sort==="podiums")list=[...list].sort((a,b)=>(Number(b.podiums)||0)-(Number(a.podiums)||0));$("result-count").textContent=list.length.toLocaleString()+" shown";const body=$("leaderboard-body");if(!list.length){body.innerHTML='<tr><td colspan="4"><div class="empty"><strong>'+(rows().length?"No matches found":"No leaderboard data yet")+'</strong>'+(rows().length?"Try another search term.":"The standings appear after the first successful data refresh.")+'</div></td></tr>';return;}body.innerHTML=list.map((r,i)=>{const rank=sort==="rank"?Number(r.rank||i+1):i+1;const n=name(r)||"Unknown";return '<tr tabindex="0" role="button" aria-label="Show details for '+esc(n)+'" data-index="'+i+'"><td class="rank '+(rank<=3?"top":"")+'">'+String(rank).padStart(2,"0")+'</td><td><div class="entity"><span class="mini-mark" aria-hidden="true">'+(teams?"♜":"♟")+'</span><span>'+esc(n)+'</span></div></td><td class="optional-col secondary">'+(r.tournaments_played==null?"—":num(r.tournaments_played))+'</td><td class="points">'+num(r.points)+'</td></tr>';}).join("");Array.from(body.querySelectorAll("tr[data-index]")).forEach(tr=>{const open=()=>details(list[Number(tr.dataset.index)]);tr.addEventListener("click",open);tr.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();open();}});});}
+function render(){
+  const teams=state.view==="teams";
+  $("teams-btn").classList.toggle("active",teams);$("players-btn").classList.toggle("active",!teams);
+  $("teams-btn").setAttribute("aria-pressed",String(teams));$("players-btn").setAttribute("aria-pressed",String(!teams));
+  $("board-title").textContent=teams?"Team standings":"Player standings";
+  if(state.periodData)$("board-sub").textContent=state.periodData.label+" · "+num(state.periodData.battle_count)+" battles · "+(teams?"team points":"individual points");
+  else if(state.periodType==="all")$("board-sub").textContent=teams?"All-time points across matching battles":"All-time individual points across matching battles";
+  else if(state.periodLoading)$("board-sub").textContent="Loading selected ranking period…";
+  else if(state.periodError)$("board-sub").textContent=state.periodError;
+  else $("board-sub").textContent="Select a period to view its ranking";
+  $("search").placeholder=teams?"Search teams…":"Search players…";
+  const body=$("leaderboard-body");
+  if(state.periodLoading){$("result-count").textContent="Loading";body.innerHTML='<tr><td colspan="4"><div class="empty"><strong>Loading period ranking…</strong>Fetching the selected month or season.</div></td></tr>';return;}
+  if(state.periodError){$("result-count").textContent="Unavailable";body.innerHTML='<tr><td colspan="4"><div class="empty"><strong>Period ranking unavailable</strong>'+esc(state.periodError)+'</div></td></tr>';return;}
+  const q=state.query.trim().toLocaleLowerCase();
+  let list=rows().filter(r=>String(name(r)||"").toLocaleLowerCase().includes(q));
+  const sort=$("sort-select").value;
+  if(sort==="points")list=[...list].sort((a,b)=>(Number(b.points)||0)-(Number(a.points)||0));
+  if(sort==="avg_points")list=[...list].sort((a,b)=>(Number(b.avg_points)||0)-(Number(a.avg_points)||0));
+  if(sort==="battles")list=[...list].sort((a,b)=>(Number(b.tournaments_played)||0)-(Number(a.tournaments_played)||0));
+  if(sort==="podiums")list=[...list].sort((a,b)=>(Number(b.podiums)||0)-(Number(a.podiums)||0));
+  $("result-count").textContent=list.length.toLocaleString()+" shown";
+  if(!list.length){body.innerHTML='<tr><td colspan="4"><div class="empty"><strong>'+(rows().length?"No matches found":"No ranking data available")+'</strong>'+(rows().length?"Try another search term.":"No competitor has recorded results in this period.")+'</div></td></tr>';return;}
+  body.innerHTML=list.map((r,i)=>{const rank=sort==="rank"?Number(r.rank||i+1):i+1;const n=name(r)||"Unknown";return '<tr tabindex="0" role="button" aria-label="Show details for '+esc(n)+'" data-index="'+i+'"><td class="rank '+(rank<=3?"top":"")+'">'+String(rank).padStart(2,"0")+'</td><td><div class="entity"><span class="mini-mark" aria-hidden="true">'+(teams?"♜":"♟")+'</span><span>'+esc(n)+'</span></div></td><td class="optional-col secondary">'+(r.tournaments_played==null?"—":num(r.tournaments_played))+'</td><td class="points">'+num(r.points)+'</td></tr>';}).join("");
+  Array.from(body.querySelectorAll("tr[data-index]")).forEach(tr=>{const open=()=>details(list[Number(tr.dataset.index)]);tr.addEventListener("click",open);tr.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();open();}});});
+}
 function renderProfileHistory(history){$("modal-history-list").innerHTML=history.length?history.slice(0,12).map(b=>'<li><span>'+esc(b.name||"UltraBullet battle")+'<br><small>'+esc(date(b.startsAt))+'</small></span><strong>'+esc(num(b.score))+' pts</strong></li>').join(""):'<li>No detailed battle records are available for this competitor.</li>';}
 async function profileHistory(r){if(Array.isArray(r.history))return r.history;if(!r.profile_file||!r.profile_key)return[];const file=r.profile_file;if(!state.profileCache[file])state.profileCache[file]=load("./data/"+file).catch(error=>{delete state.profileCache[file];throw error;});const shard=await state.profileCache[file];const profile=shard[r.profile_key];return profile&&Array.isArray(profile.history)?profile.history:[];}
-function details(r){if(!r)return;const token=++state.profileRequest;$("modal-title").textContent=name(r)||"Competitor";$("modal-points").textContent=num(r.points)+" cumulative points · rank #"+num(r.rank);const cards=stats.filter(([k])=>r[k]!==undefined&&r[k]!==null&&r[k]!=="").map(([k,label,fmt])=>'<div class="detail-item"><span>'+esc(label)+'</span><strong>'+esc(fmt(r[k]))+'</strong></div>');$("modal-stats").innerHTML=cards.length?cards.join(""):'<div class="detail-item"><span>Statistics</span><strong>Not available yet</strong></div>';const a=$("modal-link");a.href=link(r)||"#";a.style.display=a.href&&a.getAttribute("href")!=="#"?"inline-flex":"none";$("modal-history-list").innerHTML='<li>Loading battle history…</li>';$("modal-backdrop").classList.add("open");$("modal-close").focus();profileHistory(r).then(history=>{if(token===state.profileRequest)renderProfileHistory(history);}).catch(error=>{console.error("Could not load competitor history",error);if(token===state.profileRequest)$("modal-history-list").innerHTML='<li>Battle history could not be loaded. Please try opening this profile again.</li>';});}
-function renderHistory(){const q=state.historyQuery.trim().toLocaleLowerCase();const filtered=state.history.filter(b=>String(b.name||"").toLocaleLowerCase().includes(q));const shown=state.showAllHistory?filtered:filtered.slice(0,10);$("history-count").textContent=filtered.length.toLocaleString()+" battles";$("history-more").classList.toggle("hidden",filtered.length<=10);$("history-more").textContent=state.showAllHistory?"Show fewer ↑":"Show more battles ↓";if(!shown.length){$("history-list").innerHTML='<div class="empty"><strong>'+(state.history.length?"No battles match":"No battle history published yet")+'</strong>'+(state.history.length?"Try another search.":"The archive is populated after a successful refresh.")+'</div>';return;}$("history-list").innerHTML=shown.map(b=>'<div class="history-row"><div><div class="history-name">'+esc(b.name||"UltraBullet battle")+'</div><span class="history-date">'+esc(date(b.startsAt))+' · '+esc(num(b.nbPlayers))+' participants</span></div><span class="history-meta">'+esc(b.id||"")+'</span><a class="history-link" href="'+esc(b.url||("https://lichess.org/tournament/"+encodeURIComponent(b.id||"")))+'" target="_blank" rel="noopener noreferrer">Open battle ↗</a></div>').join("");}
-function csv(){const keys=state.view==="teams"?["rank","team_name","team_id","points","tournaments_played","podiums","first_places","avg_points","best_finish","last_played"]:["rank","username","points","tournaments_played","podiums","first_places","avg_points","best_finish","last_played"];const quote=v=>'"'+String(v??"").replace(/"/g,'""')+'"';const content=[keys.join(","),...rows().map(r=>keys.map(k=>quote(r[k])).join(","))].join("\r\n");const url=URL.createObjectURL(new Blob(["\ufeff"+content],{type:"text/csv;charset=utf-8;"}));const a=document.createElement("a");a.href=url;a.download="ultrabullet-"+state.view+"-leaderboard.csv";a.click();URL.revokeObjectURL(url);}
+function details(r){
+  if(!r)return;const token=++state.profileRequest;$("modal-title").textContent=name(r)||"Competitor";
+  const periodLabel=state.periodData?state.periodData.label+" · ":"";$("modal-points").textContent=periodLabel+num(r.points)+" points · rank #"+num(r.rank);
+  const cards=stats.filter(([k])=>r[k]!==undefined&&r[k]!==null&&r[k]!=="").map(([k,label,fmt])=>'<div class="detail-item"><span>'+esc(label)+'</span><strong>'+esc(fmt(r[k]))+'</strong></div>');
+  $("modal-stats").innerHTML=cards.length?cards.join(""):'<div class="detail-item"><span>Statistics</span><strong>Not available yet</strong></div>';
+  const a=$("modal-link");a.href=link(r)||"#";a.style.display=a.href&&a.getAttribute("href")!=="#"?"inline-flex":"none";
+  $("modal-history-list").innerHTML='<li>Loading battle history…</li>';$("modal-backdrop").classList.add("open");$("modal-close").focus();
+  profileHistory(r).then(history=>{if(token===state.profileRequest)renderProfileHistory(history);}).catch(error=>{console.error("Could not load competitor history",error);if(token===state.profileRequest)$("modal-history-list").innerHTML='<li>Battle history could not be loaded. Please try opening this profile again.</li>';});
+}
+function renderHistory(){
+  const q=state.historyQuery.trim().toLocaleLowerCase(),filtered=state.history.filter(b=>String(b.name||"").toLocaleLowerCase().includes(q));
+  const shown=state.showAllHistory?filtered:filtered.slice(0,10);$("history-count").textContent=filtered.length.toLocaleString()+" battles";
+  $("history-more").classList.toggle("hidden",filtered.length<=10);$("history-more").textContent=state.showAllHistory?"Show fewer ↑":"Show more battles ↓";
+  if(!shown.length){$("history-list").innerHTML='<div class="empty"><strong>'+(state.history.length?"No battles match":"No battle history published yet")+'</strong>'+(state.history.length?"Try another search.":"The archive is populated after a successful refresh.")+'</div>';return;}
+  $("history-list").innerHTML=shown.map(b=>'<div class="history-row"><div><div class="history-name">'+esc(b.name||"UltraBullet battle")+'</div><span class="history-date">'+esc(date(b.startsAt))+' · '+esc(num(b.nbPlayers))+' participants</span></div><span class="history-meta">'+esc(b.id||"")+'</span><a class="history-link" href="'+esc(b.url||("https://lichess.org/tournament/"+encodeURIComponent(b.id||"")))+'" target="_blank" rel="noopener noreferrer">Open battle ↗</a></div>').join("");
+}
+function csv(){
+  const keys=state.view==="teams"?["rank","team_name","team_id","points","avg_points","tournaments_played","podiums","first_places","best_finish","last_played"]:["rank","username","points","avg_points","tournaments_played","podiums","first_places","best_finish","last_played"];
+  const quote=v=>'"'+String(v??"").replace(/"/g,'""')+'"';const content=[keys.join(","),...rows().map(r=>keys.map(k=>quote(r[k])).join(","))].join("\r\n");
+  const url=URL.createObjectURL(new Blob(["\ufeff"+content],{type:"text/csv;charset=utf-8;"}));const a=document.createElement("a");a.href=url;
+  a.download="ultrabullet-"+state.view+(state.periodData?"-"+state.periodData.key:"-all-time")+"-leaderboard.csv";a.click();URL.revokeObjectURL(url);
+}
 async function load(path){const r=await fetch(path,{cache:"no-cache"});if(!r.ok)throw Error("Could not load "+path+" ("+r.status+")");return r.json();}
-async function init(){const res=await Promise.allSettled([load("./data/leaderboard_teams.json"),load("./data/leaderboard_players.json"),load("./data/meta.json"),load("./data/battle_history.json")]);state.teams=res[0].status==="fulfilled"&&Array.isArray(res[0].value)?res[0].value:[];state.players=res[1].status==="fulfilled"&&Array.isArray(res[1].value)?res[1].value:[];state.meta=res[2].status==="fulfilled"?res[2].value:{};state.history=res[3].status==="fulfilled"&&Array.isArray(res[3].value)?res[3].value:[];$("stat-battles").textContent=num(state.meta.tournaments_processed);$("stat-teams").textContent=num(state.meta.teams_count??state.teams.length);$("stat-players").textContent=num(state.meta.players_count??state.players.length);$("updated-label").textContent=state.meta.generated_at?"Updated "+date(state.meta.generated_at):"No successful data refresh yet";$("filter-label").textContent=(state.meta.name_filters||"ultrabullet")+" · completed tournaments";$("status-pill").textContent=state.meta.generated_at?"UPDATED "+date(state.meta.generated_at):"AWAITING FIRST UPDATE";if(res.slice(0,3).some(x=>x.status==="rejected"))$("updated-label").classList.add("error");if(res[3].status==="rejected")$("history-status").textContent="Battle archive unavailable — run the leaderboard workflow to generate it.";else if(Number(state.meta.errors_count||0)>0)$("history-status").textContent="Archive refreshed · "+num(state.meta.errors_count)+" data collection issue(s) recorded.";else $("history-status").textContent="Archive from latest successful data refresh · no collection errors recorded";render();renderHistory();}
-$("teams-btn").addEventListener("click",()=>{state.view="teams";render();});$("players-btn").addEventListener("click",()=>{state.view="players";render();});$("search").addEventListener("input",e=>{state.query=e.target.value;render();});$("sort-select").addEventListener("change",render);$("export-btn").addEventListener("click",csv);$("history-search").addEventListener("input",e=>{state.historyQuery=e.target.value;state.showAllHistory=false;renderHistory();});$("history-more").addEventListener("click",()=>{state.showAllHistory=!state.showAllHistory;renderHistory();});$("modal-close").addEventListener("click",()=>$("modal-backdrop").classList.remove("open"));$("modal-backdrop").addEventListener("click",e=>{if(e.target===$("modal-backdrop"))$("modal-backdrop").classList.remove("open");});document.addEventListener("keydown",e=>{if(e.key==="Escape")$("modal-backdrop").classList.remove("open");});init().catch(e=>{console.error(e);$("updated-label").textContent="Could not load leaderboard data";$("updated-label").classList.add("error");render();renderHistory();});
+function periodEntries(type){if(!state.periodsIndex)return[];return type==="month"?(state.periodsIndex.months||[]):(state.periodsIndex.seasons||[]);}
+async function loadSelectedPeriod(){
+  const type=$("period-type").value;state.periodType=type;state.periodRequest++;const token=state.periodRequest;
+  if(type==="all"){state.periodData=null;state.periodLoading=false;state.periodError="";state.periodKey="";$("period-select").classList.add("hidden");render();return;}
+  const entries=periodEntries(type),selector=$("period-select");selector.classList.remove("hidden");
+  if(!entries.length){state.periodData=null;state.periodLoading=false;state.periodError="No "+(type==="month"?"monthly":"seasonal")+" index is available yet. Run the leaderboard refresh after deploying V1.2.";render();return;}
+  const previous=selector.value,entry=entries.find(item=>item.key===previous)||entries[0];selector.innerHTML="";
+  for(const item of entries){const option=document.createElement("option");option.value=item.key;option.textContent=item.label+(type==="season"&&!item.complete?" · in progress":"");selector.appendChild(option);}
+  selector.value=entry.key;state.periodKey=entry.key;state.periodData=null;state.periodLoading=true;state.periodError="";render();
+  try{
+    const data=state.periodCache[entry.data_file]||(state.periodCache[entry.data_file]=load("./data/"+entry.data_file));
+    const payload=await data;if(token!==state.periodRequest)return;state.periodData=payload;state.periodLoading=false;state.periodError="";render();
+  }catch(error){console.error("Could not load period ranking",error);if(token!==state.periodRequest)return;delete state.periodCache[entry.data_file];state.periodData=null;state.periodLoading=false;state.periodError="The selected period could not be loaded. Try again or choose another period.";render();}
+}
+async function init(){
+  const res=await Promise.allSettled([load("./data/leaderboard_teams.json"),load("./data/leaderboard_players.json"),load("./data/meta.json"),load("./data/battle_history.json"),load("./data/periods_index.json")]);
+  state.teams=res[0].status==="fulfilled"&&Array.isArray(res[0].value)?res[0].value:[];state.players=res[1].status==="fulfilled"&&Array.isArray(res[1].value)?res[1].value:[];
+  state.meta=res[2].status==="fulfilled"?res[2].value:{};state.history=res[3].status==="fulfilled"&&Array.isArray(res[3].value)?res[3].value:[];
+  state.periodsIndex=res[4].status==="fulfilled"?res[4].value:null;
+  $("stat-battles").textContent=num(state.meta.tournaments_processed);$("stat-teams").textContent=num(state.meta.teams_count??state.teams.length);$("stat-players").textContent=num(state.meta.players_count??state.players.length);
+  $("updated-label").textContent=state.meta.generated_at?"Updated "+date(state.meta.generated_at):"No successful data refresh yet";
+  $("filter-label").textContent=(state.meta.name_filters||"ultrabullet")+" · completed tournaments";
+  $("status-pill").textContent=state.meta.generated_at?"UPDATED "+date(state.meta.generated_at):"AWAITING FIRST UPDATE";
+  if(res.slice(0,3).some(x=>x.status==="rejected"))$("updated-label").classList.add("error");
+  if(res[3].status==="rejected")$("history-status").textContent="Battle archive unavailable — run the leaderboard workflow to generate it.";
+  else if(Number(state.meta.errors_count||0)>0)$("history-status").textContent="Archive refreshed · "+num(state.meta.errors_count)+" data collection issue(s) recorded.";
+  else $("history-status").textContent="Archive from latest successful data refresh · no collection errors recorded";
+  $("period-type").disabled=!state.periodsIndex;
+  $("period-type").title=state.periodsIndex?"Choose all-time, monthly or 50-battle seasonal rankings":"Period rankings will become available after the V1.2 data refresh";
+  render();renderHistory();
+}
+$("teams-btn").addEventListener("click",()=>{state.view="teams";render();});
+$("players-btn").addEventListener("click",()=>{state.view="players";render();});
+$("period-type").addEventListener("change",loadSelectedPeriod);
+$("period-select").addEventListener("change",loadSelectedPeriod);
+$("search").addEventListener("input",e=>{state.query=e.target.value;render();});
+$("sort-select").addEventListener("change",render);$("export-btn").addEventListener("click",csv);
+$("history-search").addEventListener("input",e=>{state.historyQuery=e.target.value;state.showAllHistory=false;renderHistory();});
+$("history-more").addEventListener("click",()=>{state.showAllHistory=!state.showAllHistory;renderHistory();});
+$("modal-close").addEventListener("click",()=>$("modal-backdrop").classList.remove("open"));
+$("modal-backdrop").addEventListener("click",e=>{if(e.target===$("modal-backdrop"))$("modal-backdrop").classList.remove("open");});
+document.addEventListener("keydown",e=>{if(e.key==="Escape")$("modal-backdrop").classList.remove("open");});
+init().catch(e=>{console.error(e);$("updated-label").textContent="Could not load leaderboard data";$("updated-label").classList.add("error");render();renderHistory();});
 })();
 </script>
 </body>
