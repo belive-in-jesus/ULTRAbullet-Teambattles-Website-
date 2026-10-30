@@ -137,6 +137,9 @@ jobs:
             docs/data/leaderboard_teams.json
             docs/data/meta.json
             docs/data/battle_history.json
+            docs/data/periods_index.json
+            docs/data/periods/
+            docs/data/profiles/
             errors.json
           if-no-files-found: error
           retention-days: 7
