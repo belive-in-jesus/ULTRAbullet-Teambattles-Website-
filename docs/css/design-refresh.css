@@ -1,0 +1,508 @@
+/* UltraBullet Team Battles — V1.7 visual refresh
+   Shared competitive interface + page-specific Hall of Fame and editorial styles.
+   This layer intentionally overrides presentation only; data and interaction logic stay untouched. */
+
+:root {
+  color-scheme: dark;
+  --bg: #070b12;
+  --surface: #101827;
+  --surface-raised: #172337;
+  --line: rgba(145, 169, 197, .18);
+  --text: #f4f7fb;
+  --muted: #9aaabe;
+  --accent: #8aa8ff;
+  --cyan: #6fe2e7;
+  --gold: #e8bd74;
+  --panel: #101927;
+  --shadow: 0 24px 70px rgba(0, 0, 0, .32);
+  --font-sans: "Manrope", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: "Space Grotesk", "Manrope", system-ui, sans-serif;
+  --font-mono: "DM Mono", "SFMono-Regular", Consolas, monospace;
+}
+
+html { scroll-padding-top: 28px; }
+body {
+  position: relative;
+  isolation: isolate;
+  color: var(--text);
+  background:
+    radial-gradient(ellipse at 7% 0%, rgba(84, 204, 220, .13), transparent 34rem),
+    radial-gradient(ellipse at 95% 4%, rgba(103, 119, 225, .15), transparent 38rem),
+    linear-gradient(145deg, #070b12 0%, #0a1220 56%, #080e18 100%);
+  font-family: var(--font-sans);
+  font-size: 15px;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+}
+body:before {
+  z-index: -1;
+  opacity: .19;
+  background-image:
+    linear-gradient(rgba(174, 207, 226, .045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(174, 207, 226, .045) 1px, transparent 1px);
+  background-size: 52px 52px;
+  mask-image: linear-gradient(to bottom, black, rgba(0,0,0,.7) 45%, transparent 90%);
+}
+body:after {
+  z-index: -1;
+  opacity: .2;
+  background: radial-gradient(ellipse at 50% 0%, rgba(100, 140, 190, .07), transparent 54rem);
+}
+::selection { color: #071018; background: rgba(111, 226, 231, .8); }
+a { text-underline-offset: 3px; }
+button, input, select { font-family: var(--font-sans); }
+:focus-visible { outline: 2px solid var(--cyan); outline-offset: 3px; }
+
+.shell {
+  width: min(1320px, calc(100% - 52px));
+  padding: 24px 0 56px;
+}
+.masthead {
+  min-height: 100px;
+  margin-bottom: 48px;
+  padding: 10px 18px;
+  border: 1px solid rgba(142, 171, 201, .19);
+  border-radius: 20px;
+  background: rgba(10, 17, 29, .82);
+  box-shadow: 0 16px 46px rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.035);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+.brand { gap: 15px; min-width: 230px; }
+.brand-emblem {
+  border-color: rgba(111, 226, 231, .28);
+  border-radius: 19px;
+  background:
+    radial-gradient(circle at 45% 38%, rgba(111,226,231,.16), transparent 68%),
+    linear-gradient(145deg, #182b3d, #0c1726);
+  box-shadow: 0 0 32px rgba(87, 205, 222, .11), inset 0 1px 0 rgba(255,255,255,.07);
+}
+.brand-logo { filter: drop-shadow(0 0 14px rgba(111,226,231,.2)); }
+.brand-copy strong {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  letter-spacing: .11em;
+}
+.brand-copy small { letter-spacing: .22em; }
+.mast-actions { gap: 8px clamp(10px, 1.25vw, 19px); }
+.nav-link {
+  min-height: 39px;
+  padding: 8px 2px;
+  color: #9eafc2;
+  font-size: .76rem;
+  font-weight: 750;
+  letter-spacing: .015em;
+}
+.nav-link:hover, .nav-link.active { color: #f5f9fc; }
+.nav-link.active:after {
+  height: 2px;
+  background: linear-gradient(90deg, var(--cyan), #8ba7ff);
+  box-shadow: 0 0 13px rgba(111,226,231,.35);
+}
+.pill {
+  border-color: rgba(145,169,197,.2);
+  background: rgba(255,255,255,.035);
+  color: #a9b9cb;
+  font-size: .64rem;
+}
+.status-pill { border-color: rgba(111,226,231,.25); background: rgba(111,226,231,.07); color: #b2e4e7; }
+
+.eyebrow {
+  color: var(--cyan);
+  font-size: .65rem;
+  font-weight: 600;
+  letter-spacing: .19em;
+}
+.eyebrow:before { width: 24px; opacity: .75; }
+.hero { gap: clamp(30px, 5vw, 76px); margin-bottom: 42px; }
+.hero-copy { padding: 14px 0; }
+.hero h1 {
+  font-family: var(--font-display);
+  font-size: clamp(3.25rem, 6.6vw, 6.2rem);
+  font-weight: 700;
+  line-height: .94;
+  letter-spacing: -.075em;
+}
+.hero h1 em {
+  background: linear-gradient(105deg, #6fe2e7 0%, #89a9ff 62%, #b3a6ff 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+}
+.lede { color: #aab9c9; font-size: .97rem; line-height: 1.9; }
+.hero-actions { gap: 12px; margin-top: 28px; }
+.primary-action, .secondary-action {
+  min-height: 46px;
+  padding: 12px 17px;
+  border-radius: 10px;
+  font-size: .77rem;
+  letter-spacing: .01em;
+}
+.primary-action {
+  border-color: rgba(111,226,231,.45);
+  background: linear-gradient(110deg, #176d7c, #3d64a4);
+  box-shadow: 0 10px 30px rgba(31,117,145,.2);
+}
+.primary-action:hover { background: linear-gradient(110deg, #218294, #4a73b8); }
+.secondary-action { border-color: rgba(145,169,197,.24); background: rgba(255,255,255,.035); color: #cad5e0; }
+.secondary-action:hover { border-color: rgba(111,226,231,.4); background: rgba(111,226,231,.065); }
+
+.hero-note {
+  border-color: rgba(116, 158, 193, .3);
+  border-radius: 23px;
+  background:
+    radial-gradient(circle at 82% 36%, rgba(69, 174, 198, .13), transparent 45%),
+    linear-gradient(145deg, rgba(23,43,64,.96), rgba(11,21,36,.98));
+  box-shadow: 0 25px 72px rgba(0,0,0,.3), inset 0 1px 0 rgba(255,255,255,.05);
+}
+.arena-panel-content { padding: 30px; }
+.hero-note .note-label { color: #73dfe7; letter-spacing: .19em; }
+.refresh-indicator { color: #9db2c4; }
+.hero-note strong { font-family: var(--font-display); font-size: 1.5rem; letter-spacing: -.04em; }
+.hero-note p { color: #a9bbca; line-height: 1.8; }
+.arena-panel-foot { color: #8da7ba; letter-spacing: .17em; }
+
+.stats { gap: 15px; margin: 30px 0 32px; }
+.stat {
+  padding: 22px 23px;
+  border-color: rgba(133,163,194,.2);
+  border-radius: 17px;
+  background: linear-gradient(145deg, rgba(24,42,61,.78), rgba(13,24,39,.84));
+  box-shadow: 0 15px 38px rgba(0,0,0,.15), inset 0 1px 0 rgba(255,255,255,.025);
+}
+.stat:after { width: 108px; background: linear-gradient(90deg, var(--cyan), rgba(138,168,255,.42), transparent); }
+.stat-label { color: #9eafc1; font-size: .7rem; letter-spacing: .035em; }
+.stat-value { font-size: 1.95rem; color: #f4f8fc; }
+
+.dashboard-grid { gap: 15px; }
+.dashboard-card {
+  padding: 23px;
+  border-color: rgba(126,157,189,.22);
+  border-radius: 17px;
+  background: linear-gradient(145deg, rgba(20,38,57,.88), rgba(11,22,37,.94));
+  box-shadow: 0 17px 42px rgba(0,0,0,.17), inset 0 1px 0 rgba(255,255,255,.025);
+}
+.dashboard-card h2 { font-family: var(--font-display); font-size: 1.18rem; }
+.dashboard-sub { color: #9eafc0; }
+.info-kicker { color: #77dce4; letter-spacing: .17em; }
+.dashboard-status { border-color: rgba(111,226,231,.22); background: rgba(111,226,231,.055); }
+.dashboard-link { color: #78dfe6; }
+
+.board {
+  border-color: rgba(126,157,189,.23);
+  border-radius: 19px;
+  background: rgba(11,20,34,.95);
+  box-shadow: 0 28px 85px rgba(0,0,0,.27), inset 0 1px 0 rgba(255,255,255,.025);
+}
+.board-head { padding: 25px 27px 20px; border-color: rgba(126,157,189,.18); }
+.board-title, .section-heading h2 { font-family: var(--font-display); }
+.board-title { font-size: 1.5rem; letter-spacing: -.045em; }
+.board-sub { color: #96aabd; }
+.controls { padding: 15px 22px; border-color: rgba(126,157,189,.15); background: rgba(255,255,255,.018); }
+.segmented, .search input, .select-input {
+  border-color: rgba(132,160,190,.25);
+  border-radius: 10px;
+  background: #0b1524;
+}
+.segmented button.active { background: linear-gradient(110deg, #217d8b, #4b70b9); }
+.search input, .select-input { min-height: 43px; color: #f2f6fa; }
+.search input:focus, .select-input:focus { border-color: var(--cyan); box-shadow: 0 0 0 3px rgba(111,226,231,.1); }
+thead { background: #17253a; }
+th { color: #8fa6ba; letter-spacing: .12em; }
+td { border-color: rgba(144,177,204,.09); color: #dce6ee; }
+tbody tr:hover { background: rgba(111,226,231,.055); }
+tbody tr:nth-child(-n+3) { background: rgba(232,189,116,.035); }
+tbody tr:nth-child(-n+3):hover { background: rgba(232,189,116,.075); }
+.rank.top { color: var(--gold); }
+.mini-mark { border-color: rgba(111,226,231,.25); background: linear-gradient(140deg, rgba(111,226,231,.11), rgba(138,168,255,.13)); color: #79dfe6; }
+.pagination, .board-foot { border-color: rgba(126,157,189,.18); }
+.page-button { border-color: rgba(132,160,190,.24); border-radius: 9px; }
+.page-button:hover:not(:disabled) { border-color: rgba(111,226,231,.4); }
+.section-heading { margin-top: 50px; }
+.section-heading h2 { font-size: 1.5rem; }
+.history-panel { border-color: rgba(126,157,189,.22); border-radius: 17px; background: rgba(11,20,34,.84); }
+.history-row { border-color: rgba(144,177,204,.09); }
+.history-name { color: #edf5fa; }
+.history-link { color: #76dce5; }
+.compare-section { margin-top: 48px; }
+.compare-heading h2 { font-family: var(--font-display); }
+.modal-backdrop { background: rgba(2,6,12,.82); }
+.modal { border-color: rgba(128,164,197,.32); border-radius: 20px; background: #101a2a; }
+.modal-close { border-radius: 10px; }
+.detail-item { border-color: rgba(132,160,190,.2); background: rgba(255,255,255,.025); }
+.profile-link { border-color: rgba(111,226,231,.28); background: rgba(111,226,231,.075); color: #7de0e7; }
+
+footer { color: #8498ad; }
+footer a { color: #c2d1df; }
+
+/* Information: editorial, calm and deliberately less ornamental. */
+.page-information .info-hero {
+  max-width: 900px;
+  margin: 42px 0 40px;
+  padding: 4px 0 26px;
+  border-bottom: 1px solid rgba(137,164,190,.17);
+}
+.page-information .info-hero h1 {
+  font-family: var(--font-display);
+  font-size: clamp(3rem, 6vw, 5.25rem);
+  font-weight: 700;
+  letter-spacing: -.07em;
+}
+.page-information .info-hero h1 em {
+  background: linear-gradient(100deg, #74dfe6, #9db2ff);
+  background-clip: text;
+  -webkit-background-clip: text;
+}
+.page-information .info-hero p { color: #a8b7c7; line-height: 1.9; }
+.page-information .info-grid { gap: 14px; }
+.page-information .info-card {
+  padding: 25px 26px;
+  border-color: rgba(130,158,187,.19);
+  border-radius: 15px;
+  background: rgba(15,25,40,.78);
+  box-shadow: 0 13px 36px rgba(0,0,0,.12);
+}
+.page-information .info-card h2 {
+  font-family: var(--font-display);
+  font-size: 1.13rem;
+  letter-spacing: -.035em;
+}
+.page-information .info-card p,
+.page-information .info-card li { color: #a8b7c7; line-height: 1.85; }
+.page-information .info-kicker { color: #76dce5; }
+.page-information .period-item {
+  border-color: rgba(130,158,187,.17);
+  border-radius: 10px;
+  background: rgba(255,255,255,.022);
+}
+.page-information .period-item strong { color: #edf4f8; }
+.page-information .period-item span { color: #9aafc0; }
+.page-information .info-callout {
+  border-left-color: #68d8e1;
+  background: rgba(104,216,225,.055);
+  color: #b2c1ce;
+}
+.page-information .info-callout strong { color: #f0f6fa; }
+.page-information .info-card a,
+.page-information .info-footer a { color: #7adfe6; }
+
+/* Hall of Fame: a distinct, ceremonial presentation built around achievements. */
+.page-hall-of-fame {
+  --gold: #edc982;
+  --hof-glow: rgba(220, 174, 98, .13);
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(177,132,65,.13), transparent 38rem),
+    radial-gradient(ellipse at 5% 18%, rgba(78,124,151,.08), transparent 30rem),
+    linear-gradient(145deg, #090b11 0%, #11141c 55%, #0a0d14 100%);
+}
+.page-hall-of-fame:before {
+  opacity: .16;
+  background-image:
+    linear-gradient(rgba(229,197,143,.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(229,197,143,.04) 1px, transparent 1px);
+}
+.page-hall-of-fame .masthead {
+  border-color: rgba(195,160,103,.22);
+  background: rgba(13,15,21,.86);
+}
+.page-hall-of-fame .brand-emblem {
+  border-color: rgba(221,185,119,.32);
+  background: radial-gradient(circle at 45% 38%, rgba(232,189,116,.18), transparent 68%), linear-gradient(145deg,#332b20,#17171a);
+  box-shadow: 0 0 30px rgba(220,174,98,.1), inset 0 1px 0 rgba(255,255,255,.07);
+}
+.page-hall-of-fame .brand-logo { filter: drop-shadow(0 0 12px rgba(232,189,116,.18)); }
+.page-hall-of-fame .nav-link.active:after { background: linear-gradient(90deg, #d7ad68, #f0d8a5); box-shadow: 0 0 12px rgba(232,189,116,.28); }
+.page-hall-of-fame .eyebrow { color: #d9b575; letter-spacing: .2em; }
+.page-hall-of-fame .eyebrow:before { background: currentColor; }
+.page-hall-of-fame .hof-hero {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  max-width: none;
+  margin: 36px 0 25px;
+  padding: clamp(30px, 5vw, 62px);
+  border: 1px solid rgba(205,166,101,.3);
+  border-radius: 26px;
+  background:
+    radial-gradient(ellipse at 82% 38%, rgba(211,169,98,.15), transparent 36%),
+    linear-gradient(125deg, rgba(44,37,27,.94), rgba(22,24,30,.97) 58%, rgba(15,19,28,.98));
+  box-shadow: 0 28px 80px rgba(0,0,0,.27), inset 0 1px 0 rgba(255,255,255,.045);
+}
+.page-hall-of-fame .hof-hero:after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  top: -150px;
+  right: -45px;
+  width: 430px;
+  height: 430px;
+  border: 1px solid rgba(232,189,116,.16);
+  border-radius: 50%;
+  box-shadow: 0 0 0 34px rgba(232,189,116,.025), 0 0 0 70px rgba(232,189,116,.018), inset 0 0 70px rgba(232,189,116,.035);
+  pointer-events: none;
+}
+.page-hall-of-fame .hof-hero h1 {
+  position: relative;
+  max-width: 850px;
+  margin: 20px 0 16px;
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: clamp(4rem, 8vw, 7.2rem);
+  font-weight: 600;
+  line-height: .82;
+  letter-spacing: -.045em;
+}
+.page-hall-of-fame .hof-hero h1 em {
+  background: linear-gradient(100deg, #f0d9a9 0%, #d5a85f 58%, #f2e1bd 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+}
+.page-hall-of-fame .hof-hero p {
+  position: relative;
+  max-width: 710px;
+  color: #c1b9aa;
+  font-size: .93rem;
+  line-height: 1.9;
+}
+.page-hall-of-fame .hof-stats { gap: 13px; margin: 22px 0 44px; }
+.page-hall-of-fame .hof-stat {
+  position: relative;
+  overflow: hidden;
+  padding: 20px 21px;
+  border-color: rgba(199,164,108,.24);
+  border-radius: 15px;
+  background: linear-gradient(145deg, rgba(44,38,29,.83), rgba(20,23,29,.91));
+  box-shadow: 0 14px 38px rgba(0,0,0,.17);
+}
+.page-hall-of-fame .hof-stat:before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 86px;
+  height: 2px;
+  background: linear-gradient(90deg, #e4bd79, transparent);
+}
+.page-hall-of-fame .hof-stat span { color: #b7aa93; font-size: .68rem; letter-spacing: .035em; }
+.page-hall-of-fame .hof-stat strong {
+  color: #f0dfc0;
+  font-family: var(--font-display);
+  font-size: 1.85rem;
+  font-weight: 600;
+  letter-spacing: -.055em;
+}
+.page-hall-of-fame .hof-section { margin: 46px 0; }
+.page-hall-of-fame .hof-section-head h2 {
+  font-family: var(--font-display);
+  font-size: 1.55rem;
+  letter-spacing: -.045em;
+}
+.page-hall-of-fame .hof-section-head p { color: #a99f8e; }
+.page-hall-of-fame .record-group,
+.page-hall-of-fame .season-card {
+  border-color: rgba(192,158,104,.23);
+  border-radius: 17px;
+  background: linear-gradient(145deg, rgba(36,33,28,.91), rgba(17,21,29,.95));
+  box-shadow: 0 17px 44px rgba(0,0,0,.17), inset 0 1px 0 rgba(255,255,255,.025);
+}
+.page-hall-of-fame .record-group h3 { color: #eee4d1; font-family: var(--font-display); }
+.page-hall-of-fame .record-group h3 span {
+  border-color: rgba(232,189,116,.3);
+  background: rgba(232,189,116,.09);
+  color: #e7c786;
+}
+.page-hall-of-fame .record-card { border-color: rgba(197,170,128,.12); }
+.page-hall-of-fame .record-card label { color: #b2a58f; }
+.page-hall-of-fame .record-card a { color: #f0e6d5; }
+.page-hall-of-fame .record-card a:hover { color: #f0cb88; }
+.page-hall-of-fame .record-card strong { color: #edc982; }
+.page-hall-of-fame .record-card small { color: #a69b89; }
+.page-hall-of-fame .leader-panel {
+  border-color: rgba(192,158,104,.23);
+  border-radius: 16px;
+  background: rgba(20,22,28,.91);
+}
+.page-hall-of-fame .leader-panel-head { border-color: rgba(197,170,128,.15); }
+.page-hall-of-fame .leader-panel-head h3 { color: #eee4d1; font-family: var(--font-display); }
+.page-hall-of-fame .leader-rank.top { color: #e8bf78; }
+.page-hall-of-fame .leader-name { color: #eee5d5; }
+.page-hall-of-fame .leader-name:hover { color: #f0cb88; }
+.page-hall-of-fame .leader-points { color: #e3c080; }
+.page-hall-of-fame .season-head h3 { color: #f1e5d0; font-family: var(--font-display); }
+.page-hall-of-fame .season-head p { color: #a99f8e; }
+.page-hall-of-fame .season-state.final {
+  border-color: rgba(232,189,116,.35);
+  background: rgba(232,189,116,.09);
+  color: #e9c887;
+}
+.page-hall-of-fame .podium-panel {
+  border-color: rgba(197,170,128,.16);
+  background: rgba(255,255,255,.022);
+}
+.page-hall-of-fame .podium-panel h4 { color: #b8aa92; }
+.page-hall-of-fame .podium-row { border-color: rgba(197,170,128,.12); }
+.page-hall-of-fame .podium-row:first-of-type .podium-medal { color: #edc982; }
+.page-hall-of-fame .podium-row a { color: #eee5d5; }
+.page-hall-of-fame .podium-row a:hover { color: #f0cb88; }
+.page-hall-of-fame .podium-row strong { color: #e1c184; }
+.page-hall-of-fame .season-missing,
+.page-hall-of-fame .hof-footer { color: #a79c8a; }
+.page-hall-of-fame .loading-state,
+.page-hall-of-fame .empty-state {
+  border-color: rgba(192,158,104,.2);
+  background: rgba(24,24,27,.86);
+  color: #b8ad9b;
+}
+.page-hall-of-fame .loading-state strong,
+.page-hall-of-fame .empty-state strong { color: #f0e6d5; }
+.page-hall-of-fame .season-state.provisional {
+  border-color: rgba(135,158,224,.3);
+  background: rgba(135,158,224,.08);
+  color: #b8c7ef;
+}
+.page-hall-of-fame .hof-footer { border-color: rgba(192,158,104,.18); }
+
+@media (max-width: 980px) {
+  .masthead { align-items: flex-start; }
+  .mast-actions { justify-content: flex-end; }
+}
+@media (max-width: 760px) {
+  .shell { width: calc(100% - 30px); padding-top: 16px; }
+  .masthead { gap: 12px; margin-bottom: 34px; padding: 10px 13px; }
+  .brand { min-width: 0; }
+  .mast-actions { gap: 5px 14px; }
+  .nav-link { min-height: 34px; font-size: .72rem; }
+  .hero { gap: 24px; margin-bottom: 30px; }
+  .hero h1 { font-size: clamp(3rem, 11vw, 4.7rem); }
+  .stats { gap: 9px; }
+  .stat { padding: 16px; }
+  .stat-value { font-size: 1.45rem; }
+  .board-head { padding: 20px 17px 16px; }
+  .controls { padding: 13px 15px; }
+  .page-information .info-hero { margin-top: 25px; }
+  .page-information .info-card { padding: 21px; }
+  .page-hall-of-fame .hof-hero { margin-top: 25px; padding: 30px 23px; }
+  .page-hall-of-fame .hof-hero h1 { font-size: clamp(3.8rem, 15vw, 5.5rem); }
+  .page-hall-of-fame .hof-stats { gap: 9px; }
+  .page-hall-of-fame .hof-stat { padding: 15px; }
+  .page-hall-of-fame .hof-stat strong { font-size: 1.5rem; }
+}
+@media (max-width: 560px) {
+  .masthead { flex-direction: column; align-items: stretch; }
+  .brand { align-self: flex-start; }
+  .mast-actions { justify-content: flex-start; gap: 3px 13px; }
+  .nav-link { font-size: .7rem; }
+  .mast-actions .pill { margin-left: auto; }
+  .hero h1 { font-size: 3.15rem; }
+  .hero-note { border-radius: 18px; }
+  .arena-panel-content { padding: 22px; }
+  .stats { grid-template-columns: repeat(3, minmax(0,1fr)); }
+  .stat { padding: 13px 11px; }
+  .stat-label { font-size: .62rem; }
+  .stat-value { font-size: 1.12rem; }
+  .page-information .info-hero h1 { font-size: 3rem; }
+  .page-information .period-list { grid-template-columns: 1fr; }
+  .page-hall-of-fame .hof-stats { grid-template-columns: repeat(2, minmax(0,1fr)); }
+  .page-hall-of-fame .hof-hero:after { right: -220px; opacity: .7; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *:before, *:after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; }
+}
