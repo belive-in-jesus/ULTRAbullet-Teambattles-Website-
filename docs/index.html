@@ -227,7 +227,7 @@ const date=v=>{if(!v)return"Not available";const d=new Date(v);return Number.isN
 const rows=()=>state.periodData?(state.periodData[state.view]||[]):(state.view==="teams"?state.teams:state.players);
 const name=r=>state.view==="teams"?r.team_name:r.username;
 const link=r=>state.view==="teams"?(r.team_id?"https://lichess.org/team/"+encodeURIComponent(r.team_id):""):(r.username?"https://lichess.org/@/"+encodeURIComponent(r.username):"");
-const profileUrl=r=>{const id=state.view==="teams"?r.team_id:r.username;return id?"./profile.html?type="+(state.view==="teams"?"team":"player")+"&id="+encodeURIComponent(id):"#";};
+const profileUrl=r=>{const isTeam=Boolean(r&&r.team_id&&!r.username);const id=isTeam?r.team_id:r&&r.username;return id?"./profile.html?type="+(isTeam?"team":"player")+"&id="+encodeURIComponent(id):"#";};
 const stats=[["tournaments_played","Battles played",num],["best_tournament","Best battle",v=>String(v)],["best_tournament_score","Best battle score",num],["best_finish","Best finish",v=>"#"+num(v)],["worst_finish","Lowest finish",v=>"#"+num(v)],["avg_finish","Average finish",v=>"#"+v],["avg_points","Average points",num],["highest_points","Highest battle score",num],["podiums","Podium finishes",num],["first_places","First places",num],["top3_rate","Podium rate",v=>(Number(v)*100).toFixed(1)+"%"],["active_since","First recorded battle",date],["last_played","Last played",date]];
 const competitorKey=r=>state.view==="teams"?String(r.team_id||""):String(r.username||"");
 function renderCompareSuggestions(side){
