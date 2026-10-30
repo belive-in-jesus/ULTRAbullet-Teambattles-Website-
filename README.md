@@ -7,7 +7,7 @@ A standalone website for the recurring UltraBullet team battles organised by **N
 ## Features
 
 - Combined team and individual points across matching finished UltraBullet tournaments
-- Searchable team/player standings with sort controls and CSV export
+- Searchable team/player standings with all-time, monthly and 50-battle seasonal rankings, sort controls and CSV export
 - Detailed competitor profiles with cumulative performance metrics and lazily loaded battle history
 - Searchable battle archive linking back to the original Lichess tournaments
 - Daily automated refresh through GitHub Actions
@@ -16,10 +16,12 @@ A standalone website for the recurring UltraBullet team battles organised by **N
 ## Repository layout
 
 - `docs/` — esports-style GitHub Pages dashboard and generated JSON data (`battle_history.json`, compact team/player leaderboard indexes, metadata and profile-history shards)
-- `scripts/discover.py` — finds matching finished tournaments created by the configured Lichess account
+- `scripts/discover.py` — finds finished regular ULTRAbullet Team Battles with their official ordinal battle number
 - `scripts/fetch_worker.py` — fetches each tournament's individual and team results
 - `scripts/aggregate.py` — combines scores and calculates statistics
 - `.github/workflows/leaderboard.yml` — daily and manual update workflow
+- `.github/workflows/validate.yml` — pull-request checks and aggregation tests
+- `scripts/tests/test_aggregate.py` — regression tests for official-number 50-battle seasons, missing numbers, special-event exclusion and monthly groupings
 
 ## Publish the website
 
@@ -42,14 +44,16 @@ The defaults are:
 - Finished tournaments only
 - Scheduled refresh: daily at 03:00 UTC
 
-You can run the workflow manually from **Actions → UltraBullet Team Battles Leaderboard → Run workflow**, and override the Lichess username or name filter.
+You can run the workflow manually from **Actions → UltraBullet Team Battles Leaderboard → Run workflow** and override the Lichess username or the standard tournament-name substring.
 
 An optional Lichess API token may be added as a repository Actions secret named `LICHESS_TOKEN`. It is not required for public tournaments. Never put a token in the website files or commit it to the repository.
 
 ## Notes
 
-- Only tournaments created by the configured account and matching the configured name filter are included.
+- Only finished regular battles with titles matching the numbered `1st ULTRAbullet Team Battle` pattern are included. Alliance, qualification, Christmas, Daily Arena, restarted and other unnumbered/special events are excluded from points, profiles, history and rankings.
+- Seasonal rankings use fixed official battle-number ranges: Season 1 = Battles 1–50, Season 2 = Battles 51–100, and so on. Thus Battle 301 always starts Season 7, even if earlier records are missing. Missing numbers are shown as data gaps and do not shift later seasons.
+- Monthly rankings use UTC calendar months and include only eligible regular numbered battles.
 - Points are summed across the discovered tournaments, so the leaderboard is cumulative, not a single-day ranking.
-- When changing the filter, use a distinctive tournament-name substring to avoid accidentally including unrelated events.
 - Generated result files are written into `docs/data/` and committed by the workflow.
 - Competitor histories are stored in `docs/data/profiles/` in shards of 200 competitors and fetched only when a profile is opened. The next successful leaderboard workflow run regenerates the compact indexes and these shards.
+- Period summaries are stored separately under `docs/data/periods/`; the frontend loads only the selected month or season.
