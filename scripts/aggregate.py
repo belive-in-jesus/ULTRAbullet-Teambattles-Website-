@@ -42,7 +42,9 @@ def compute_stats(records: list) -> dict:
 
 
 def write_json(path: str, payload) -> None:
-    os.makedirs(os.path.dirname(path), exist_ok=True)
+    directory = os.path.dirname(path)
+    if directory:
+        os.makedirs(directory, exist_ok=True)
     with open(path, "w", encoding="utf-8") as handle:
         json.dump(payload, handle, ensure_ascii=False, separators=(",", ":"))
         handle.write("\n")
