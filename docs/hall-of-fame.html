@@ -137,9 +137,7 @@
       if(!response.ok)throw new Error("Could not load "+path+" ("+response.status+")");
       return response.json();
     };
-    const profileUrl=(kind,id)=>kind==="teams"
-      ?"https://lichess.org/team/"+encodeURIComponent(id||"")
-      :"https://lichess.org/@/"+encodeURIComponent(id||"");
+    const profileUrl=(kind,id)=>"./profile.html?type="+(kind==="teams"?"team":"player")+"&id="+encodeURIComponent(id||"");
     const compact=(row,kind)=>({
       name:kind==="teams"?row.team_name:row.username,
       id:kind==="teams"?row.team_id:row.username,

@@ -165,6 +165,33 @@ class AggregatePeriodTests(unittest.TestCase):
             self.assertEqual(meta["excluded_events_count"], 1)
             self.assertEqual(meta["selection_rule"], "Numbered regular ULTRAbullet Team Battles only; special and unnumbered events excluded.")
 
+    def test_profile_lookup_indexes_are_bucketed_and_case_insensitive(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            profiles_dir = Path(temporary) / "profiles"
+            players = [
+                {"username": "Alice", "rank": 1, "profile_file": "profiles/players-000.json", "profile_key": "Alice"},
+                {"username": "Nathanael01", "rank": 2, "profile_file": "profiles/players-000.json", "profile_key": "Nathanael01"},
+                {"username": "!Special", "rank": 3, "profile_file": "profiles/players-000.json", "profile_key": "!Special"},
+            ]
+            teams = [
+                {"team_id": "club-id", "team_name": "Club ID", "rank": 1, "profile_file": "profiles/teams-000.json", "profile_key": "club-id"},
+            ]
+
+            shard_count = aggregate.write_profile_lookup_indexes(str(profiles_dir), players, teams)
+
+            self.assertEqual(shard_count, 4)
+            alice_index = json.loads((profiles_dir / "index" / "players-a.json").read_text(encoding="utf-8"))
+            self.assertEqual(alice_index["alice"]["username"], "Alice")
+            self.assertEqual(alice_index["alice"]["profile_key"], "Alice")
+
+            special_index = json.loads((profiles_dir / "index" / "players-_.json").read_text(encoding="utf-8"))
+            self.assertEqual(special_index["!special"]["name"], "!Special")
+
+            team_index = json.loads((profiles_dir / "index" / "teams-c.json").read_text(encoding="utf-8"))
+            self.assertEqual(team_index["club-id"]["team_name"], "Club ID")
+            self.assertEqual(aggregate.profile_index_bucket("Nathanael01"), "n")
+            self.assertEqual(aggregate.profile_index_bucket("!Special"), "_")
+
     def test_number_parser_excludes_non_regular_titles(self):
         self.assertEqual(aggregate.parse_battle_number("300th ULTRAbullet Team Battle"), 300)
         self.assertEqual(aggregate.parse_battle_number("108th ULTRAbullet teambattle Team Battle"), 108)
@@ -185,6 +212,16 @@ class AggregatePeriodTests(unittest.TestCase):
         self.assertEqual(aggregate.season_number_for_battle(300), 6)
         self.assertEqual(aggregate.season_number_for_battle(301), 7)
         self.assertEqual(aggregate.season_number_for_battle(642), 13)
+
+    def test_longest_podium_streak_breaks_on_missing_battles_and_non_podium_finishes(self):
+        records = [
+            {"name": "100th ULTRAbullet Team Battle", "rank": 1},
+            {"name": "101st ULTRAbullet Team Battle", "rank": 3},
+            {"name": "103rd ULTRAbullet Team Battle", "rank": 2},
+            {"name": "104th ULTRAbullet Team Battle", "rank": 4},
+        ]
+        self.assertEqual(aggregate.longest_podium_streak(records), 2)
+        self.assertEqual(aggregate.longest_podium_streak([]), 0)
 
     def test_compute_stats_uses_only_the_supplied_period_records(self):
         stats = aggregate.compute_stats([

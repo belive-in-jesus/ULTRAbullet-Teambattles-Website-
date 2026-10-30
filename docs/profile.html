@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#080b12">
+  <meta name="description" content="Individual and team performance profiles for the Lichess UltraBullet Team Battles.">
+  <title>Competitor Profile — UltraBullet Team Battles</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="css/design-system.css" rel="stylesheet">
+  <link href="css/design-refresh.css" rel="stylesheet">
+  <link href="css/profile.css" rel="stylesheet">
+</head>
+<body class="page-profile">
+  <main class="shell profile-shell">
+    <nav class="masthead" aria-label="Site navigation">
+      <a class="brand" href="./index.html" aria-label="UltraBullet Team Battles home">
+        <span class="brand-emblem"><img class="brand-logo" src="https://i.imgur.com/Zo7BRdZ.gif" alt="UltraBullet Team Battles logo" width="84" height="84" loading="eager" decoding="async" onerror="this.hidden=true"></span>
+        <span class="brand-copy"><strong>ULTRAbullet</strong><small>TEAM BATTLES</small></span>
+      </a>
+      <div class="mast-actions">
+        <a class="nav-link" href="./index.html#leaderboard">Leaderboard</a>
+        <a class="nav-link" href="./index.html#compare">Compare</a>
+        <a class="nav-link" href="./hall-of-fame.html">Hall of Fame</a>
+        <span class="nav-link upcoming" aria-disabled="true" title="Planned for a future update">Special Events</span>
+        <a class="nav-link" href="./information.html">Information</a>
+      </div>
+    </nav>
+
+    <section class="profile-hero">
+      <div class="profile-hero-copy">
+        <span class="eyebrow" id="profile-kind">COMPETITOR PROFILE</span>
+        <h1 id="profile-name">Loading profile…</h1>
+        <p class="lede" id="profile-description">Loading verified statistics from the UltraBullet Team Battles archive.</p>
+        <div class="profile-actions">
+          <a class="primary-action" id="lichess-profile-link" href="#" target="_blank" rel="noopener noreferrer">Open on Lichess ↗</a>
+          <button class="secondary-action" id="share-profile" type="button">Copy profile link</button>
+          <a class="secondary-action" href="./index.html#leaderboard">Back to leaderboard</a>
+        </div>
+        <p class="profile-feedback" id="profile-feedback" aria-live="polite"></p>
+      </div>
+      <aside class="profile-identity-card">
+        <span class="note-label">ALL-TIME POSITION</span>
+        <strong id="profile-rank">—</strong>
+        <span id="profile-rank-caption">Current cumulative ranking</span>
+        <div class="identity-divider"></div>
+        <span class="identity-label">LAST RECORDED BATTLE</span>
+        <strong class="identity-secondary" id="profile-last-active">—</strong>
+      </aside>
+    </section>
+
+    <section class="profile-stats" aria-label="Competitor statistics">
+      <article class="profile-stat"><span>Total points</span><strong id="stat-points">—</strong><small id="stat-points-caption">Cumulative score</small></article>
+      <article class="profile-stat"><span>Battles played</span><strong id="stat-battles">—</strong><small>Recorded eligible battles</small></article>
+      <article class="profile-stat"><span>Average points</span><strong id="stat-average">—</strong><small>Points per recorded battle</small></article>
+      <article class="profile-stat"><span>Podiums</span><strong id="stat-podiums">—</strong><small id="stat-podium-caption">Top-three finishes</small></article>
+    </section>
+
+    <section class="profile-section">
+      <div class="profile-section-heading">
+        <div><span class="eyebrow">CAREER OVERVIEW</span><h2>Performance records</h2></div>
+        <span class="profile-section-note" id="profile-period-caption">All recorded battles</span>
+      </div>
+      <div class="profile-record-grid" id="profile-records">
+        <div class="profile-loading">Loading performance records…</div>
+      </div>
+    </section>
+
+    <section class="profile-section">
+      <div class="profile-section-heading">
+        <div><span class="eyebrow">RECENT FORM</span><h2>Performance over time</h2></div>
+        <span class="profile-section-note" id="chart-caption">Latest recorded battles</span>
+      </div>
+      <article class="profile-panel">
+        <div class="profile-chart" id="profile-chart" aria-label="Recent battle score chart">
+          <div class="profile-loading">Loading battle history…</div>
+        </div>
+        <div class="chart-legend"><span><i></i> Points scored per battle</span><span id="chart-range">No data</span></div>
+      </article>
+    </section>
+
+    <section class="profile-section" id="battle-history">
+      <div class="profile-section-heading">
+        <div><span class="eyebrow">COMPETITION HISTORY</span><h2>Battle history</h2><p class="section-description">Browse the recorded results and open each original Lichess tournament.</p></div>
+      </div>
+      <article class="profile-panel history-panel">
+        <div class="history-controls">
+          <label class="history-control"><span>Period</span><select id="history-period" class="select-input">
+            <option value="all">All-time</option><option value="month">Monthly</option><option value="season">Seasonal</option><option value="last10">Last 10 battles</option><option value="last25">Last 25 battles</option><option value="last50">Last 50 battles</option>
+          </select></label>
+          <label class="history-control hidden" id="specific-period-wrap"><span>Selection</span><select id="specific-period" class="select-input"></select></label>
+          <label class="history-search"><span>Search battle</span><input id="history-search" type="search" placeholder="Search battle name…"></label>
+        </div>
+        <div class="history-summary" id="history-summary">Loading battle history…</div>
+        <div class="history-table-wrap">
+          <table class="profile-history-table">
+            <thead><tr><th>Battle</th><th>Date</th><th class="number-cell">Finish</th><th class="number-cell">Points</th><th></th></tr></thead>
+            <tbody id="history-rows"><tr><td colspan="5" class="profile-loading">Loading battle history…</td></tr></tbody>
+          </table>
+        </div>
+        <div class="history-pagination">
+          <span id="history-page-summary">—</span>
+          <div><button class="page-button" id="history-prev" type="button" disabled>← Previous</button><span id="history-page">Page 1</span><button class="page-button" id="history-next" type="button" disabled>Next →</button></div>
+        </div>
+      </article>
+    </section>
+
+    <footer class="profile-footer">
+      <span>UltraBullet Team Battles · Competitor profile</span>
+      <span>Statistics are calculated from recorded eligible numbered battles.</span>
+    </footer>
+  </main>
+  <script src="js/profile.js" defer></script>
+</body>
+</html>

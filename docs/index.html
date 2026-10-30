@@ -46,6 +46,7 @@
 @media(max-width:760px){.dashboard-grid{grid-template-columns:1fr}.leaders-card{grid-column:auto}.dashboard-card{padding:18px}.pagination{align-items:flex-start}.pagination-actions{width:100%;justify-content:space-between}}
 @media(max-width:480px){.pagination-actions{gap:6px}.page-button{padding:8px}.page-indicator{font-size:.61rem}}
 
+.compare-profile-links{display:flex;flex-wrap:wrap;gap:9px;margin:12px 0 20px}.compare-profile-links .profile-link{margin-top:0}
 </style>
   <link href="css/design-system.css" rel="stylesheet">
   <link href="css/design-refresh.css" rel="stylesheet">
@@ -165,8 +166,11 @@
         </select>
         <select id="period-select" class="select-input hidden" aria-label="Select month or season" style="width:auto;min-width:190px"></select>
         <label class="search"><input id="search" type="search" autocomplete="off" placeholder="Search teams or players…" aria-label="Search leaderboard"></label>
+        <select id="min-battles-select" class="select-input" aria-label="Minimum battles" style="width:auto;min-width:145px">
+          <option value="0">Any activity</option><option value="5">5+ battles</option><option value="25">25+ battles</option><option value="50">50+ battles</option><option value="100">100+ battles</option>
+        </select>
         <select id="sort-select" class="select-input" aria-label="Sort leaderboard" style="width:auto;min-width:155px">
-          <option value="rank">Sort: Rank</option><option value="points">Sort: Points</option><option value="avg_points">Sort: Average points</option><option value="battles">Sort: Battles</option><option value="podiums">Sort: Podiums</option>
+          <option value="rank">Sort: Rank</option><option value="points">Sort: Points</option><option value="avg_points">Sort: Average points</option><option value="battles">Sort: Battles</option><option value="podiums">Sort: Podiums</option><option value="first_places">Sort: First places</option><option value="best_finish">Sort: Best finish</option><option value="last_played">Sort: Recent activity</option>
         </select>
         <button id="export-btn" class="filter-button" type="button">Export CSV ↗</button>
       </div>
@@ -193,7 +197,7 @@
     </section>
 
     <section class="section-heading" id="battle-history"><div><span class="eyebrow">The archive</span><h2>Battle history</h2><p>Browse completed tournaments included in the cumulative standings.</p></div><span class="pill" id="history-count">LOADING ARCHIVE</span></section>
-    <section class="history-panel" aria-label="Battle history"><div class="controls"><label class="search"><input id="history-search" type="search" autocomplete="off" placeholder="Find a battle by name…" aria-label="Search battle history"></label></div><div id="history-list" class="history-list"><div class="empty"><strong>Loading battle history…</strong>Fetching tournament archive.</div></div><div class="board-foot"><span id="history-status">Archive from latest successful data refresh</span><button id="history-more" class="filter-button hidden" type="button">Show more battles ↓</button></div></section>
+    <section class="history-panel" aria-label="Battle history"><div class="controls"><label class="search"><input id="history-search" type="search" autocomplete="off" placeholder="Find a battle by name…" aria-label="Search battle history"></label><select id="history-period-filter" class="select-input" aria-label="Filter battle history by month or season" style="width:auto;min-width:190px"><option value="all">All battles</option></select></div><div id="history-list" class="history-list"><div class="empty"><strong>Loading battle history…</strong>Fetching tournament archive.</div></div><div class="board-foot"><span id="history-status">Archive from latest successful data refresh</span><button id="history-more" class="filter-button hidden" type="button">Show more battles ↓</button></div></section>
 
     <footer>
       <span>Standings for <a href="https://lichess.org/" target="_blank" rel="noopener noreferrer">Lichess.org</a> UltraBullet battles.</span>
@@ -208,6 +212,7 @@
       <p class="modal-points" id="modal-points"></p>
       <div class="detail-grid" id="modal-stats"></div>
       <a class="profile-link" id="modal-link" href="#" target="_blank" rel="noopener noreferrer">Open on Lichess ↗</a>
+      <a class="profile-link full-profile-link" id="modal-profile-link" href="#" rel="noopener noreferrer">Open full profile ↗</a>
       <div class="modal-form">
         <div class="modal-section-heading"><h3>Recent form</h3><span id="modal-form-count">LAST 10 BATTLES</span></div>
         <div class="form-chart" id="modal-form-chart"><span class="form-chart-empty">Battle history will appear here.</span></div>
@@ -218,7 +223,7 @@
 
   <script>
 (()=>{"use strict";
-const state={view:"teams",teams:[],players:[],meta:{},history:[],query:"",historyQuery:"",showAllHistory:false,page:1,pageSize:50,compareA:"",compareB:"",compareQueryA:"",compareQueryB:"",periodsIndex:null,periodData:null,periodType:"all",periodKey:"",periodCache:{},periodRequest:0,periodLoading:false,periodError:"",profileCache:{},profileRequest:0};
+const state={view:"teams",teams:[],players:[],meta:{},history:[],query:"",historyQuery:"",historyPeriodFilter:"all",showAllHistory:false,page:1,pageSize:50,compareA:"",compareB:"",compareQueryA:"",compareQueryB:"",periodsIndex:null,periodData:null,periodType:"all",periodKey:"",periodCache:{},periodRequest:0,periodLoading:false,periodError:"",profileCache:{},profileRequest:0};
 const $=id=>document.getElementById(id);
 const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const num=v=>Number(v||0).toLocaleString();
@@ -226,7 +231,8 @@ const date=v=>{if(!v)return"Not available";const d=new Date(v);return Number.isN
 const rows=()=>state.periodData?(state.periodData[state.view]||[]):(state.view==="teams"?state.teams:state.players);
 const name=r=>state.view==="teams"?r.team_name:r.username;
 const link=r=>state.view==="teams"?(r.team_id?"https://lichess.org/team/"+encodeURIComponent(r.team_id):""):(r.username?"https://lichess.org/@/"+encodeURIComponent(r.username):"");
-const stats=[["tournaments_played","Battles played",num],["best_tournament","Best battle",v=>String(v)],["best_tournament_score","Best battle score",num],["best_finish","Best finish",v=>"#"+num(v)],["worst_finish","Lowest finish",v=>"#"+num(v)],["avg_finish","Average finish",v=>"#"+v],["avg_points","Average points",num],["highest_points","Highest battle score",num],["podiums","Podium finishes",num],["first_places","First places",num],["top3_rate","Podium rate",v=>(Number(v)*100).toFixed(1)+"%"],["active_since","First recorded battle",date],["last_played","Last played",date]];
+const profileUrl=r=>{const isTeam=Boolean(r&&r.team_id&&!r.username);const id=isTeam?r.team_id:r&&r.username;return id?"./profile.html?type="+(isTeam?"team":"player")+"&id="+encodeURIComponent(id):"#";};
+const stats=[["tournaments_played","Battles played",num],["best_tournament","Best battle",v=>String(v)],["best_tournament_score","Best battle score",num],["best_finish","Best finish",v=>"#"+num(v)],["worst_finish","Lowest finish",v=>"#"+num(v)],["avg_finish","Average finish",v=>"#"+v],["avg_points","Average points",num],["highest_points","Highest battle score",num],["podiums","Podium finishes",num],["first_places","First places",num],["top3_rate","Podium rate",v=>(Number(v)*100).toFixed(1)+"%"],["longest_podium_streak","Longest podium streak",num],["active_since","First recorded battle",date],["last_played","Last played",date]];
 const competitorKey=r=>state.view==="teams"?String(r.team_id||""):String(r.username||"");
 function renderCompareSuggestions(side){
   const suffix=side.toLowerCase();
@@ -300,7 +306,7 @@ function renderCompare(){
     };
     return '<div class="compare-metric"><div class="compare-metric-head"><strong>'+metric.label+'</strong><span><b>'+esc(metric.format(first[metric.key]))+'</b><i>vs</i><b>'+esc(metric.format(second[metric.key]))+'</b></span></div><div class="compare-bar-stack"><div class="compare-bar-line"><span class="compare-bar-tag">A</span><div class="compare-track"><i class="compare-fill fill-a" style="width:'+width(a)+'%"></i></div></div><div class="compare-bar-line"><span class="compare-bar-tag">B</span><div class="compare-track"><i class="compare-fill fill-b" style="width:'+width(b)+'%"></i></div></div></div></div>';
   }).join("");
-  $("compare-results").innerHTML='<div class="compare-summary"><span class="compare-summary-label">HEAD-TO-HEAD RESULT</span><strong>'+esc(leader)+'</strong><span>'+esc(name(first))+' vs '+esc(name(second))+'</span></div><div class="compare-metrics">'+metricHtml+'</div><p class="compare-footnote">Bars are scaled within each statistic. For best finish, a lower number is better.</p>';
+  $("compare-results").innerHTML='<div class="compare-summary"><span class="compare-summary-label">HEAD-TO-HEAD RESULT</span><strong>'+esc(leader)+'</strong><span>'+esc(name(first))+' vs '+esc(name(second))+'</span></div><div class="compare-profile-links"><a class="profile-link" href="'+esc(profileUrl(first))+'">Open '+esc(name(first))+' profile ↗</a><a class="profile-link" href="'+esc(profileUrl(second))+'">Open '+esc(name(second))+' profile ↗</a></div><div class="compare-metrics">'+metricHtml+'</div><p class="compare-footnote">Bars are scaled within each statistic. For best finish, a lower number is better.</p>';
 }
 function render(){
   renderCompare();
@@ -320,12 +326,16 @@ function render(){
   if(state.periodLoading){$("result-count").textContent="Loading";body.innerHTML='<tr><td colspan="5"><div class="empty"><strong>Loading period ranking…</strong>Fetching the selected month or season.</div></td></tr>';return;}
   if(state.periodError){$("result-count").textContent="Unavailable";body.innerHTML='<tr><td colspan="5"><div class="empty"><strong>Period ranking unavailable</strong>'+esc(state.periodError)+'</div></td></tr>';return;}
   const q=state.query.trim().toLocaleLowerCase();
-  let list=rows().filter(r=>String(name(r)||"").toLocaleLowerCase().includes(q));
+  const minimumBattles=Number($("min-battles-select").value)||0;
+  let list=rows().filter(r=>String(name(r)||"").toLocaleLowerCase().includes(q)&&(Number(r.tournaments_played)||0)>=minimumBattles);
   const sort=$("sort-select").value;
   if(sort==="points")list=[...list].sort((a,b)=>(Number(b.points)||0)-(Number(a.points)||0));
   if(sort==="avg_points")list=[...list].sort((a,b)=>(Number(b.avg_points)||0)-(Number(a.avg_points)||0));
   if(sort==="battles")list=[...list].sort((a,b)=>(Number(b.tournaments_played)||0)-(Number(a.tournaments_played)||0));
   if(sort==="podiums")list=[...list].sort((a,b)=>(Number(b.podiums)||0)-(Number(a.podiums)||0));
+  if(sort==="first_places")list=[...list].sort((a,b)=>(Number(b.first_places)||0)-(Number(a.first_places)||0));
+  if(sort==="best_finish")list=[...list].sort((a,b)=>(Number(a.best_finish)||Infinity)-(Number(b.best_finish)||Infinity));
+  if(sort==="last_played")list=[...list].sort((a,b)=>(Number(b.last_played)||0)-(Number(a.last_played)||0));
   if(!list.length){
     $("result-count").textContent="0 shown";
     $("page-summary").textContent="Showing 0 entries";
@@ -372,6 +382,9 @@ function details(r){
   const a=$("modal-link");
   a.href=link(r)||"#";
   a.style.display=a.getAttribute("href")!=="#"?"inline-flex":"none";
+  const fullProfile=$("modal-profile-link");
+  fullProfile.href=profileUrl(r);
+  fullProfile.style.display=fullProfile.getAttribute("href")!=="#"? "inline-flex":"none";
   $("modal-history-list").innerHTML='<li>Loading battle history…</li>';
   $("modal-form-chart").innerHTML='<span class="form-chart-empty">Loading recent battle history…</span>';
   $("modal-form-count").textContent="LOADING";
@@ -430,7 +443,7 @@ function renderDashboard(){
   const team=state.teams[0],player=state.players[0];
   if(team){
     $("leader-team-link").textContent=team.team_name||"Unknown team";
-    $("leader-team-link").href=team.team_id?"https://lichess.org/team/"+encodeURIComponent(team.team_id):"#leaderboard";
+    $("leader-team-link").href=team.team_id?profileUrl(team):"#leaderboard";
     $("leader-team-points").textContent=num(team.points)+" pts";
   }else{
     $("leader-team-link").textContent="Not available";
@@ -439,7 +452,7 @@ function renderDashboard(){
   }
   if(player){
     $("leader-player-link").textContent=player.username||"Unknown player";
-    $("leader-player-link").href=player.username?"https://lichess.org/@/"+encodeURIComponent(player.username):"#leaderboard";
+    $("leader-player-link").href=player.username?profileUrl(player):"#leaderboard";
     $("leader-player-points").textContent=num(player.points)+" pts";
   }else{
     $("leader-player-link").textContent="Not available";
@@ -447,8 +460,38 @@ function renderDashboard(){
     $("leader-player-points").textContent="—";
   }
 }
+function populateHistoryPeriodFilter(){
+  const select=$("history-period-filter");
+  const months=new Set(),seasons=new Set();
+  state.history.forEach(b=>{
+    if(b.startsAt){const dateValue=new Date(Number(b.startsAt));if(!Number.isNaN(dateValue.getTime()))months.add(dateValue.toISOString().slice(0,7));}
+    const number=Number(b.battle_number)||Number((String(b.name||"").match(/^\s*(\d+)(?:st|nd|rd|th)\s+ultrabullet\s+/i)||[])[1]);
+    if(number>0)seasons.add(Math.floor((number-1)/50)+1);
+  });
+  select.innerHTML='<option value="all">All battles</option>';
+  if(months.size){
+    const group=document.createElement("optgroup");group.label="Months";
+    [...months].sort((a,b)=>b.localeCompare(a)).forEach(key=>{const option=document.createElement("option");option.value="month:"+key;const [year,month]=key.split("-").map(Number);option.textContent=new Date(Date.UTC(year,month-1,1)).toLocaleDateString(undefined,{month:"long",year:"numeric",timeZone:"UTC"});group.appendChild(option);});
+    select.appendChild(group);
+  }
+  if(seasons.size){
+    const group=document.createElement("optgroup");group.label="Seasons";
+    [...seasons].sort((a,b)=>b-a).forEach(number=>{const option=document.createElement("option");option.value="season:"+number;option.textContent="Season "+number+" · Battles "+((number-1)*50+1)+"–"+(number*50);group.appendChild(option);});
+    select.appendChild(group);
+  }
+}
 function renderHistory(){
-  const q=state.historyQuery.trim().toLocaleLowerCase(),filtered=state.history.filter(b=>String(b.name||"").toLocaleLowerCase().includes(q));
+  const q=state.historyQuery.trim().toLocaleLowerCase();
+  const filtered=state.history.filter(b=>{
+    if(!String(b.name||"").toLocaleLowerCase().includes(q))return false;
+    const selected=state.historyPeriodFilter;
+    if(selected.startsWith("month:"))return b.startsAt&&new Date(Number(b.startsAt)).toISOString().slice(0,7)===selected.slice(6);
+    if(selected.startsWith("season:")){
+      const number=Number(b.battle_number)||Number((String(b.name||"").match(/^\s*(\d+)(?:st|nd|rd|th)\s+ultrabullet\s+/i)||[])[1]);
+      return number&&Math.floor((number-1)/50)+1===Number(selected.slice(7));
+    }
+    return true;
+  });
   const shown=state.showAllHistory?filtered:filtered.slice(0,10);$("history-count").textContent=filtered.length.toLocaleString()+" battles";
   $("history-more").classList.toggle("hidden",filtered.length<=10);$("history-more").textContent=state.showAllHistory?"Show fewer ↑":"Show more battles ↓";
   if(!shown.length){$("history-list").innerHTML='<div class="empty"><strong>'+(state.history.length?"No battles match":"No battle history published yet")+'</strong>'+(state.history.length?"Try another search.":"The archive is populated after a successful refresh.")+'</div>';return;}
@@ -456,7 +499,20 @@ function renderHistory(){
 }
 function csv(){
   const keys=state.view==="teams"?["rank","team_name","team_id","points","avg_points","tournaments_played","podiums","first_places","best_finish","last_played"]:["rank","username","points","avg_points","tournaments_played","podiums","first_places","best_finish","last_played"];
-  const quote=v=>'"'+String(v??"").replace(/"/g,'""')+'"';const content=[keys.join(","),...rows().map(r=>keys.map(k=>quote(r[k])).join(","))].join("\r\n");
+  const minimumBattles=Number($("min-battles-select").value)||0;
+  let exportRows=rows().filter(r=>String(name(r)||"").toLocaleLowerCase().includes(state.query.trim().toLocaleLowerCase())&&(Number(r.tournaments_played)||0)>=minimumBattles);
+  const sort=$("sort-select").value;
+  const sorters={
+    points:(a,b)=>(Number(b.points)||0)-(Number(a.points)||0),
+    avg_points:(a,b)=>(Number(b.avg_points)||0)-(Number(a.avg_points)||0),
+    battles:(a,b)=>(Number(b.tournaments_played)||0)-(Number(a.tournaments_played)||0),
+    podiums:(a,b)=>(Number(b.podiums)||0)-(Number(a.podiums)||0),
+    first_places:(a,b)=>(Number(b.first_places)||0)-(Number(a.first_places)||0),
+    best_finish:(a,b)=>(Number(a.best_finish)||Infinity)-(Number(b.best_finish)||Infinity),
+    last_played:(a,b)=>(Number(b.last_played)||0)-(Number(a.last_played)||0)
+  };
+  if(sorters[sort])exportRows=[...exportRows].sort(sorters[sort]);
+  const quote=v=>'"'+String(v??"").replace(/"/g,'""')+'"';const content=[keys.join(","),...exportRows.map(r=>keys.map(k=>quote(r[k])).join(","))].join("\r\n");
   const url=URL.createObjectURL(new Blob(["\ufeff"+content],{type:"text/csv;charset=utf-8;"}));const a=document.createElement("a");a.href=url;
   a.download="ultrabullet-"+state.view+(state.periodData?"-"+state.periodData.key:"-all-time")+"-leaderboard.csv";a.click();URL.revokeObjectURL(url);
 }
@@ -480,6 +536,7 @@ async function init(){
   state.teams=res[0].status==="fulfilled"&&Array.isArray(res[0].value)?res[0].value:[];state.players=res[1].status==="fulfilled"&&Array.isArray(res[1].value)?res[1].value:[];
   state.meta=res[2].status==="fulfilled"?res[2].value:{};state.history=res[3].status==="fulfilled"&&Array.isArray(res[3].value)?res[3].value:[];
   state.periodsIndex=res[4].status==="fulfilled"?res[4].value:null;
+  populateHistoryPeriodFilter();
   $("stat-battles").textContent=num(state.meta.tournaments_processed);$("stat-teams").textContent=num(state.meta.teams_count??state.teams.length);$("stat-players").textContent=num(state.meta.players_count??state.players.length);
   $("updated-label").textContent=state.meta.generated_at?"Updated "+date(state.meta.generated_at):"No successful data refresh yet";
   $("filter-label").textContent=state.meta.selection_rule||"Regular numbered ULTRAbullet Team Battles only";
@@ -519,11 +576,13 @@ $("players-btn").addEventListener("click",()=>{state.view="players";state.page=1
 $("period-type").addEventListener("change",loadSelectedPeriod);
 $("period-select").addEventListener("change",loadSelectedPeriod);
 $("search").addEventListener("input",e=>{state.query=e.target.value;state.page=1;render();});
-$("sort-select").addEventListener("change",()=>{state.page=1;render();});$("export-btn").addEventListener("click",csv);
+$("sort-select").addEventListener("change",()=>{state.page=1;render();});
+$("min-battles-select").addEventListener("change",()=>{state.page=1;render();});$("export-btn").addEventListener("click",csv);
 $("page-prev").addEventListener("click",()=>{if(state.page>1){state.page--;render();}});
 $("page-next").addEventListener("click",()=>{state.page++;render();});
 $("page-size").addEventListener("change",e=>{const size=Number(e.target.value);if([25,50,100].includes(size)){state.pageSize=size;state.page=1;render();}});
 $("history-search").addEventListener("input",e=>{state.historyQuery=e.target.value;state.showAllHistory=false;renderHistory();});
+$("history-period-filter").addEventListener("change",e=>{state.historyPeriodFilter=e.target.value;state.showAllHistory=false;renderHistory();});
 $("history-more").addEventListener("click",()=>{state.showAllHistory=!state.showAllHistory;renderHistory();});
 $("modal-close").addEventListener("click",()=>$("modal-backdrop").classList.remove("open"));
 $("modal-backdrop").addEventListener("click",e=>{if(e.target===$("modal-backdrop"))$("modal-backdrop").classList.remove("open");});

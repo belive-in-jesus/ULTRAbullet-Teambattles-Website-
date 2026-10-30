@@ -27,6 +27,32 @@ def season_number_for_battle(battle_number: int) -> int:
     return (battle_number - 1) // SEASON_SIZE + 1
 
 
+def longest_podium_streak(records: list) -> int:
+    """Count podium finishes in consecutive official numbered battles."""
+    ranks_by_number = {}
+    for row in records:
+        number = parse_battle_number(row.get("name"))
+        rank = row.get("rank")
+        if number is None or rank is None:
+            continue
+        try:
+            ranks_by_number[number] = int(rank)
+        except (TypeError, ValueError):
+            continue
+    if not ranks_by_number:
+        return 0
+
+    current = longest = 0
+    for number in range(min(ranks_by_number), max(ranks_by_number) + 1):
+        rank = ranks_by_number.get(number)
+        if rank is not None and 1 <= rank <= 3:
+            current += 1
+            longest = max(longest, current)
+        else:
+            current = 0
+    return longest
+
+
 def compute_stats(records: list) -> dict:
     if not records:
         return {}
@@ -42,6 +68,7 @@ def compute_stats(records: list) -> dict:
         "avg_points": round(sum(scores) / len(scores), 1) if scores else None,
         "active_since": records[0].get("startsAt"),
         "last_played": records[-1].get("startsAt"),
+        "longest_podium_streak": longest_podium_streak(records),
     }
     if ranks:
         podiums = sum(rank <= 3 for rank in ranks)
@@ -108,6 +135,7 @@ def build_record_holders(rows: list, kind: str) -> list:
         ("most_podiums", "Most podium finishes", "podiums", "podiums", 1),
         ("most_first_places", "Most first places", "first_places", "wins", 1),
         ("highest_single_battle", "Highest single-battle score", "highest_points", "points", 1),
+        ("longest_podium_streak", "Longest consecutive podium streak", "longest_podium_streak", "consecutive battles", 1),
         ("highest_average", "Highest average points (25+ battles)", "avg_points", "points / battle", 25),
     ]
     records = []
@@ -153,6 +181,41 @@ def build_hall_of_fame(teams: list, players: list, seasons: list, generated_at: 
         },
         "seasons": seasons,
     }
+
+
+
+def profile_index_bucket(identifier: str) -> str:
+    """Return the one-character bucket shared by the profile page lookup."""
+    first = str(identifier or "").strip().lower()[:1]
+    return re.sub(r"[^a-z0-9]", "_", first) or "_"
+
+
+def write_profile_lookup_indexes(profiles_dir: str, players: list, teams: list) -> int:
+    """Write small bucketed indexes so direct profile URLs avoid full leaderboard downloads."""
+    index_dir = os.path.join(profiles_dir, "index")
+    if os.path.isdir(index_dir):
+        shutil.rmtree(index_dir)
+    os.makedirs(index_dir, exist_ok=True)
+    total_shards = 0
+    for kind, rows, id_field in (
+        ("players", players, "username"),
+        ("teams", teams, "team_id"),
+    ):
+        buckets = defaultdict(dict)
+        for row in rows:
+            identifier = str(row.get(id_field) or "").strip()
+            lookup_key = identifier.lower()
+            if not lookup_key:
+                continue
+            bucket = profile_index_bucket(identifier)
+            entry = dict(row)
+            entry["id"] = identifier
+            entry["name"] = row.get("username") if kind == "players" else row.get("team_name", identifier)
+            buckets[bucket][lookup_key] = entry
+        for bucket, payload in buckets.items():
+            write_json(os.path.join(index_dir, f"{kind}-{bucket}.json"), payload)
+            total_shards += 1
+    return total_shards
 
 
 def main() -> int:
@@ -267,6 +330,8 @@ def main() -> int:
     for shards in profile_shards.values():
         for filename, payload in shards.items():
             write_json(os.path.join(profiles_dir, filename), payload)
+
+    profile_lookup_shards = write_profile_lookup_indexes(profiles_dir, players, teams)
 
     # Monthly tables use regular numbered battles only. Seasons are fixed to
     # official battle-number ranges, not the count/order of available records.
@@ -393,6 +458,7 @@ def main() -> int:
         "selection_rule": "Numbered regular ULTRAbullet Team Battles only; special and unnumbered events excluded.",
         "profile_shard_size": PROFILE_SHARD_SIZE,
         "profiles_shards": sum(len(shards) for shards in profile_shards.values()),
+        "profile_lookup_shards": profile_lookup_shards,
         "season_size": SEASON_SIZE,
         "season_count": len(season_index),
         "hall_of_fame_seasons": len(season_hall),
