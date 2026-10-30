@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Discover finished UltraBullet team battles by name filter or explicit tournament ID."""
+"""Discover finished, regular numbered ULTRAbullet Team Battles only."""
 import json
 import os
 import re
@@ -47,7 +47,7 @@ def main() -> int:
     if not USER:
         raise ValueError("LICHESS_USER must not be empty")
     if not NAME_FILTERS:
-        raise ValueError("Configure at least one name filter or explicit tournament ID")
+        raise ValueError("Configure at least one name filter")
 
     url = f"https://lichess.org/api/user/{quote(USER, safe='')}/tournament/created"
     headers = {"Accept": "application/x-ndjson", "User-Agent": "UltraBulletTeamBattlesLeaderboard/1.0"}
