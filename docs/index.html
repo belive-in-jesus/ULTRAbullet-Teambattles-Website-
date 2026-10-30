@@ -197,7 +197,7 @@
     </section>
 
     <section class="section-heading" id="battle-history"><div><span class="eyebrow">The archive</span><h2>Battle history</h2><p>Browse completed tournaments included in the cumulative standings.</p></div><span class="pill" id="history-count">LOADING ARCHIVE</span></section>
-    <section class="history-panel" aria-label="Battle history"><div class="controls"><label class="search"><input id="history-search" type="search" autocomplete="off" placeholder="Find a battle by name…" aria-label="Search battle history"></label></div><div id="history-list" class="history-list"><div class="empty"><strong>Loading battle history…</strong>Fetching tournament archive.</div></div><div class="board-foot"><span id="history-status">Archive from latest successful data refresh</span><button id="history-more" class="filter-button hidden" type="button">Show more battles ↓</button></div></section>
+    <section class="history-panel" aria-label="Battle history"><div class="controls"><label class="search"><input id="history-search" type="search" autocomplete="off" placeholder="Find a battle by name…" aria-label="Search battle history"></label><select id="history-period-filter" class="select-input" aria-label="Filter battle history by month or season" style="width:auto;min-width:190px"><option value="all">All battles</option></select></div><div id="history-list" class="history-list"><div class="empty"><strong>Loading battle history…</strong>Fetching tournament archive.</div></div><div class="board-foot"><span id="history-status">Archive from latest successful data refresh</span><button id="history-more" class="filter-button hidden" type="button">Show more battles ↓</button></div></section>
 
     <footer>
       <span>Standings for <a href="https://lichess.org/" target="_blank" rel="noopener noreferrer">Lichess.org</a> UltraBullet battles.</span>
@@ -223,7 +223,7 @@
 
   <script>
 (()=>{"use strict";
-const state={view:"teams",teams:[],players:[],meta:{},history:[],query:"",historyQuery:"",showAllHistory:false,page:1,pageSize:50,compareA:"",compareB:"",compareQueryA:"",compareQueryB:"",periodsIndex:null,periodData:null,periodType:"all",periodKey:"",periodCache:{},periodRequest:0,periodLoading:false,periodError:"",profileCache:{},profileRequest:0};
+const state={view:"teams",teams:[],players:[],meta:{},history:[],query:"",historyQuery:"",historyPeriodFilter:"all",showAllHistory:false,page:1,pageSize:50,compareA:"",compareB:"",compareQueryA:"",compareQueryB:"",periodsIndex:null,periodData:null,periodType:"all",periodKey:"",periodCache:{},periodRequest:0,periodLoading:false,periodError:"",profileCache:{},profileRequest:0};
 const $=id=>document.getElementById(id);
 const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const num=v=>Number(v||0).toLocaleString();
@@ -460,8 +460,38 @@ function renderDashboard(){
     $("leader-player-points").textContent="—";
   }
 }
+function populateHistoryPeriodFilter(){
+  const select=$("history-period-filter");
+  const months=new Set(),seasons=new Set();
+  state.history.forEach(b=>{
+    if(b.startsAt){const dateValue=new Date(Number(b.startsAt));if(!Number.isNaN(dateValue.getTime()))months.add(dateValue.toISOString().slice(0,7));}
+    const number=Number(b.battle_number)||Number((String(b.name||"").match(/^\\s*(\\d+)(?:st|nd|rd|th)\\s+ultrabullet\\s+/i)||[])[1]);
+    if(number>0)seasons.add(Math.floor((number-1)/50)+1);
+  });
+  select.innerHTML="<option value=\\"all\\">All battles</option>";
+  if(months.size){
+    const group=document.createElement("optgroup");group.label="Months";
+    [...months].sort((a,b)=>b.localeCompare(a)).forEach(key=>{const option=document.createElement("option");option.value="month:"+key;const [year,month]=key.split("-").map(Number);option.textContent=new Date(Date.UTC(year,month-1,1)).toLocaleDateString(undefined,{month:"long",year:"numeric",timeZone:"UTC"});group.appendChild(option);});
+    select.appendChild(group);
+  }
+  if(seasons.size){
+    const group=document.createElement("optgroup");group.label="Seasons";
+    [...seasons].sort((a,b)=>b-a).forEach(number=>{const option=document.createElement("option");option.value="season:"+number;option.textContent="Season "+number+" · Battles "+((number-1)*50+1)+"–"+(number*50);group.appendChild(option);});
+    select.appendChild(group);
+  }
+}
 function renderHistory(){
-  const q=state.historyQuery.trim().toLocaleLowerCase(),filtered=state.history.filter(b=>String(b.name||"").toLocaleLowerCase().includes(q));
+  const q=state.historyQuery.trim().toLocaleLowerCase();
+  const filtered=state.history.filter(b=>{
+    if(!String(b.name||"").toLocaleLowerCase().includes(q))return false;
+    const selected=state.historyPeriodFilter;
+    if(selected.startsWith("month:"))return b.startsAt&&new Date(Number(b.startsAt)).toISOString().slice(0,7)===selected.slice(6);
+    if(selected.startsWith("season:")){
+      const number=Number(b.battle_number)||Number((String(b.name||"").match(/^\\s*(\\d+)(?:st|nd|rd|th)\\s+ultrabullet\\s+/i)||[])[1]);
+      return number&&Math.floor((number-1)/50)+1===Number(selected.slice(7));
+    }
+    return true;
+  });
   const shown=state.showAllHistory?filtered:filtered.slice(0,10);$("history-count").textContent=filtered.length.toLocaleString()+" battles";
   $("history-more").classList.toggle("hidden",filtered.length<=10);$("history-more").textContent=state.showAllHistory?"Show fewer ↑":"Show more battles ↓";
   if(!shown.length){$("history-list").innerHTML='<div class="empty"><strong>'+(state.history.length?"No battles match":"No battle history published yet")+'</strong>'+(state.history.length?"Try another search.":"The archive is populated after a successful refresh.")+'</div>';return;}
@@ -506,6 +536,7 @@ async function init(){
   state.teams=res[0].status==="fulfilled"&&Array.isArray(res[0].value)?res[0].value:[];state.players=res[1].status==="fulfilled"&&Array.isArray(res[1].value)?res[1].value:[];
   state.meta=res[2].status==="fulfilled"?res[2].value:{};state.history=res[3].status==="fulfilled"&&Array.isArray(res[3].value)?res[3].value:[];
   state.periodsIndex=res[4].status==="fulfilled"?res[4].value:null;
+  populateHistoryPeriodFilter();
   $("stat-battles").textContent=num(state.meta.tournaments_processed);$("stat-teams").textContent=num(state.meta.teams_count??state.teams.length);$("stat-players").textContent=num(state.meta.players_count??state.players.length);
   $("updated-label").textContent=state.meta.generated_at?"Updated "+date(state.meta.generated_at):"No successful data refresh yet";
   $("filter-label").textContent=state.meta.selection_rule||"Regular numbered ULTRAbullet Team Battles only";
@@ -551,6 +582,7 @@ $("page-prev").addEventListener("click",()=>{if(state.page>1){state.page--;rende
 $("page-next").addEventListener("click",()=>{state.page++;render();});
 $("page-size").addEventListener("change",e=>{const size=Number(e.target.value);if([25,50,100].includes(size)){state.pageSize=size;state.page=1;render();}});
 $("history-search").addEventListener("input",e=>{state.historyQuery=e.target.value;state.showAllHistory=false;renderHistory();});
+$("history-period-filter").addEventListener("change",e=>{state.historyPeriodFilter=e.target.value;state.showAllHistory=false;renderHistory();});
 $("history-more").addEventListener("click",()=>{state.showAllHistory=!state.showAllHistory;renderHistory();});
 $("modal-close").addEventListener("click",()=>$("modal-backdrop").classList.remove("open"));
 $("modal-backdrop").addEventListener("click",e=>{if(e.target===$("modal-backdrop"))$("modal-backdrop").classList.remove("open");});
