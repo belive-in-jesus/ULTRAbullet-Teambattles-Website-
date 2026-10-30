@@ -344,6 +344,8 @@
     seasonNumber,
     chronological,
     percentile,
+    longestPodiumStreak,
+    latestPodiumRun,
     summarize,
     groupMonths,
     groupSeasons,
