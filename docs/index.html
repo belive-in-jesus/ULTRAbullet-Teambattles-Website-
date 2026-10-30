@@ -74,10 +74,10 @@
       <div class="table-scroll">
         <table>
           <thead>
-            <tr><th scope="col">Rank</th><th scope="col">Name</th><th scope="col" class="optional-col">Battles</th><th scope="col" class="points">Points</th></tr>
+            <tr><th scope="col">Rank</th><th scope="col">Name</th><th scope="col" class="optional-col">Battles</th><th scope="col" class="points">Points</th><th scope="col" class="optional-col points">Avg / Battle</th></tr>
           </thead>
           <tbody id="leaderboard-body">
-            <tr><td colspan="4"><div class="empty"><strong>Loading standings…</strong>Fetching the latest published data.</div></td></tr>
+            <tr><td colspan="5"><div class="empty"><strong>Loading standings…</strong>Fetching the latest published data.</div></td></tr>
           </tbody>
         </table>
       </div>
@@ -127,8 +127,8 @@ function render(){
   else $("board-sub").textContent="Select a period to view its ranking";
   $("search").placeholder=teams?"Search teams…":"Search players…";
   const body=$("leaderboard-body");
-  if(state.periodLoading){$("result-count").textContent="Loading";body.innerHTML='<tr><td colspan="4"><div class="empty"><strong>Loading period ranking…</strong>Fetching the selected month or season.</div></td></tr>';return;}
-  if(state.periodError){$("result-count").textContent="Unavailable";body.innerHTML='<tr><td colspan="4"><div class="empty"><strong>Period ranking unavailable</strong>'+esc(state.periodError)+'</div></td></tr>';return;}
+  if(state.periodLoading){$("result-count").textContent="Loading";body.innerHTML='<tr><td colspan="5"><div class="empty"><strong>Loading period ranking…</strong>Fetching the selected month or season.</div></td></tr>';return;}
+  if(state.periodError){$("result-count").textContent="Unavailable";body.innerHTML='<tr><td colspan="5"><div class="empty"><strong>Period ranking unavailable</strong>'+esc(state.periodError)+'</div></td></tr>';return;}
   const q=state.query.trim().toLocaleLowerCase();
   let list=rows().filter(r=>String(name(r)||"").toLocaleLowerCase().includes(q));
   const sort=$("sort-select").value;
@@ -137,8 +137,8 @@ function render(){
   if(sort==="battles")list=[...list].sort((a,b)=>(Number(b.tournaments_played)||0)-(Number(a.tournaments_played)||0));
   if(sort==="podiums")list=[...list].sort((a,b)=>(Number(b.podiums)||0)-(Number(a.podiums)||0));
   $("result-count").textContent=list.length.toLocaleString()+" shown";
-  if(!list.length){body.innerHTML='<tr><td colspan="4"><div class="empty"><strong>'+(rows().length?"No matches found":"No ranking data available")+'</strong>'+(rows().length?"Try another search term.":"No competitor has recorded results in this period.")+'</div></td></tr>';return;}
-  body.innerHTML=list.map((r,i)=>{const rank=sort==="rank"?Number(r.rank||i+1):i+1;const n=name(r)||"Unknown";return '<tr tabindex="0" role="button" aria-label="Show details for '+esc(n)+'" data-index="'+i+'"><td class="rank '+(rank<=3?"top":"")+'">'+String(rank).padStart(2,"0")+'</td><td><div class="entity"><span class="mini-mark" aria-hidden="true">'+(teams?"♜":"♟")+'</span><span>'+esc(n)+'</span></div></td><td class="optional-col secondary">'+(r.tournaments_played==null?"—":num(r.tournaments_played))+'</td><td class="points">'+num(r.points)+'</td></tr>';}).join("");
+  if(!list.length){body.innerHTML='<tr><td colspan="5"><div class="empty"><strong>'+(rows().length?"No matches found":"No ranking data available")+'</strong>'+(rows().length?"Try another search term.":"No competitor has recorded results in this period.")+'</div></td></tr>';return;}
+  body.innerHTML=list.map((r,i)=>{const rank=sort==="rank"?Number(r.rank||i+1):i+1;const n=name(r)||"Unknown";return '<tr tabindex="0" role="button" aria-label="Show details for '+esc(n)+'" data-index="'+i+'"><td class="rank '+(rank<=3?"top":"")+'">'+String(rank).padStart(2,"0")+'</td><td><div class="entity"><span class="mini-mark" aria-hidden="true">'+(teams?"♜":"♟")+'</span><span>'+esc(n)+'</span></div></td><td class="optional-col secondary">'+(r.tournaments_played==null?"—":num(r.tournaments_played))+'</td><td class="points">'+num(r.points)+'</td><td class="optional-col points">'+(r.avg_points==null?"—":num(r.avg_points))+'</td></tr>';}).join("");
   Array.from(body.querySelectorAll("tr[data-index]")).forEach(tr=>{const open=()=>details(list[Number(tr.dataset.index)]);tr.addEventListener("click",open);tr.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();open();}});});
 }
 function renderProfileHistory(history){$("modal-history-list").innerHTML=history.length?history.slice(0,12).map(b=>'<li><span>'+esc(b.name||"UltraBullet battle")+'<br><small>'+esc(date(b.startsAt))+'</small></span><strong>'+esc(num(b.score))+' pts</strong></li>').join(""):'<li>No detailed battle records are available for this competitor.</li>';}
