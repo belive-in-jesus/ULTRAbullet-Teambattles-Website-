@@ -10,6 +10,7 @@ A standalone website for the recurring UltraBullet team battles organised by **N
 - Searchable team/player standings with all-time, monthly and 50-battle seasonal rankings, sort controls, pagination and CSV export
 - Homepage dashboard with current-season progress, latest indexed battle and all-time leaders
 - Head-to-head team/player comparisons with six performance metrics
+- Hall of Fame with season champions, podiums and automatically updated career records
 - Competitor profiles with cumulative metrics, recent-form charts and lazily loaded battle history
 - Searchable battle archive linking back to the original Lichess tournaments
 - Information page explaining eligibility, ranking periods, points and data refreshes
@@ -22,7 +23,7 @@ A standalone website for the recurring UltraBullet team battles organised by **N
 - `docs/` — esports-style GitHub Pages dashboard (`index.html`), methodology page (`information.html`) and generated JSON data (`battle_history.json`, compact team/player leaderboard indexes, metadata and profile-history shards)
 - `scripts/discover.py` — finds finished regular ULTRAbullet Team Battles with their official ordinal battle number
 - `scripts/fetch_worker.py` — fetches each tournament's individual and team results
-- `scripts/aggregate.py` — combines scores and calculates statistics
+- `scripts/aggregate.py` — combines scores and calculates statistics and generates the Hall of Fame dataset
 - `.github/workflows/leaderboard.yml` — daily and manual update workflow
 - `.github/workflows/validate.yml` — pull-request checks and aggregation tests
 - `scripts/tests/test_aggregate.py` — regression tests for official-number 50-battle seasons, missing numbers, special-event exclusion and monthly groupings
