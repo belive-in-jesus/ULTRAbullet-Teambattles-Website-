@@ -143,7 +143,24 @@ class AggregatePeriodTests(unittest.TestCase):
             self.assertEqual(months["2026-01"]["battle_count"], 31)
             self.assertEqual(months["2026-02"]["battle_count"], 21)
 
+            hall = json.loads((data_dir / "hall_of_fame.json").read_text(encoding="utf-8"))
+            self.assertEqual(hall["totals"]["numbered_battles"], 52)
+            self.assertEqual(hall["totals"]["teams"], 1)
+            self.assertEqual(hall["totals"]["players"], 2)
+            self.assertEqual(hall["totals"]["completed_seasons"], 6)
+            hall_seasons = {item["key"]: item for item in hall["seasons"]}
+            self.assertEqual(hall_seasons["season-06"]["team_champion"]["name"], "Test Club")
+            self.assertEqual(hall_seasons["season-06"]["battle_count"], 49)
+            self.assertEqual(hall_seasons["season-06"]["missing_battle_numbers"], [276])
+            self.assertIsNone(hall_seasons["season-07"]["team_champion"])
+            self.assertEqual(hall_seasons["season-07"]["status"], "in_progress")
+            self.assertEqual(hall_seasons["season-07"]["team_podium"][0]["name"], "Test Club")
+            team_records = {item["key"]: item for item in hall["records"]["teams"]}
+            self.assertEqual(team_records["most_points"]["holder"], "Test Club")
+            self.assertEqual(team_records["highest_average"]["battles_required"], 25)
+
             meta = json.loads((data_dir / "meta.json").read_text(encoding="utf-8"))
+            self.assertEqual(meta["hall_of_fame_seasons"], 7)
             self.assertEqual(meta["tournaments_processed"], 52)
             self.assertEqual(meta["excluded_events_count"], 1)
             self.assertEqual(meta["selection_rule"], "Numbered regular ULTRAbullet Team Battles only; special and unnumbered events excluded.")
