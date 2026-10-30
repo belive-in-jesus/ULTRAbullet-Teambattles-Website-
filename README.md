@@ -15,7 +15,7 @@ A standalone website for the recurring UltraBullet team battles organised by **N
 - Compact first-character profile lookup indexes to resolve direct profile URLs without downloading the full leaderboard
 - Searchable battle archive linking back to the original Lichess tournaments
 - Information page explaining eligibility, ranking periods, points and data refreshes
-- Refined responsive design, consistent typography and enlarged brand logo
+- V2 visual system with distinct dashboard, profile, Hall of Fame and editorial page layouts, responsive navigation and accessible interaction states
 - Daily automated refresh through GitHub Actions
 - Public, static frontend; no Lichess token is exposed to website visitors
 
