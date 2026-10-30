@@ -468,7 +468,20 @@ function renderHistory(){
 }
 function csv(){
   const keys=state.view==="teams"?["rank","team_name","team_id","points","avg_points","tournaments_played","podiums","first_places","best_finish","last_played"]:["rank","username","points","avg_points","tournaments_played","podiums","first_places","best_finish","last_played"];
-  const quote=v=>'"'+String(v??"").replace(/"/g,'""')+'"';const content=[keys.join(","),...rows().map(r=>keys.map(k=>quote(r[k])).join(","))].join("\r\n");
+  const minimumBattles=Number($("min-battles-select").value)||0;
+  let exportRows=rows().filter(r=>String(name(r)||"").toLocaleLowerCase().includes(state.query.trim().toLocaleLowerCase())&&(Number(r.tournaments_played)||0)>=minimumBattles);
+  const sort=$("sort-select").value;
+  const sorters={
+    points:(a,b)=>(Number(b.points)||0)-(Number(a.points)||0),
+    avg_points:(a,b)=>(Number(b.avg_points)||0)-(Number(a.avg_points)||0),
+    battles:(a,b)=>(Number(b.tournaments_played)||0)-(Number(a.tournaments_played)||0),
+    podiums:(a,b)=>(Number(b.podiums)||0)-(Number(a.podiums)||0),
+    first_places:(a,b)=>(Number(b.first_places)||0)-(Number(a.first_places)||0),
+    best_finish:(a,b)=>(Number(a.best_finish)||Infinity)-(Number(b.best_finish)||Infinity),
+    last_played:(a,b)=>(Number(b.last_played)||0)-(Number(a.last_played)||0)
+  };
+  if(sorters[sort])exportRows=[...exportRows].sort(sorters[sort]);
+  const quote=v=>'"'+String(v??"").replace(/"/g,'""')+'"';const content=[keys.join(","),...exportRows.map(r=>keys.map(k=>quote(r[k])).join(","))].join("\r\n");
   const url=URL.createObjectURL(new Blob(["\ufeff"+content],{type:"text/csv;charset=utf-8;"}));const a=document.createElement("a");a.href=url;
   a.download="ultrabullet-"+state.view+(state.periodData?"-"+state.periodData.key:"-all-time")+"-leaderboard.csv";a.click();URL.revokeObjectURL(url);
 }
