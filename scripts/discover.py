@@ -2,6 +2,7 @@
 """Discover finished UltraBullet team battles by name filter or explicit tournament ID."""
 import json
 import os
+import re
 import sys
 from urllib.parse import quote
 
@@ -10,19 +11,13 @@ import requests
 USER = os.environ.get("LICHESS_USER", "Nathanael01").strip()
 TOKEN = os.environ.get("LICHESS_TOKEN", "").strip()
 NB = max(1, min(int(os.environ.get("DISCOVER_NB", "6000")), 10000))
+REGULAR_BATTLE_PATTERN = re.compile(
+    r"^\s*\d+(?:st|nd|rd|th)\s+ultrabullet\s+(?:team\s+battle|teambattle\s+team\s+battle)\s*$",
+    re.IGNORECASE,
+)
 NAME_FILTERS = [
     item.strip().lower()
     for item in os.environ.get("NAME_FILTERS", "ultrabullet").split(",")
-    if item.strip()
-]
-EXTRA_NAME_FILTERS = [
-    item.strip().lower()
-    for item in os.environ.get("EXTRA_NAME_FILTERS", "").split(",")
-    if item.strip()
-]
-INCLUDE_TOURNAMENT_IDS = [
-    item.strip()
-    for item in os.environ.get("INCLUDE_TOURNAMENT_IDS", "").split(",")
     if item.strip()
 ]
 ONLY_FINISHED = os.environ.get("ONLY_FINISHED", "1") == "1"
@@ -48,33 +43,10 @@ def normalize_tournament(tournament: dict) -> dict:
     }
 
 
-def fetch_explicit_tournament(tournament_id: str) -> dict:
-    """Resolve an explicitly configured ID even when its title does not match a filter."""
-    response = session.get(
-        f"https://lichess.org/api/tournament/{quote(tournament_id, safe='')}",
-        timeout=(15, 45),
-    )
-    response.raise_for_status()
-    tournament = response.json()
-    if not tournament.get("id"):
-        raise ValueError(f"Tournament ID {tournament_id!r} returned no tournament record")
-    is_finished = tournament.get("isFinished") is True or tournament.get("status") == FINISHED_STATUS
-    if ONLY_FINISHED and not is_finished:
-        raise ValueError(
-            f"Explicit tournament {tournament_id!r} is not finished "
-            f"(isFinished={tournament.get('isFinished')!r}, status={tournament.get('status')!r}); "
-            "refusing to include it."
-        )
-    record = normalize_tournament(tournament)
-    if is_finished:
-        record["status"] = FINISHED_STATUS
-    return record
-
-
 def main() -> int:
     if not USER:
         raise ValueError("LICHESS_USER must not be empty")
-    if not NAME_FILTERS and not EXTRA_NAME_FILTERS and not INCLUDE_TOURNAMENT_IDS:
+    if not NAME_FILTERS:
         raise ValueError("Configure at least one name filter or explicit tournament ID")
 
     url = f"https://lichess.org/api/user/{quote(USER, safe='')}/tournament/created"
@@ -82,10 +54,8 @@ def main() -> int:
     if TOKEN:
         headers["Authorization"] = f"Bearer {TOKEN}"
 
-    all_filters = NAME_FILTERS + EXTRA_NAME_FILTERS
     print(
-        f"Scanning tournaments created by {USER}; filters={all_filters}; "
-        f"explicit_ids={len(INCLUDE_TOURNAMENT_IDS)}; max={NB}",
+        f"Scanning regular numbered battles created by {USER}; filters={NAME_FILTERS}; max={NB}",
         file=sys.stderr,
     )
     response = session.get(url, headers=headers, params={"nb": NB}, stream=True, timeout=(15, 180))
@@ -110,17 +80,12 @@ def main() -> int:
             continue
         if ONLY_FINISHED and tournament.get("status") != FINISHED_STATUS:
             continue
-        if any(term in lowered for term in all_filters):
-            record = normalize_tournament(tournament)
-            matches[record["id"]] = record
-
-    # Explicit IDs are deliberate inclusions and bypass title and creator-list filters.
-    # The public tournament endpoint still verifies that each requested event exists
-    # and is finished before it is allowed into the cumulative statistics.
-    for tournament_id in INCLUDE_TOURNAMENT_IDS:
-        if tournament_id not in matches:
-            record = fetch_explicit_tournament(tournament_id)
-            matches[record["id"]] = record
+        if not any(term in lowered for term in NAME_FILTERS):
+            continue
+        if not REGULAR_BATTLE_PATTERN.fullmatch(name):
+            continue
+        record = normalize_tournament(tournament)
+        matches[record["id"]] = record
 
     selected = sorted(
         matches.values(),
@@ -131,8 +96,7 @@ def main() -> int:
 
     print(
         f"Scanned {scanned} tournaments; selected {len(selected)} finished matches "
-        f"({len(NAME_FILTERS)} standard filters, {len(EXTRA_NAME_FILTERS)} extra filters, "
-        f"{len(INCLUDE_TOURNAMENT_IDS)} explicit IDs).",
+        f"using {len(NAME_FILTERS)} name filter(s); only numbered regular events are eligible.",
         file=sys.stderr,
     )
     if scanned >= NB:
@@ -144,7 +108,7 @@ def main() -> int:
     if not selected:
         print(
             "ERROR: no completed tournaments matched the current configuration. "
-            "Check the Lichess username, filters and explicit tournament IDs. "
+            "Check the Lichess username, name filters and regular numbered battle titles. "
             "Stopping before aggregation so an existing leaderboard is not overwritten with empty data.",
             file=sys.stderr,
         )
