@@ -11,7 +11,7 @@ A standalone website for the recurring UltraBullet team battles organised by **N
 - Homepage dashboard with current-season progress, latest indexed battle and all-time leaders
 - Head-to-head team/player comparisons with six performance metrics
 - Hall of Fame with season champions, podiums and automatically updated career records
-- Dedicated shareable team and player profile pages with cumulative metrics, period filters, recent-form charts and paginated battle history
+- Dedicated shareable team and player profiles with score-trend charts, finish-distribution donuts, monthly point charts, 52-week activity heatmaps, season-by-season comparisons, period filters and paginated battle history
 - Compact first-character profile lookup indexes to resolve direct profile URLs without downloading the full leaderboard
 - Searchable battle archive linking back to the original Lichess tournaments
 - Information page explaining eligibility, ranking periods, points and data refreshes
@@ -21,13 +21,13 @@ A standalone website for the recurring UltraBullet team battles organised by **N
 
 ## Repository layout
 
-- `docs/` — esports-style GitHub Pages dashboard (`index.html`), Hall of Fame (`hall-of-fame.html`), methodology page (`information.html`) and generated JSON data (`hall_of_fame.json`, `battle_history.json`, compact team/player leaderboard indexes, metadata and profile-history shards)
+- `docs/` — GitHub Pages dashboard (`index.html`), Hall of Fame (`hall-of-fame.html`), methodology page (`information.html`), shareable analytics profiles (`profile.html`) and generated JSON data (`hall_of_fame.json`, `battle_history.json`, compact team/player leaderboard indexes, metadata and profile-history shards)
 - `scripts/discover.py` — finds finished regular ULTRAbullet Team Battles with their official ordinal battle number
 - `scripts/fetch_worker.py` — fetches each tournament's individual and team results
 - `scripts/aggregate.py` — combines scores and calculates statistics and generates the Hall of Fame dataset
 - `.github/workflows/leaderboard.yml` — daily and manual update workflow
 - `.github/workflows/validate.yml` — pull-request checks and aggregation tests
-- `scripts/tests/test_aggregate.py` — regression tests for official-number 50-battle seasons, missing numbers, special-event exclusion and monthly groupings
+- `scripts/tests/` — Python aggregation tests and Node.js regression tests for profile analytics, chart data and browser script syntax
 
 ## Publish the website
 
