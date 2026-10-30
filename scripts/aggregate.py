@@ -1,17 +1,15 @@
 #!/usr/bin/env python3
-"""Combine worker output into the JSON files consumed by GitHub Pages.
-
-Based on the cumulative result-processing concept by DarkOnCrack:
-https://lichessbotacc.github.io/Gift-For-Nathanael/
-"""
+"""Build compact leaderboard indexes and lazy-loaded competitor profile shards."""
 import glob
 import json
 import os
+import shutil
 from datetime import datetime, timezone
 
 PARTIALS_DIR = os.environ.get("PARTIALS_DIR", "artifacts")
 OUTPUT_DIR = os.environ.get("OUTPUT_DIR", "docs/data")
 NAME_FILTERS = os.environ.get("NAME_FILTERS", "ultrabullet")
+PROFILE_SHARD_SIZE = 200
 
 
 def compute_stats(records: list) -> dict:
@@ -41,6 +39,15 @@ def compute_stats(records: list) -> dict:
             "top3_rate": round(podiums / len(ranks), 3),
         })
     return stats
+
+
+def write_json(path: str, payload) -> None:
+    directory = os.path.dirname(path)
+    if directory:
+        os.makedirs(directory, exist_ok=True)
+    with open(path, "w", encoding="utf-8") as handle:
+        json.dump(payload, handle, ensure_ascii=False, separators=(",", ":"))
+        handle.write("\n")
 
 
 def main() -> int:
@@ -79,23 +86,56 @@ def main() -> int:
 
     player_rank = sorted(player_totals.items(), key=lambda item: (-item[1], item[0].lower()))
     team_rank = sorted(team_totals.items(), key=lambda item: (-item[1], item[0].lower()))
-    os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-    players = [{
-        "rank": index + 1,
-        "username": username,
-        "points": points,
-        **compute_stats(player_records.get(username, [])),
-        "history": sorted(player_records.get(username, []), key=lambda row: row.get("startsAt") or "", reverse=True),
-    } for index, (username, points) in enumerate(player_rank)]
-    teams = [{
-        "rank": index + 1,
-        "team_id": team_id,
-        "team_name": team_names.get(team_id, team_id),
-        "points": points,
-        **compute_stats(team_records.get(team_id, [])),
-        "history": sorted(team_records.get(team_id, []), key=lambda row: row.get("startsAt") or "", reverse=True),
-    } for index, (team_id, points) in enumerate(team_rank)]
+    # Remove old profile shards so deleted or renamed competitors cannot leave stale files.
+    profiles_dir = os.path.join(OUTPUT_DIR, "profiles")
+    if os.path.isdir(profiles_dir):
+        shutil.rmtree(profiles_dir)
+    os.makedirs(profiles_dir, exist_ok=True)
+
+    players, teams = [], []
+    profile_shards = {"players": {}, "teams": {}}
+
+    for index, (username, points) in enumerate(player_rank):
+        history = sorted(
+            player_records.get(username, []),
+            key=lambda row: row.get("startsAt") or "",
+            reverse=True,
+        )
+        shard_index = index // PROFILE_SHARD_SIZE
+        shard_name = f"players-{shard_index:03d}.json"
+        players.append({
+            "rank": index + 1,
+            "username": username,
+            "points": points,
+            **compute_stats(player_records.get(username, [])),
+            "profile_file": f"profiles/{shard_name}",
+            "profile_key": username,
+        })
+        profile_shards["players"].setdefault(shard_name, {})[username] = {"history": history}
+
+    for index, (team_id, points) in enumerate(team_rank):
+        history = sorted(
+            team_records.get(team_id, []),
+            key=lambda row: row.get("startsAt") or "",
+            reverse=True,
+        )
+        shard_index = index // PROFILE_SHARD_SIZE
+        shard_name = f"teams-{shard_index:03d}.json"
+        teams.append({
+            "rank": index + 1,
+            "team_id": team_id,
+            "team_name": team_names.get(team_id, team_id),
+            "points": points,
+            **compute_stats(team_records.get(team_id, [])),
+            "profile_file": f"profiles/{shard_name}",
+            "profile_key": team_id,
+        })
+        profile_shards["teams"].setdefault(shard_name, {})[team_id] = {"history": history}
+
+    for kind, shards in profile_shards.items():
+        for filename, payload in shards.items():
+            write_json(os.path.join(profiles_dir, filename), payload)
 
     meta = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
@@ -104,6 +144,8 @@ def main() -> int:
         "players_count": len(players),
         "errors_count": len(all_errors),
         "name_filters": NAME_FILTERS,
+        "profile_shard_size": PROFILE_SHARD_SIZE,
+        "profiles_shards": sum(len(shards) for shards in profile_shards.values()),
     }
     for filename, payload in (
         ("leaderboard_players.json", players),
@@ -111,17 +153,13 @@ def main() -> int:
         ("meta.json", meta),
         ("battle_history.json", sorted(battle_history.values(), key=lambda row: row.get("startsAt") or "", reverse=True)),
     ):
-        with open(os.path.join(OUTPUT_DIR, filename), "w", encoding="utf-8") as handle:
-            json.dump(payload, handle, indent=2, ensure_ascii=False)
-            handle.write("\n")
+        write_json(os.path.join(OUTPUT_DIR, filename), payload)
 
-    with open("errors.json", "w", encoding="utf-8") as handle:
-        json.dump(all_errors, handle, indent=2, ensure_ascii=False)
-        handle.write("\n")
-
+    write_json("errors.json", all_errors)
     print(
         f"Finished: {tournaments_processed} tournaments, {len(teams)} teams, "
-        f"{len(players)} players, {len(all_errors)} recorded API errors."
+        f"{len(players)} players, {len(all_errors)} recorded API errors, "
+        f"{meta['profiles_shards']} profile shards."
     )
     return 0
 
