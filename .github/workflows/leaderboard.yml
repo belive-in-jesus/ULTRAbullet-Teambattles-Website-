@@ -11,6 +11,14 @@ on:
         description: "Comma-separated name filters (case-insensitive)"
         required: false
         default: "ultrabullet"
+      extra_name_filters:
+        description: "Additional comma-separated tournament name filters (for special events)"
+        required: false
+        default: ""
+      include_tournament_ids:
+        description: "Comma-separated Lichess tournament IDs to include regardless of title"
+        required: false
+        default: ""
       num_workers:
         description: "Parallel workers (start with 8)"
         required: false
@@ -46,6 +54,8 @@ jobs:
         env:
           LICHESS_USER: ${{ inputs.lichess_user || vars.LICHESS_USER || 'Nathanael01' }}
           NAME_FILTERS: ${{ inputs.name_filters || vars.NAME_FILTERS || 'ultrabullet' }}
+          EXTRA_NAME_FILTERS: ${{ inputs.extra_name_filters || vars.EXTRA_NAME_FILTERS || '' }}
+          INCLUDE_TOURNAMENT_IDS: ${{ inputs.include_tournament_ids || vars.INCLUDE_TOURNAMENT_IDS || '' }}
           DISCOVER_NB: ${{ vars.DISCOVER_NB || '6000' }}
           LICHESS_TOKEN: ${{ secrets.LICHESS_TOKEN }}
         run: python scripts/discover.py
@@ -115,6 +125,8 @@ jobs:
       - name: Build cumulative leaderboards
         env:
           NAME_FILTERS: ${{ inputs.name_filters || vars.NAME_FILTERS || 'ultrabullet' }}
+          EXTRA_NAME_FILTERS: ${{ inputs.extra_name_filters || vars.EXTRA_NAME_FILTERS || '' }}
+          INCLUDE_TOURNAMENT_IDS: ${{ inputs.include_tournament_ids || vars.INCLUDE_TOURNAMENT_IDS || '' }}
         run: python scripts/aggregate.py
       - name: Upload processing report
         uses: actions/upload-artifact@v4
