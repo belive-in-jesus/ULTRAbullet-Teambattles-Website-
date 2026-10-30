@@ -88,11 +88,16 @@ class WebsiteAssetTests(unittest.TestCase):
                 page = DOCS / page_name
                 parser = PageAssets()
                 parser.feed(page.read_text(encoding="utf-8"))
-                self.assertTrue(parser.stylesheets, "No stylesheet references were found.")
+                self.assertIn("css/v2-visual-system.css", parser.stylesheets)
+                expected_last = (
+                    "css/profile-analytics.css"
+                    if page_name == "profile.html"
+                    else "css/v2-visual-system.css"
+                )
                 self.assertEqual(
                     parser.stylesheets[-1],
-                    "css/v2-visual-system.css",
-                    "The V2 stylesheet must load after all page-specific styles.",
+                    expected_last,
+                    "The shared V2 stylesheet and any page-specific analytics layer must load in the correct order.",
                 )
 
     def test_local_stylesheets_and_scripts_exist(self):
