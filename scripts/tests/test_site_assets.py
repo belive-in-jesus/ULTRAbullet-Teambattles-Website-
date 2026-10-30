@@ -110,10 +110,37 @@ class WebsiteAssetTests(unittest.TestCase):
                     if path is not None:
                         self.assertTrue(path.is_file(), f"{page_name} references missing asset {reference}")
 
-    def test_v2_stylesheet_delimiters_are_balanced(self):
-        stylesheet = DOCS / "css" / "v2-visual-system.css"
-        source = stylesheet.read_text(encoding="utf-8")
-        self.assertTrue(css_delimiters_are_balanced(source), "V2 stylesheet contains an unbalanced delimiter.")
+    def test_v2_stylesheets_have_balanced_delimiters(self):
+        for filename in ("v2-visual-system.css", "profile-analytics.css"):
+            with self.subTest(stylesheet=filename):
+                source = (DOCS / "css" / filename).read_text(encoding="utf-8")
+                self.assertTrue(
+                    css_delimiters_are_balanced(source),
+                    f"{filename} contains an unbalanced delimiter.",
+                )
+
+    def test_profile_analytics_module_loads_before_profile_controller(self):
+        page = DOCS / "profile.html"
+        parser = PageAssets()
+        source = page.read_text(encoding="utf-8")
+        parser.feed(source)
+        self.assertIn("js/analytics.js", parser.scripts)
+        self.assertIn("js/profile.js", parser.scripts)
+        self.assertLess(
+            parser.scripts.index("js/analytics.js"),
+            parser.scripts.index("js/profile.js"),
+        )
+        for element_id in (
+            "trend-range",
+            "analytics-recent-average",
+            "analytics-recent-podium-rate",
+            "analytics-latest-streak",
+            "analytics-donut",
+            "analytics-monthly-chart",
+            "analytics-heatmap",
+            "analytics-season-rows",
+        ):
+            self.assertIn(f'id="{element_id}"', source)
 
     def test_planned_special_events_remain_explicitly_disabled(self):
         for page_name in PAGES:
