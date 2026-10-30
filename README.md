@@ -50,9 +50,9 @@ An optional Lichess API token may be added as a repository Actions secret named 
 
 ## Notes
 
-- Standard and additional name-filter matches are discovered from tournaments created by the configured account. Exact IDs in `INCLUDE_TOURNAMENT_IDS` are explicit exceptions and are checked through the public Lichess tournament API, even when their title differs or another organizer created them.
-- Seasonal rankings group each consecutive 50 included finished tournaments in chronological order (UTC start time). Season labels show their inclusive battle-number range; the latest incomplete season is marked as in progress. Event titles do not determine season membership.
-- Monthly rankings use UTC calendar months. Both period rankings include only results recorded for the selected events.
+- Only finished regular battles with titles matching the numbered `1st ULTRAbullet Team Battle` pattern are included. Alliance, qualification, Christmas, Daily Arena, restarted and other unnumbered/special events are excluded from points, profiles, history and rankings.
+- Seasonal rankings use fixed official battle-number ranges: Season 1 = Battles 1–50, Season 2 = Battles 51–100, and so on. Thus Battle 301 always starts Season 7, even if earlier records are missing. Missing numbers are shown as data gaps and do not shift later seasons.
+- Monthly rankings use UTC calendar months and include only eligible regular numbered battles.
 - Points are summed across the discovered tournaments, so the leaderboard is cumulative, not a single-day ranking.
 - Generated result files are written into `docs/data/` and committed by the workflow.
 - Competitor histories are stored in `docs/data/profiles/` in shards of 200 competitors and fetched only when a profile is opened. The next successful leaderboard workflow run regenerates the compact indexes and these shards.
