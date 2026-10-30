@@ -173,7 +173,7 @@ async function loadSelectedPeriod(){
   const entries=periodEntries(type),selector=$("period-select");selector.classList.remove("hidden");
   if(!entries.length){state.periodData=null;state.periodLoading=false;state.periodError="No "+(type==="month"?"monthly":"seasonal")+" index is available yet. Run the leaderboard refresh after deploying V1.2.";render();return;}
   const previous=selector.value,entry=entries.find(item=>item.key===previous)||entries[0];selector.innerHTML="";
-  for(const item of entries){const option=document.createElement("option");option.value=item.key;option.textContent=item.label+(type==="season"&&!item.complete?" · in progress":"");selector.appendChild(option);}
+  for(const item of entries){const option=document.createElement("option");option.value=item.key;const missing=Array.isArray(item.missing_battle_numbers)?item.missing_battle_numbers.length:0;option.textContent=item.label+(type==="season"&&!item.complete?" · in progress":"")+(type==="season"&&missing?" · "+missing+" not recorded":"");selector.appendChild(option);}
   selector.value=entry.key;state.periodKey=entry.key;state.periodData=null;state.periodLoading=true;state.periodError="";render();
   try{
     const data=state.periodCache[entry.data_file]||(state.periodCache[entry.data_file]=load("./data/"+entry.data_file));
@@ -187,7 +187,7 @@ async function init(){
   state.periodsIndex=res[4].status==="fulfilled"?res[4].value:null;
   $("stat-battles").textContent=num(state.meta.tournaments_processed);$("stat-teams").textContent=num(state.meta.teams_count??state.teams.length);$("stat-players").textContent=num(state.meta.players_count??state.players.length);
   $("updated-label").textContent=state.meta.generated_at?"Updated "+date(state.meta.generated_at):"No successful data refresh yet";
-  $("filter-label").textContent=(state.meta.name_filters||"ultrabullet")+" · completed tournaments";
+  $("filter-label").textContent=state.meta.selection_rule||"Regular numbered ULTRAbullet Team Battles only";
   $("status-pill").textContent=state.meta.generated_at?"UPDATED "+date(state.meta.generated_at):"AWAITING FIRST UPDATE";
   if(res.slice(0,3).some(x=>x.status==="rejected"))$("updated-label").classList.add("error");
   if(res[3].status==="rejected")$("history-status").textContent="Battle archive unavailable — run the leaderboard workflow to generate it.";
