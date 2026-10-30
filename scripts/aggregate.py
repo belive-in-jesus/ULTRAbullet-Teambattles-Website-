@@ -4,6 +4,7 @@ import calendar
 import glob
 import json
 import os
+import re
 import shutil
 from collections import defaultdict
 from datetime import datetime, timezone
@@ -15,6 +16,18 @@ EXTRA_NAME_FILTERS = os.environ.get("EXTRA_NAME_FILTERS", "")
 INCLUDE_TOURNAMENT_IDS = os.environ.get("INCLUDE_TOURNAMENT_IDS", "")
 PROFILE_SHARD_SIZE = 200
 SEASON_SIZE = 50
+BATTLE_NAME_PATTERN = re.compile(r"^\\s*(?P<number>\\d+)(?:st|nd|rd|th)\\s+ultrabullet\\s+(?:team\\s+battle|teambattle\\s+team\\s+battle)\\s*$", re.IGNORECASE)
+
+
+def parse_battle_number(name: str):
+    match = BATTLE_NAME_PATTERN.fullmatch(str(name or ""))
+    return int(match.group("number")) if match else None
+
+
+def season_number_for_battle(battle_number: int) -> int:
+    if battle_number < 1:
+        raise ValueError("Battle numbers must be positive")
+    return (battle_number - 1) // SEASON_SIZE + 1
 
 
 def compute_stats(records: list) -> dict:
@@ -108,6 +121,27 @@ def main() -> int:
             team_records.setdefault(team_id, []).extend(records)
         all_errors.extend(data.get("errors", []))
 
+    # Keep only regular numbered team battles. This defensive filter is applied
+    # even if discovery configuration or old worker artifacts contain special events.
+    regular_battles = {}
+    for battle_id, battle in battle_history.items():
+        number = parse_battle_number(battle.get("name") or battle.get("fullName"))
+        if number is None:
+            continue
+        record = dict(battle)
+        record["battle_number"] = number
+        regular_battles[battle_id] = record
+    allowed_ids = set(regular_battles)
+    player_records = {key: [row for row in records if str(row.get("id") or "") in allowed_ids]
+                      for key, records in player_records.items()}
+    player_records = {key: records for key, records in player_records.items() if records}
+    team_records = {key: [row for row in records if str(row.get("id") or "") in allowed_ids]
+                    for key, records in team_records.items()}
+    team_records = {key: records for key, records in team_records.items() if records}
+    player_totals = {key: sum(float(row.get("score", 0) or 0) for row in records)
+                     for key, records in player_records.items()}
+    team_totals = {key: sum(float(row.get("score", 0) or 0) for row in records)
+                   for key, records in team_records.items()}
     player_rank = sorted(player_totals.items(), key=lambda item: (-item[1], item[0].lower()))
     team_rank = sorted(team_totals.items(), key=lambda item: (-item[1], item[0].lower()))
 
@@ -166,14 +200,11 @@ def main() -> int:
         for filename, payload in shards.items():
             write_json(os.path.join(profiles_dir, filename), payload)
 
-    # All period boundaries are calculated from the chronological list of included,
-    # finished tournaments. Titles are deliberately not used to infer a season.
-    dated_battles = [
-        row for row in battle_history.values()
-        if row.get("startsAt") is not None
-    ]
-    dated_battles.sort(key=lambda row: (int(row["startsAt"]), str(row.get("id") or "")))
-    undated_battles = len(battle_history) - len(dated_battles)
+    # Monthly tables use regular numbered battles only. Seasons are fixed to
+    # official battle-number ranges, not the count/order of available records.
+    numbered_battles = sorted(regular_battles.values(), key=lambda row: (int(row["battle_number"]), str(row.get("id") or "")))
+    max_battle_number = max((int(row["battle_number"]) for row in numbered_battles), default=0)
+    dated_battles = [row for row in numbered_battles if row.get("startsAt") is not None]
 
     period_dir = os.path.join(OUTPUT_DIR, "periods")
     if os.path.isdir(period_dir):
@@ -209,35 +240,40 @@ def main() -> int:
             "data_file": data_file,
         })
 
+    seasons_by_number = defaultdict(list)
+    for battle in numbered_battles:
+        seasons_by_number[season_number_for_battle(int(battle["battle_number"]))].append(battle)
+
     season_index = []
-    for season_offset in range(0, len(dated_battles), SEASON_SIZE):
-        season_number = season_offset // SEASON_SIZE + 1
-        battles = dated_battles[season_offset:season_offset + SEASON_SIZE]
-        first_battle = season_offset + 1
-        last_battle = season_offset + len(battles)
+    for season_number in sorted(seasons_by_number):
+        battles = seasons_by_number[season_number]
+        first_battle = (season_number - 1) * SEASON_SIZE + 1
+        last_battle = season_number * SEASON_SIZE
         season_key = f"season-{season_number:02d}"
         data_file = f"periods/seasons/{season_key}.json"
         ids = {str(row["id"]) for row in battles}
+        recorded_numbers = {int(row["battle_number"]) for row in battles}
+        missing_numbers = sorted(set(range(first_battle, last_battle + 1)) - recorded_numbers)
+        complete = max_battle_number >= last_battle
+        in_progress = max_battle_number >= first_battle and not complete
         label = f"Season {season_number} · Battles {first_battle}–{last_battle}"
         payload = {
-            "period_type": "season",
-            "key": season_key,
-            "label": label,
-            "battle_count": len(battles),
+            "period_type": "season", "key": season_key, "label": label,
+            "battle_count": len(battles), "expected_battles": SEASON_SIZE,
+            "missing_battle_numbers": missing_numbers, "complete": complete,
+            "in_progress": in_progress,
             "battle_ids": [str(row["id"]) for row in battles],
             "teams": build_period_ranking(team_records, team_names, ids, "team_name", team_profile_refs),
             "players": build_period_ranking(player_records, {key: key for key in player_records}, ids, "username", player_profile_refs),
         }
         write_json(os.path.join(OUTPUT_DIR, data_file), payload)
+        dated = [int(row["startsAt"]) for row in battles if row.get("startsAt") is not None]
         season_index.append({
-            "key": season_key,
-            "label": label,
-            "battle_count": len(battles),
-            "first_battle": first_battle,
-            "last_battle": last_battle,
-            "complete": len(battles) == SEASON_SIZE,
-            "start_at": int(battles[0]["startsAt"]),
-            "end_at": int(battles[-1]["startsAt"]),
+            "key": season_key, "label": label, "battle_count": len(battles),
+            "expected_battles": SEASON_SIZE, "missing_battle_numbers": missing_numbers,
+            "first_battle": first_battle, "last_battle": last_battle,
+            "complete": complete, "in_progress": in_progress,
+            "start_at": min(dated) if dated else None, "end_at": max(dated) if dated else None,
             "data_file": data_file,
         })
 
@@ -245,47 +281,43 @@ def main() -> int:
     period_index = {
         "generated_at": generated_at,
         "season_size": SEASON_SIZE,
-        "season_method": "Every consecutive 50 included finished battles, ordered by start time (UTC).",
+        "season_method": "Fixed official battle-number ranges: Season 1 = Battles 1–50, Season 2 = 51–100, etc. Unnumbered and special events are excluded.",
+        "numbered_battles_count": len(numbered_battles),
+        "max_battle_number": max_battle_number,
         "months": list(reversed(month_index)),
         "seasons": list(reversed(season_index)),
     }
     write_json(os.path.join(OUTPUT_DIR, "periods_index.json"), period_index)
 
-    combined_filters = [
-        item.strip().lower()
-        for item in (NAME_FILTERS + "," + EXTRA_NAME_FILTERS).split(",")
-        if item.strip()
-    ]
-    included_ids = [item.strip() for item in INCLUDE_TOURNAMENT_IDS.split(",") if item.strip()]
     meta = {
         "generated_at": generated_at,
-        "tournaments_processed": tournaments_processed,
+        "tournaments_processed": len(numbered_battles),
         "teams_count": len(teams),
         "players_count": len(players),
         "errors_count": len(all_errors),
-        "name_filters": ", ".join(combined_filters),
-        "extra_tournament_ids": included_ids,
+        "selection_rule": "Numbered regular ULTRAbullet Team Battles only; special and unnumbered events excluded.",
         "profile_shard_size": PROFILE_SHARD_SIZE,
         "profiles_shards": sum(len(shards) for shards in profile_shards.values()),
         "season_size": SEASON_SIZE,
         "season_count": len(season_index),
         "month_count": len(month_index),
-        "undated_battles": undated_battles,
+        "max_battle_number": max_battle_number,
+        "excluded_events_count": len(battle_history) - len(regular_battles),
     }
     for filename, payload in (
         ("leaderboard_players.json", players),
         ("leaderboard_teams.json", teams),
         ("meta.json", meta),
-        ("battle_history.json", sorted(battle_history.values(), key=lambda row: int(row.get("startsAt") or 0), reverse=True)),
+        ("battle_history.json", sorted(numbered_battles, key=lambda row: int(row["battle_number"]), reverse=True)),
     ):
         write_json(os.path.join(OUTPUT_DIR, filename), payload)
 
     write_json("errors.json", all_errors)
     print(
-        f"Finished: {tournaments_processed} tournaments, {len(teams)} teams, "
-        f"{len(players)} players, {len(all_errors)} recorded API errors, "
-        f"{len(season_index)} seasons, {len(month_index)} months, "
-        f"{meta['profiles_shards']} profile shards, {undated_battles} undated battles."
+        f"Finished: {len(numbered_battles)} regular numbered battles, "
+        f"{len(battle_history) - len(regular_battles)} excluded special events, "
+        f"{len(teams)} teams, {len(players)} players, {len(all_errors)} errors, "
+        f"{len(season_index)} fixed-number seasons and {len(month_index)} months."
     )
     return 0
 
