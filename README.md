@@ -20,6 +20,8 @@ A standalone website for the recurring UltraBullet team battles organised by **N
 - `scripts/fetch_worker.py` — fetches each tournament's individual and team results
 - `scripts/aggregate.py` — combines scores and calculates statistics
 - `.github/workflows/leaderboard.yml` — daily and manual update workflow
+- `.github/workflows/validate.yml` — pull-request checks and aggregation tests
+- `scripts/tests/test_aggregate.py` — regression tests for chronological 50-battle seasons and monthly groupings
 
 ## Publish the website
 
@@ -40,9 +42,11 @@ The defaults are:
 - Lichess tournament creator: `Nathanael01`
 - Tournament name filter: `ultrabullet` (case-insensitive substring match)
 - Finished tournaments only
+- Optional additional name filters: `EXTRA_NAME_FILTERS` (comma-separated)
+- Optional exact Lichess event IDs: `INCLUDE_TOURNAMENT_IDS` (comma-separated; supports special events with unrelated titles or other organizers)
 - Scheduled refresh: daily at 03:00 UTC
 
-You can run the workflow manually from **Actions → UltraBullet Team Battles Leaderboard → Run workflow**, and override the Lichess username or name filter.
+You can run the workflow manually from **Actions → UltraBullet Team Battles Leaderboard → Run workflow**. Besides the standard username and name-filter inputs, the form now has `extra_name_filters` and `include_tournament_ids` for special events. For automatic runs, the corresponding repository variables are `EXTRA_NAME_FILTERS` and `INCLUDE_TOURNAMENT_IDS`.
 
 An optional Lichess API token may be added as a repository Actions secret named `LICHESS_TOKEN`. It is not required for public tournaments. Never put a token in the website files or commit it to the repository.
 
