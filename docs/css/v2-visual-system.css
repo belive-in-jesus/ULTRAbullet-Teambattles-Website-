@@ -138,7 +138,8 @@ button, input, select { font-family: var(--v2-sans); }
   color: #f4f9fc;
 }
 .nav-link.active:after { display: none; }
-.nav-link.upcoming { opacity: .68; }
+.nav-link.upcoming { opacity: .78; }
+.mast-actions .nav-link.upcoming { display: inline-flex; }
 .nav-link.upcoming:before {
   padding: 2px 4px;
   border: 1px solid rgba(143,160,181,.2);
