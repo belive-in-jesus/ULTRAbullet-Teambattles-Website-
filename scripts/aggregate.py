@@ -926,6 +926,19 @@ def main() -> int:
             team_member_records.setdefault(team_id, []).extend(records)
         all_errors.extend(data.get("errors", []))
 
+    # Fail closed before touching published datasets. A worker error means at
+    # least one result endpoint may be missing, so publishing the aggregate
+    # would silently turn an incomplete refresh into the new public baseline.
+    if all_errors:
+        write_json("errors.json", all_errors)
+        print(
+            f"ERROR: refusing to publish incomplete data; "
+            f"{len(all_errors)} worker error(s) were recorded. "
+            "The previous generated datasets remain untouched. See errors.json.",
+            file=sys.stderr,
+        )
+        return 1
+
     # Keep only regular numbered team battles. This defensive filter is applied
     # even if discovery configuration or old worker artifacts contain special events.
     regular_battles = {}
