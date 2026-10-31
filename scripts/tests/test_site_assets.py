@@ -1,4 +1,5 @@
 from html.parser import HTMLParser
+import json
 from pathlib import Path
 from urllib.parse import urlsplit
 import re
@@ -172,6 +173,28 @@ class WebsiteAssetTests(unittest.TestCase):
         ids = re.findall(r'\bid="([^"]+)"', source)
         duplicates = sorted({element_id for element_id in ids if ids.count(element_id) > 1})
         self.assertEqual(duplicates, [], "Dashboard page contains duplicate HTML IDs.")
+
+
+    def test_published_dashboard_analytics_snapshots_are_consistent(self):
+        analytics_dir = DOCS / "data" / "analytics"
+        overview = json.loads((analytics_dir / "overview.json").read_text(encoding="utf-8"))
+        timeseries = json.loads((analytics_dir / "timeseries.json").read_text(encoding="utf-8"))
+        self.assertEqual(overview["schema_version"], 1)
+        self.assertEqual(timeseries["schema_version"], 1)
+        self.assertEqual(overview["generated_at"], timeseries["generated_at"])
+        self.assertEqual(overview["totals"]["numbered_battles"], 639)
+        self.assertEqual(overview["totals"]["teams"], 818)
+        self.assertEqual(overview["totals"]["players"], 13366)
+        self.assertEqual(len(timeseries["months"]), 24)
+        self.assertEqual(len(timeseries["seasons"]), 13)
+        self.assertEqual(timeseries["months"][0]["key"], "2024-11")
+        self.assertEqual(timeseries["months"][-1]["key"], "2026-10")
+        self.assertEqual(timeseries["months"][-1]["active_players"], 1116)
+        self.assertEqual(timeseries["months"][-1]["active_teams"], 229)
+        self.assertEqual(overview["current_month"]["key"], "2026-10")
+        self.assertEqual(overview["current_season"]["season_number"], 13)
+        self.assertTrue(overview["current_season"]["in_progress"])
+        self.assertEqual(overview["latest_battle"]["battle_number"], 643)
 
     def test_planned_special_events_remain_explicitly_disabled(self):
         for page_name in PAGES:
