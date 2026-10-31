@@ -5,7 +5,7 @@
   const esc = (value) => String(value ?? "").replace(/[&<>"']/g, (char) => ({
     "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
   })[char]);
-  const number = (value) => Number.isFinite(Number(value)) ? Number(value).toFixed(1) : "—";
+  const number = (value) => value == null || !Number.isFinite(Number(value)) ? "—" : Number(value).toFixed(1);
   const nameOf = (row) => state.type === "teams" ? row.team_name : row.username;
   const profileUrl = (row) => "./profile.html?type=" + (state.type === "teams" ? "team" : "player")
     + "&id=" + encodeURIComponent(state.type === "teams" ? row.team_id : row.username);
