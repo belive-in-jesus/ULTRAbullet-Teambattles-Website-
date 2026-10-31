@@ -156,9 +156,9 @@
         label: "S" + row.season_number
       })), "battle_count", "Recorded battles per fixed 50-battle season", "battles", 20]
     ];
-    for (const [id, rows, field, label, unit] of chartData) {
+    for (const [id, rows, field, label, unit, maxItems] of chartData) {
       const element = documentObject.getElementById(id);
-      if (element) element.innerHTML = buildBarChart(rows, field, label, unit);
+      if (element) element.innerHTML = buildBarChart(rows, field, label, unit, maxItems);
     }
 
     const teamList = documentObject.getElementById("global-top-teams");
