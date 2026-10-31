@@ -2,7 +2,7 @@
 
 const test = require("node:test");
 const assert = require("node:assert/strict");
-const { compareHistories } = require("../../docs/js/compare-core.js");
+const { compareHistories, comparePerformanceIndexHistories } = require("../../docs/js/compare-core.js");
 
 test("comparison treats missing ranks as unknown, never as rank zero", () => {
   const a = [
@@ -60,4 +60,30 @@ test("comparison excludes missing scores from score wins and totals", () => {
   assert.equal(result.draws, 0);
   assert.equal(result.pointsA, 0);
   assert.equal(result.pointsB, 20);
+});
+
+
+test("seasonal PI comparison aligns fixed seasons and preserves missing checkpoints", () => {
+  const a = [
+    [50, 80, 12, 80, 12, 4],
+    [100, 85, 25, 90, 13, 2]
+  ];
+  const b = [
+    [50, 77, 10, 70, 10, 6],
+    [150, 88, 35, 95, 10, 1]
+  ];
+
+  const rows = comparePerformanceIndexHistories(a, b);
+  assert.deepEqual(rows.map(row => row.season), [1, 2, 3]);
+  assert.equal(rows[0].a.careerPI, 80);
+  assert.equal(rows[0].b.seasonPI, 70);
+  assert.equal(rows[1].a.careerRank, 2);
+  assert.equal(rows[1].b, null);
+  assert.equal(rows[2].a, null);
+  assert.equal(rows[2].b.careerRank, 1);
+});
+
+test("seasonal PI comparison accepts absent or invalid checkpoint data", () => {
+  assert.deepEqual(comparePerformanceIndexHistories(null, []), []);
+  assert.deepEqual(comparePerformanceIndexHistories([[0, 90]], []), []);
 });
