@@ -15,6 +15,142 @@ SPEC.loader.exec_module(aggregate)
 
 
 class AggregatePeriodTests(unittest.TestCase):
+    def test_performance_index_uses_normalized_placements_and_separate_rank(self):
+        records = [{
+            "id": f"battle-{index}",
+            "name": f"{index}th ULTRAbullet Team Battle",
+            "startsAt": index * 1000,
+            "rank": 1,
+            "nbPlayers": 10,
+            "score": 100 - index,
+        } for index in range(1, 11)]
+
+        stats = aggregate.compute_stats(records)
+        self.assertEqual(stats["performance_index"], 88.0)
+        self.assertTrue(stats["performance_index_eligible"])
+        self.assertEqual(stats["performance_index_battles"], 10)
+        self.assertEqual(stats["performance_index_components"], {
+            "average_performance": 100.0,
+            "consistency": 100.0,
+            "recent_performance": 100.0,
+            "participation": 20.0,
+        })
+
+        rows = [
+            {"username": "Eligible", **stats},
+            {"username": "Provisional", "performance_index": 99.0,
+             "performance_index_eligible": False, "performance_index_battles": 4},
+        ]
+        aggregate.assign_performance_index_ranks(rows)
+        self.assertEqual(rows[0]["performance_index_rank"], 1)
+        self.assertIsNone(rows[1]["performance_index_rank"])
+
+    def test_performance_index_uses_player_and_team_field_sizes(self):
+        player = aggregate.performance_index_stats([{
+            "startsAt": 1000, "rank": 2, "nbPlayers": 12, "score": 10,
+        }])
+        team = aggregate.performance_index_stats([{
+            "startsAt": 1000, "rank": 2, "nbTeams": 4, "score": 10,
+        }])
+
+        self.assertEqual(player["performance_index_components"]["average_performance"], 90.9)
+        self.assertEqual(team["performance_index_components"]["average_performance"], 66.7)
+        self.assertEqual(player["performance_index_battles"], 1)
+        self.assertEqual(team["performance_index_battles"], 1)
+
+    def test_performance_index_is_provisional_below_ten_ranked_battles(self):
+        records = [{
+            "id": f"battle-{index}",
+            "startsAt": index * 1000,
+            "rank": 2,
+            "nbTeams": 5,
+            "score": 10,
+        } for index in range(9)]
+
+        stats = aggregate.compute_stats(records)
+        self.assertFalse(stats["performance_index_eligible"])
+        self.assertEqual(stats["performance_index_battles"], 9)
+        self.assertIsNotNone(stats["performance_index"])
+        self.assertEqual(stats["performance_index_components"]["average_performance"], 75.0)
+
+    def test_performance_index_history_tracks_cumulative_and_season_only_checkpoints(self):
+        battles = []
+        records = []
+        for number in list(range(1, 12)) + [51]:
+            suffix = "st" if number % 10 == 1 and number % 100 != 11 else (
+                "nd" if number % 10 == 2 and number % 100 != 12 else (
+                    "rd" if number % 10 == 3 and number % 100 != 13 else "th"
+                )
+            )
+            battle_id = f"battle-{number}"
+            battles.append({
+                "id": battle_id,
+                "name": f"{number}{suffix} ULTRAbullet Team Battle",
+                "battle_number": number,
+            })
+            records.append({
+                "id": battle_id,
+                "name": f"{number}{suffix} ULTRAbullet Team Battle",
+                "startsAt": number * 1000,
+                "rank": 1 if number <= 10 else 2,
+                "nbPlayers": 10,
+                "score": 100,
+            })
+
+        history = aggregate.build_performance_index_history({"Alice": records}, battles)
+        checkpoints = history["alice"]
+        self.assertEqual([row[0] for row in checkpoints], [11, 51])
+        self.assertEqual(checkpoints[0][2], 11)
+        self.assertEqual(checkpoints[0][4], 11)
+        self.assertEqual(checkpoints[1][2], 12)
+        self.assertEqual(checkpoints[1][4], 1)
+        self.assertIsNotNone(checkpoints[0][1])
+        self.assertIsNotNone(checkpoints[1][3])
+        self.assertEqual(checkpoints[0][5], 1)
+        self.assertEqual(checkpoints[1][5], 1)
+
+    def test_worker_errors_abort_before_existing_data_is_modified(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            artifacts = root / "artifacts"
+            output = root / "docs" / "data"
+            artifacts.mkdir()
+            output.mkdir(parents=True)
+            sentinel = output / "leaderboard_players.json"
+            sentinel.write_text('[{"username":"Existing"}]', encoding="utf-8")
+            (artifacts / "partial_0.json").write_text(json.dumps({
+                "processed": 1,
+                "tournament_records": [{"id": "battle-1", "name": "1st ULTRAbullet Team Battle"}],
+                "player_points": {},
+                "player_records": {},
+                "team_points": {},
+                "team_names": {},
+                "team_records": {},
+                "team_member_records": {},
+                "errors": [{
+                    "id": "battle-1",
+                    "name": "1st ULTRAbullet Team Battle",
+                    "stage": "results",
+                    "error": "HTTP 503"
+                }]
+            }), encoding="utf-8")
+
+            old_cwd = os.getcwd()
+            try:
+                os.chdir(root)
+                with (
+                    patch.object(aggregate, "PARTIALS_DIR", "artifacts"),
+                    patch.object(aggregate, "OUTPUT_DIR", "docs/data"),
+                ):
+                    self.assertEqual(aggregate.main(), 1)
+            finally:
+                os.chdir(old_cwd)
+
+            self.assertEqual(sentinel.read_text(encoding="utf-8"), '[{"username":"Existing"}]')
+            errors = json.loads((root / "errors.json").read_text(encoding="utf-8"))
+            self.assertEqual(len(errors), 1)
+            self.assertEqual(errors[0]["error"], "HTTP 503")
+
     def test_only_regular_numbered_battles_are_counted_and_seasons_use_official_numbers(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
@@ -159,6 +295,17 @@ class AggregatePeriodTests(unittest.TestCase):
             self.assertEqual(alice_rank_index["alice"]["rank_history"], [[250, 1], [300, 1], [301, 1]])
             self.assertEqual(bob_rank_index["bob"]["rank_history"], [[301, 2]])
             self.assertEqual(team_rank_index["club-id"]["rank_history"], [[250, 1], [300, 1], [301, 1]])
+            self.assertEqual(
+                [item[0] for item in alice_rank_index["alice"]["performance_index_history"]],
+                [250, 300, 301],
+            )
+            self.assertIsNone(alice_rank_index["alice"]["performance_index_history"][0][5])
+            self.assertEqual(alice_rank_index["alice"]["performance_index_history"][-1][5], 1)
+            self.assertEqual(
+                [item[0] for item in team_rank_index["club-id"]["performance_index_history"]],
+                [250, 300, 301],
+            )
+            self.assertEqual(team_rank_index["club-id"]["performance_index_history"][-1][5], 1)
 
             players = json.loads((data_dir / "leaderboard_players.json").read_text(encoding="utf-8"))
             self.assertEqual(players[0]["username"], "alice")
@@ -223,6 +370,12 @@ class AggregatePeriodTests(unittest.TestCase):
             self.assertEqual(overview["current_month"]["battle_count"], 21)
             self.assertEqual(overview["current_month"]["active_players"], 2)
             self.assertEqual(overview["current_month"]["active_teams"], 1)
+            self.assertEqual(overview["performance_index"]["eligible_counts"]["players"], 1)
+            self.assertEqual(overview["performance_index"]["eligible_counts"]["teams"], 1)
+            self.assertEqual(overview["performance_index"]["players"][0]["id"], "alice")
+            self.assertEqual(overview["performance_index"]["players"][0]["rank"], 1)
+            self.assertEqual(overview["performance_index"]["teams"][0]["id"], "club-id")
+            self.assertEqual(overview["performance_index"]["teams"][0]["rank"], 1)
             self.assertEqual([item["key"] for item in timeline["months"]], ["2026-01", "2026-02"])
             self.assertEqual(timeline["months"][0]["new_players"], 1)
             self.assertEqual(timeline["months"][1]["new_players"], 1)

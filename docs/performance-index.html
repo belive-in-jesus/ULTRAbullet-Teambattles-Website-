@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#070b12">
+  <meta name="description" content="Compare player and team performance using normalized results from official ULTRAbullet Team Battles.">
+  <title>Performance Index — UltraBullet Team Battles</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="css/design-system.css" rel="stylesheet">
+  <link href="css/design-refresh.css" rel="stylesheet">
+  <link href="css/v2-visual-system.css" rel="stylesheet">
+  <link href="css/performance-index.css" rel="stylesheet">
+  <link href="css/navigation-hubs.css" rel="stylesheet">
+</head>
+<body>
+  <main class="shell pi-shell">
+    <nav class="masthead" aria-label="Main navigation">
+      <a class="brand" href="./index.html" aria-label="UltraBullet Team Battles home">
+        <span class="brand-emblem"><img class="brand-logo" src="https://i.imgur.com/Zo7BRdZ.gif" alt="UltraBullet Team Battles logo" width="84" height="84" loading="eager" decoding="async" onerror="this.hidden=true"></span>
+        <span class="brand-copy"><strong>ULTRAbullet</strong><small>TEAM BATTLES</small></span>
+      </a>
+      <div class="mast-actions primary-nav">
+        <a class="nav-link" href="./index.html">Overview</a>
+        <a class="nav-link active" href="./rankings.html" aria-current="page">Rankings</a>
+        <a class="nav-link" href="./analytics.html">Analytics</a>
+        <a class="nav-link" href="./records.html">Records & History</a>
+        <a class="nav-link" href="./information.html">Guide</a>
+      </div>
+    </nav>
+
+    <section class="pi-hero">
+      <span class="eyebrow">V2 STATISTICS · PERFORMANCE INDEX</span>
+      <h1>Performance beyond <em>total points.</em></h1>
+      <p>The Performance Index (PI) compares results by normalizing each finish against the number of players or teams in that battle. It is a separate ranking and does not replace the established cumulative-points standings.</p>
+      <div class="pi-hero-stats">
+        <div><strong>0–100</strong><span>Index scale</span></div>
+        <div><strong>10</strong><span>Ranked battles to qualify</span></div>
+        <div><strong>4</strong><span>Weighted components</span></div>
+      </div>
+    </section>
+
+    <section class="pi-panel" aria-labelledby="pi-ranking-title">
+      <div class="pi-panel-heading">
+        <div><span class="eyebrow">ELIGIBLE COMPETITORS</span><h2 id="pi-ranking-title">Performance ranking</h2></div>
+        <span id="pi-count" class="pi-count">Loading…</span>
+      </div>
+      <div class="pi-controls">
+        <div class="pi-switch" role="group" aria-label="Competitor type">
+          <button type="button" class="active" data-type="players" aria-pressed="true">Players</button>
+          <button type="button" data-type="teams" aria-pressed="false">Teams</button>
+        </div>
+        <label class="pi-search-label" for="pi-search">Search</label>
+        <input id="pi-search" type="search" placeholder="Find a player or team…" autocomplete="off">
+      </div>
+      <div class="pi-table-wrap">
+        <table class="pi-table">
+          <thead><tr><th>PI rank</th><th>Competitor</th><th>Index</th><th>Average</th><th>Consistency</th><th>Recent</th><th>Participation</th><th>Ranked battles</th></tr></thead>
+          <tbody id="pi-rows"><tr><td colspan="8" class="pi-message">Loading the published Performance Index…</td></tr></tbody>
+        </table>
+      </div>
+      <div class="pi-pagination" aria-label="Performance Index pages">
+        <span id="pi-page-summary" aria-live="polite">—</span>
+        <div><button type="button" id="pi-prev" disabled>← Previous</button><span id="pi-page">Page 1</span><button type="button" id="pi-next" disabled>Next →</button></div>
+      </div>
+      <p class="pi-footnote">Only competitors with at least ten ranked battle results receive an official PI rank. Others remain provisional and are excluded from this table.</p>
+    </section>
+
+    <section class="pi-method">
+      <div><span class="eyebrow">HOW IT IS CALCULATED</span><h2>A transparent, weighted score.</h2><p>Each battle finish is converted to a 0–100 performance value: first place receives 100, last place receives 0, with the other positions spaced proportionally between them.</p></div>
+      <div class="pi-weights">
+        <div><span>Average performance</span><strong>40%</strong></div>
+        <div><span>Consistency</span><strong>25%</strong></div>
+        <div><span>Recent performance · last 10</span><strong>20%</strong></div>
+        <div><span>Participation · capped at 50 battles</span><strong>15%</strong></div>
+      </div>
+      <p class="pi-method-note">Consistency rewards a stable normalized performance: it starts at 100 and decreases with the standard deviation of the competitor's results. Participation reaches its maximum contribution at 50 recorded battles. PI is descriptive, not an official Lichess rating.</p>
+    </section>
+
+    <footer class="pi-footer"><span>ULTRAbullet Team Battles · Performance Index methodology</span><a href="./rankings.html">Back to rankings ↑</a></footer>
+  </main>
+  <script src="js/performance-index.js" defer></script>
+</body>
+</html>

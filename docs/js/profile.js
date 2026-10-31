@@ -167,6 +167,72 @@ function renderMemberStatistics(profile){
   }).join("");
 }
 
+function buildPerformanceIndexHistoryMarkup(checkpoints){
+  const rows=(Array.isArray(checkpoints)?checkpoints:[])
+    .map(item=>({
+      battle:Number(item?.[0]),
+      cumulative:Number(item?.[1]),
+      cumulativeBattles:Number(item?.[2])||0,
+      seasonal:item?.[3]==null?null:Number(item[3]),
+      seasonalBattles:Number(item?.[4])||0,
+      rank:item?.[5]==null?null:Number(item[5])
+    }))
+    .filter(item=>Number.isFinite(item.battle)&&item.battle>0&&Number.isFinite(item.cumulative))
+    .sort((a,b)=>a.battle-b.battle);
+  if(!rows.length)return '<div class="pi-history-empty">Historical PI checkpoints will be available after the next successful full statistics refresh.</div>';
+
+  const width=960,height=250,left=58,right=24,top=22,bottom=44;
+  const plotWidth=width-left-right,plotHeight=height-top-bottom;
+  const minBattle=rows[0].battle,maxBattle=rows[rows.length-1].battle;
+  const xFor=battle=>left+(maxBattle===minBattle?plotWidth/2:(battle-minBattle)/(maxBattle-minBattle)*plotWidth);
+  const yFor=value=>top+(100-Math.max(0,Math.min(100,value)))/100*plotHeight;
+  const grid=[0,50,100].map(value=>{
+    const y=yFor(value);
+    return '<g><line x1="'+left+'" y1="'+y.toFixed(1)+'" x2="'+(width-right)+'" y2="'+y.toFixed(1)+'" stroke="rgba(151,178,203,.16)" stroke-dasharray="3 7"/><text x="'+(left-12)+'" y="'+(y+4).toFixed(1)+'" text-anchor="end" class="analytics-axis-label">'+value+'</text></g>';
+  }).join("");
+  const points=rows.map(item=>({...item,season:Math.floor((item.battle-1)/50)+1,x:xFor(item.battle),y:yFor(item.cumulative)}));
+  const path=points.map((point,index)=>{
+    const previous=points[index-1];
+    return (!previous||point.season!==previous.season+1?"M":"L")+point.x.toFixed(1)+" "+point.y.toFixed(1);
+  }).join(" ");
+  const line='<path d="'+path+'" fill="none" stroke="#70e2e8" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>';
+  const circles=points.map(point=>'<circle cx="'+point.x.toFixed(1)+'" cy="'+point.y.toFixed(1)+'" r="5" fill="#b19cff" stroke="#101c2d" stroke-width="2"><title>After Battle '+point.battle+' · Cumulative PI '+point.cumulative.toFixed(1)+' · Season PI '+(point.seasonal==null?"not eligible":point.seasonal.toFixed(1))+' · Career PI rank '+(point.rank==null?"provisional":"#"+point.rank)+'</title></circle>').join("");
+  const labels=points.map(point=>'<text x="'+point.x.toFixed(1)+'" y="'+(height-14)+'" text-anchor="middle" class="analytics-axis-label">S'+point.season+'</text>').join("");
+  const svg='<svg class="pi-history-svg" viewBox="0 0 '+width+' '+height+'" role="img" aria-label="Historical cumulative Performance Index from zero to one hundred">'+grid+line+circles+labels+'</svg>';
+  const table=rows.slice().reverse().map(row=>{
+    const season=Math.floor((row.battle-1)/50)+1;
+    const seasonValue=row.seasonal==null?"—":row.seasonal.toFixed(1);
+    const eligibility=row.seasonalBattles>=10?"Official":"Provisional";
+    return '<tr><td>Season '+season+'</td><td class="number-cell">#'+row.battle+'</td><td class="number-cell">'+row.cumulative.toFixed(1)+'</td><td class="number-cell">'+(row.rank==null?"—":"#"+row.rank)+'</td><td class="number-cell">'+seasonValue+'</td><td class="number-cell">'+row.seasonalBattles+'</td><td>'+eligibility+'</td></tr>';
+  }).join("");
+  return '<div class="pi-history-block"><div class="pi-history-heading"><div><strong>Historical PI development</strong><span>Cumulative index and official rank at each season checkpoint</span></div><small>'+rows.length+' checkpoints</small></div><div class="pi-history-chart">'+svg+'</div><div class="pi-history-table-wrap"><table class="pi-history-table"><thead><tr><th>Season</th><th class="number-cell">Checkpoint</th><th class="number-cell">Career PI</th><th class="number-cell">Career PI rank</th><th class="number-cell">Season PI</th><th class="number-cell">Season battles</th><th>Status</th></tr></thead><tbody>'+table+'</tbody></table></div><p class="pi-history-note">Career PI uses all ranked results up to the checkpoint. Season PI uses only that season’s results and is official from 10 ranked battles. Seasons without a recorded result are omitted.</p></div>';
+}
+
+function renderPerformanceIndex(){
+  const target=$("profile-pi-card");
+  const row=state.entry||{};
+  if(row.performance_index===undefined){
+    target.innerHTML='<div class="pi-profile-empty">Performance Index data will appear after the next successful full statistics refresh.</div>';
+    return;
+  }
+  const value=row.performance_index;
+  const eligible=Boolean(row.performance_index_eligible)&&row.performance_index_rank!=null;
+  const components=row.performance_index_components||{};
+  const componentRows=[
+    ["Average performance",components.average_performance,"40%"],
+    ["Consistency",components.consistency,"25%"],
+    ["Recent performance",components.recent_performance,"20%"],
+    ["Participation",components.participation,"15%"]
+  ];
+  const format=value=>value==null?"—":Number(value).toFixed(1);
+  const componentMarkup=componentRows.map(([label,score,weight])=>
+    '<div class="pi-profile-component"><div><span>'+escapeHtml(label)+'</span><strong>'+format(score)+'</strong></div><div class="pi-profile-track"><i style="width:'+Math.max(0,Math.min(100,Number(score)||0))+'%"></i></div><small>'+weight+' weight</small></div>'
+  ).join("");
+  const status=eligible
+    ?'<span class="pi-profile-status">Official PI rank · #'+escapeHtml(row.performance_index_rank)+'</span>'
+    :'<span class="pi-profile-status provisional">Provisional · '+escapeHtml(row.performance_index_battles||0)+' / 10 ranked battles</span>';
+  target.innerHTML='<div class="pi-profile-main"><div><span class="pi-profile-label">PERFORMANCE INDEX</span><strong class="pi-profile-value">'+format(value)+'</strong><span class="pi-profile-scale">out of 100</span></div><div class="pi-profile-meta">'+status+'<p>Based on '+escapeHtml(row.performance_index_battles||0)+' valid ranked battle results. The PI is independent of cumulative points.</p><a href="./performance-index.html">How the index works ↗</a></div></div><div class="pi-profile-components">'+componentMarkup+'</div>'+buildPerformanceIndexHistoryMarkup(row.performance_index_history);
+}
 function renderStats(){
   const m=metrics(filteredHistoryForStats());
   $("stat-points").textContent=number(m.points);
@@ -311,7 +377,7 @@ function renderPeriodOptions(){
   if(select.options.length){state.specific=select.options[0].value;select.value=state.specific;$("specific-period-wrap").classList.remove("hidden");}
   else{$("specific-period-wrap").classList.add("hidden");state.specific="";}
 }
-function renderAll(){renderStats();renderChart();renderAnalytics();renderHistory();}
+function renderAll(){renderStats();renderPerformanceIndex();renderChart();renderAnalytics();renderHistory();}
 async function init(){
   if(!requestedId){$("profile-name").textContent="Profile not found";$("profile-description").textContent="This profile URL is missing its competitor identifier.";return;}
   $("profile-kind").textContent=type==="team"?"TEAM PROFILE":"PLAYER PROFILE";
@@ -328,6 +394,7 @@ async function init(){
   $("profile-rank-caption").textContent=type==="team"?"All-time team ranking":"All-time player ranking";
   $("profile-last-active").textContent=formatDate(entry.last_played);
   $("lichess-profile-link").href=type==="team"?"https://lichess.org/team/"+encodeURIComponent(canonicalId):"https://lichess.org/@/"+encodeURIComponent(canonicalId);
+  $("compare-profile-link").href="./compare.html?type="+(type==="team"?"team":"player")+"&a="+encodeURIComponent(canonicalId);
   $("share-profile").addEventListener("click",async()=>{
     try{await navigator.clipboard.writeText(window.location.href);$("profile-feedback").textContent="Profile link copied to clipboard.";}
     catch(error){$("profile-feedback").textContent="Copy is unavailable in this browser. Copy the page address from the address bar.";}

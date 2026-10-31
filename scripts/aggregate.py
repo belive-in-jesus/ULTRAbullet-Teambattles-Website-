@@ -6,6 +6,7 @@ import json
 import os
 import re
 import shutil
+import sys
 from collections import defaultdict
 from datetime import datetime, timezone
 
@@ -53,6 +54,150 @@ def longest_podium_streak(records: list) -> int:
     return longest
 
 
+def performance_index_stats(records: list) -> dict:
+    """Calculate a transparent 0-100 index from normalized battle placements.
+
+    The same formula works for players and teams because each finish is
+    normalized against that battle's participant/team count. Scores are
+    provisional until ten ranked results are available.
+    """
+    ordered = sorted(records, key=lambda row: int(row.get("startsAt") or 0))
+    performances = []
+    for row in ordered:
+        try:
+            rank = int(row.get("rank"))
+            field_size = int(row.get("nbPlayers") if row.get("nbPlayers") is not None else row.get("nbTeams"))
+        except (TypeError, ValueError):
+            continue
+        if field_size < 2 or rank < 1 or rank > field_size:
+            continue
+        performances.append(((field_size - rank) / (field_size - 1)) * 100)
+
+    if not performances:
+        return {
+            "performance_index": None,
+            "performance_index_eligible": False,
+            "performance_index_battles": 0,
+            "performance_index_components": None,
+        }
+
+    average = sum(performances) / len(performances)
+    recent = performances[-10:]
+    recent_average = sum(recent) / len(recent)
+    variance = sum((value - average) ** 2 for value in performances) / len(performances)
+    consistency = max(0.0, 100.0 - (variance ** 0.5) * 2)
+    participation = min(100.0, len(performances) / 50 * 100)
+    index = average * 0.40 + consistency * 0.25 + recent_average * 0.20 + participation * 0.15
+    return {
+        "performance_index": round(index, 1),
+        "performance_index_eligible": len(performances) >= 10,
+        "performance_index_battles": len(performances),
+        "performance_index_components": {
+            "average_performance": round(average, 1),
+            "consistency": round(consistency, 1),
+            "recent_performance": round(recent_average, 1),
+            "participation": round(participation, 1),
+        },
+    }
+
+
+def assign_performance_index_ranks(rows: list) -> None:
+    """Add a separate PI rank without changing the all-time points ranking."""
+    eligible = [
+        row for row in rows
+        if row.get("performance_index_eligible") and row.get("performance_index") is not None
+    ]
+    eligible.sort(key=lambda row: (
+        -float(row["performance_index"]),
+        -int(row.get("performance_index_battles") or 0),
+        str(row.get("username") or row.get("team_name") or "").lower(),
+    ))
+    for row in rows:
+        row["performance_index_rank"] = None
+    for index, row in enumerate(eligible, 1):
+        row["performance_index_rank"] = index
+
+
+
+def build_performance_index_history(records_by_key: dict, numbered_battles: list, names_by_key: dict | None = None) -> dict:
+    """Build cumulative and season-only PI checkpoints and historical PI ranks.
+
+    A checkpoint is recorded at each season boundary for competitors with any
+    result up to that point. Each entry is [last_battle_number, cumulative_PI,
+    cumulative_ranked_battles, season_PI, season_ranked_battles, cumulative_PI_rank].
+    Official historical ranks require at least ten cumulative ranked results.
+    """
+    battle_numbers = {}
+    last_in_season = {}
+    for battle in numbered_battles:
+        battle_id = str(battle.get("id") or "").strip()
+        number = int(battle.get("battle_number") or parse_battle_number(battle.get("name")) or 0)
+        if not battle_id or number < 1:
+            continue
+        battle_numbers[battle_id] = number
+        season = season_number_for_battle(number)
+        last_in_season[season] = max(number, last_in_season.get(season, 0))
+
+    history = {}
+    entries_by_checkpoint = defaultdict(list)
+    for competitor_id, records in records_by_key.items():
+        seen = {}
+        for row in records:
+            number = battle_numbers.get(str(row.get("id") or "").strip())
+            if not number:
+                continue
+            current = seen.get(number)
+            try:
+                score = float(row.get("score", 0) or 0)
+            except (TypeError, ValueError):
+                score = 0.0
+            if current is None or score > float(current.get("score", 0) or 0):
+                seen[number] = row
+        numbered_records = list(seen.items())
+        if not numbered_records:
+            continue
+
+        key = str(competitor_id).lower()
+        checkpoints = []
+        for season, checkpoint in sorted(last_in_season.items()):
+            cumulative_rows = [row for number, row in numbered_records if number <= checkpoint]
+            if not cumulative_rows:
+                continue
+            season_rows = [row for number, row in numbered_records
+                           if (season - 1) * SEASON_SIZE < number <= season * SEASON_SIZE]
+            cumulative_stats = performance_index_stats(cumulative_rows)
+            season_stats = performance_index_stats(season_rows)
+            if cumulative_stats.get("performance_index") is None:
+                continue
+            entry = [
+                checkpoint,
+                cumulative_stats["performance_index"],
+                cumulative_stats["performance_index_battles"],
+                season_stats.get("performance_index"),
+                season_stats.get("performance_index_battles", 0),
+                None,
+            ]
+            checkpoints.append(entry)
+            entries_by_checkpoint[checkpoint].append((key, entry))
+        if checkpoints:
+            history[key] = checkpoints
+
+    display_names = {str(key).lower(): str(value) for key, value in (names_by_key or {}).items()}
+    for checkpoint_entries in entries_by_checkpoint.values():
+        eligible = [
+            (key, entry) for key, entry in checkpoint_entries
+            if int(entry[2] or 0) >= 10 and entry[1] is not None
+        ]
+        eligible.sort(key=lambda item: (
+            -float(item[1][1]),
+            -int(item[1][2] or 0),
+            display_names.get(item[0], item[0]).lower(),
+        ))
+        for rank, (_key, entry) in enumerate(eligible, 1):
+            entry[5] = rank
+
+    return history
+
 def compute_stats(records: list) -> dict:
     if not records:
         return {}
@@ -69,6 +214,7 @@ def compute_stats(records: list) -> dict:
         "active_since": records[0].get("startsAt"),
         "last_played": records[-1].get("startsAt"),
         "longest_podium_streak": longest_podium_streak(records),
+        **performance_index_stats(records),
     }
     if ranks:
         podiums = sum(rank <= 3 for rank in ranks)
@@ -671,6 +817,32 @@ def build_dashboard_analytics(
             "teams": [compact_leader(row, "teams") for row in teams[:5]],
             "players": [compact_leader(row, "players") for row in players[:5]],
         },
+        "performance_index": {
+            "eligible_counts": {
+                "teams": sum(bool(row.get("performance_index_eligible")) for row in teams),
+                "players": sum(bool(row.get("performance_index_eligible")) for row in players),
+            },
+            "teams": [{
+                "id": row.get("team_id"),
+                "name": row.get("team_name"),
+                "rank": row.get("performance_index_rank"),
+                "score": row.get("performance_index"),
+                "battles": row.get("performance_index_battles"),
+            } for row in sorted(
+                (item for item in teams if item.get("performance_index_eligible")),
+                key=lambda item: int(item.get("performance_index_rank") or 10**9),
+            )[:5]],
+            "players": [{
+                "id": row.get("username"),
+                "name": row.get("username"),
+                "rank": row.get("performance_index_rank"),
+                "score": row.get("performance_index"),
+                "battles": row.get("performance_index_battles"),
+            } for row in sorted(
+                (item for item in players if item.get("performance_index_eligible")),
+                key=lambda item: int(item.get("performance_index_rank") or 10**9),
+            )[:5]],
+        },
         "records": {
             "teams": compact_record_bundles(teams, "teams"),
             "players": compact_record_bundles(players, "players"),
@@ -858,7 +1030,7 @@ def write_battle_reports(
     return len(numbered_battles)
 
 
-def write_profile_lookup_indexes(profiles_dir: str, players: list, teams: list, rank_history: dict | None = None) -> int:
+def write_profile_lookup_indexes(profiles_dir: str, players: list, teams: list, rank_history: dict | None = None, performance_index_history: dict | None = None) -> int:
     """Write small bucketed indexes so direct profile URLs avoid full leaderboard downloads."""
     index_dir = os.path.join(profiles_dir, "index")
     if os.path.isdir(index_dir):
@@ -882,6 +1054,9 @@ def write_profile_lookup_indexes(profiles_dir: str, players: list, teams: list, 
             checkpoints = (rank_history or {}).get(kind, {}).get(lookup_key)
             if checkpoints:
                 entry["rank_history"] = checkpoints
+            pi_checkpoints = (performance_index_history or {}).get(kind, {}).get(lookup_key)
+            if pi_checkpoints:
+                entry["performance_index_history"] = pi_checkpoints
             buckets[bucket][lookup_key] = entry
         for bucket, payload in buckets.items():
             write_json(os.path.join(index_dir, f"{kind}-{bucket}.json"), payload)
@@ -925,6 +1100,19 @@ def main() -> int:
         for team_id, records in data.get("team_member_records", {}).items():
             team_member_records.setdefault(team_id, []).extend(records)
         all_errors.extend(data.get("errors", []))
+
+    # Fail closed before touching published datasets. A worker error means at
+    # least one result endpoint may be missing, so publishing the aggregate
+    # would silently turn an incomplete refresh into the new public baseline.
+    if all_errors:
+        write_json("errors.json", all_errors)
+        print(
+            f"ERROR: refusing to publish incomplete data; "
+            f"{len(all_errors)} worker error(s) were recorded. "
+            "The previous generated datasets remain untouched. See errors.json.",
+            file=sys.stderr,
+        )
+        return 1
 
     # Keep only regular numbered team battles. This defensive filter is applied
     # even if discovery configuration or old worker artifacts contain special events.
@@ -1044,10 +1232,18 @@ def main() -> int:
             "members": summarize_member_records(member_records_by_team.get(team_id, []), "player_id", "player_name"),
         }
 
+    # PI has its own ranking and never alters the established points leaderboard.
+    assign_performance_index_ranks(players)
+    assign_performance_index_ranks(teams)
+
     for shards in profile_shards.values():
         for filename, payload in shards.items():
             write_json(os.path.join(profiles_dir, filename), payload)
 
+    player_pi_history = build_performance_index_history(
+        player_records, numbered_battles, {key: key for key in player_records}
+    )
+    team_pi_history = build_performance_index_history(team_records, numbered_battles, team_names)
     profile_lookup_shards = write_profile_lookup_indexes(
         profiles_dir,
         players,
@@ -1055,6 +1251,10 @@ def main() -> int:
         {
             "players": {str(key).lower(): value for key, value in player_rank_history.items()},
             "teams": {str(key).lower(): value for key, value in team_rank_history.items()},
+        },
+        {
+            "players": player_pi_history,
+            "teams": team_pi_history,
         },
     )
 
@@ -1216,6 +1416,9 @@ def main() -> int:
         "season_count": len(season_index),
         "hall_of_fame_seasons": len(season_hall),
         "dashboard_analytics_schema_version": 1,
+        "performance_index_schema_version": 1,
+        "performance_index_history_schema_version": 1,
+        "performance_index_minimum_battles": 10,
         "month_count": len(month_index),
         "max_battle_number": max_battle_number,
         "excluded_events_count": len(battle_history) - len(regular_battles),

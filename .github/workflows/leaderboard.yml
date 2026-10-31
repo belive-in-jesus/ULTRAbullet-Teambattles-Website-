@@ -120,6 +120,14 @@ jobs:
         env:
           NAME_FILTERS: ${{ inputs.name_filters || vars.NAME_FILTERS || 'ultrabullet' }}
         run: python scripts/aggregate.py
+      - name: Upload failed processing report
+        if: failure() && hashFiles('errors.json') != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: leaderboard-errors
+          path: errors.json
+          if-no-files-found: warn
+          retention-days: 7
       - name: Upload processing report
         uses: actions/upload-artifact@v4
         with:

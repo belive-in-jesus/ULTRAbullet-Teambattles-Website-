@@ -114,6 +114,22 @@
     }).join("");
   }
 
+  function performanceIndexList(rows, kind) {
+    if (!Array.isArray(rows) || !rows.length) {
+      return '<p class="global-analytics-empty">No officially eligible Performance Index results are available yet.</p>';
+    }
+    return rows.slice(0, 5).map(row => {
+      const id = String(row.id || "");
+      const profileUrl = "./profile.html?type=" + kind + "&id=" + encodeURIComponent(id);
+      const title = escapeHtml(row.name || id || "Unknown");
+      return '<a class="global-leader-row global-pi-leader-row" href="' + escapeHtml(profileUrl) + '">' +
+        '<span class="global-leader-rank">#' + escapeHtml(row.rank ?? "—") + '</span>' +
+        '<span class="global-leader-copy"><strong>' + title + '</strong><small>' +
+        number(row.battles) + ' ranked battles · Performance Index</small></span>' +
+        '<strong class="global-leader-points">' + number(row.score) + '<small>/100</small></strong></a>';
+    }).join("");
+  }
+
   function recordCards(overview) {
     const records = [
       ...(overview?.records?.teams || []).map(item => ({ ...item, kind: "team" })),
@@ -171,6 +187,10 @@
     if (playerList) playerList.innerHTML = leaderList(overview.leaders?.players, "player");
     const recordsList = documentObject.getElementById("global-records");
     if (recordsList) recordsList.innerHTML = recordCards(overview);
+    const piTeams = documentObject.getElementById("global-pi-teams");
+    if (piTeams) piTeams.innerHTML = performanceIndexList(overview.performance_index?.teams, "team");
+    const piPlayers = documentObject.getElementById("global-pi-players");
+    if (piPlayers) piPlayers.innerHTML = performanceIndexList(overview.performance_index?.players, "player");
 
     const note = documentObject.getElementById("global-analytics-method");
     if (note) note.textContent = "Active competitors are counted once per UTC month when they have a recorded result. Participants per battle come from Lichess tournament entrant counts. Seasons use fixed blocks of 50 official battle numbers.";
@@ -211,5 +231,5 @@
     }
   }
 
-  return { buildBarChart, leaderList, recordCards, renderDashboardAnalytics, loadDashboardAnalytics, autoLoad };
+  return { buildBarChart, leaderList, performanceIndexList, recordCards, renderDashboardAnalytics, loadDashboardAnalytics, autoLoad };
 });

@@ -375,3 +375,89 @@
   .chart-mode-button { flex: 1; }
   .analytics-range-control, .analytics-range-control .select-input { width: 100%; min-width: 0; }
 }
+
+/* Performance Index profile panel */
+.pi-profile-card {
+  padding: clamp(18px, 3vw, 26px);
+  border: 1px solid rgba(112,226,232,.2);
+  border-radius: 17px;
+  background: radial-gradient(ellipse at 0% 0%,rgba(112,226,232,.075),transparent 55%),linear-gradient(145deg,rgba(15,29,47,.95),rgba(8,17,30,.98));
+}
+.pi-profile-main { display:flex;align-items:center;justify-content:space-between;gap:24px; }
+.pi-profile-label { display:block;color:#79dce5;font:500 .58rem "DM Mono",monospace;letter-spacing:.15em; }
+.pi-profile-value { display:block;margin:7px 0 0;color:#f4f8fc;font:700 clamp(2.6rem,6vw,4.2rem) "Space Grotesk",sans-serif;line-height:1;letter-spacing:-.06em; }
+.pi-profile-scale { display:block;margin-top:5px;color:#8fa5ba;font-size:.68rem; }
+.pi-profile-meta { max-width:440px;text-align:right; }
+.pi-profile-status { display:inline-block;padding:7px 10px;border:1px solid rgba(112,226,232,.25);border-radius:999px;color:#8ce7e9;background:rgba(112,226,232,.07);font:500 .68rem "DM Mono",monospace; }
+.pi-profile-status.provisional {border-color:rgba(239,196,124,.25);color:#efc47c;background:rgba(239,196,124,.06);}
+.pi-profile-meta p {margin:10px 0;color:#91a7bc;font-size:.72rem;line-height:1.6;}
+.pi-profile-meta a {color:#8ce7e9;font-size:.72rem;text-decoration:none;}
+.pi-profile-components {display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-top:24px;padding-top:20px;border-top:1px solid rgba(132,160,190,.14);}
+.pi-profile-component>div:first-child {display:flex;justify-content:space-between;gap:8px;color:#9db1c2;font-size:.66rem;}
+.pi-profile-component strong {color:#eef6fc;font:600 .72rem "DM Mono",monospace;}
+.pi-profile-track {height:5px;margin-top:9px;overflow:hidden;border-radius:99px;background:rgba(145,171,199,.12);}
+.pi-profile-track i {display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#70e2e8,#b19cff);}
+.pi-profile-component small {display:block;margin-top:6px;color:#738ba1;font-size:.56rem;}
+.pi-profile-empty {padding:14px 2px;color:#91a7bc;font-size:.78rem;line-height:1.65;}
+@media(max-width:760px){.pi-profile-components{grid-template-columns:repeat(2,minmax(0,1fr));}.pi-profile-main{align-items:flex-start;flex-direction:column;}.pi-profile-meta{text-align:left;}}
+@media(max-width:420px){.pi-profile-components{grid-template-columns:1fr 1fr;gap:12px 9px;}}
+
+
+/* Historical Performance Index checkpoints and season comparisons. */
+.pi-history-block {
+  margin-top: 22px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(132,160,190,.16);
+}
+.pi-history-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+.pi-history-heading strong,
+.pi-history-heading span { display: block; }
+.pi-history-heading strong { color: #edf5fb; font-size: .86rem; }
+.pi-history-heading span,
+.pi-history-heading small,
+.pi-history-note { color: #8fa5ba; font-size: .62rem; line-height: 1.6; }
+.pi-history-heading span { margin-top: 4px; }
+.pi-history-heading small { white-space: nowrap; }
+.pi-history-chart { width: 100%; overflow: hidden; }
+.pi-history-svg { display: block; width: 100%; height: auto; }
+.pi-history-table-wrap { width: 100%; overflow-x: auto; margin-top: 10px; }
+.pi-history-table { width: 100%; border-collapse: collapse; min-width: 620px; }
+.pi-history-table th,
+.pi-history-table td {
+  padding: 9px 10px;
+  border-bottom: 1px solid rgba(132,160,190,.12);
+  color: #aebfce;
+  font-size: .64rem;
+  text-align: left;
+  white-space: nowrap;
+}
+.pi-history-table th {
+  color: #7f98ad;
+  font-family: "DM Mono", monospace;
+  font-size: .54rem;
+  font-weight: 500;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+.pi-history-table .number-cell { text-align: right; }
+.pi-history-table td:nth-child(3) { color: #eaf7fb; font-weight: 700; }
+.pi-history-note { margin: 10px 0 0; }
+.pi-history-empty {
+  padding: 15px;
+  border: 1px dashed rgba(132,160,190,.2);
+  border-radius: 10px;
+  color: #91a7bc;
+  font-size: .68rem;
+  line-height: 1.6;
+}
+@media (max-width: 680px) {
+  .pi-history-heading { flex-direction: column; }
+  .pi-history-svg { min-width: 620px; }
+  .pi-history-chart { overflow-x: auto; }
+}

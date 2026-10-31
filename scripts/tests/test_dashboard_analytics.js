@@ -47,6 +47,11 @@ const sampleOverview = {
     teams: [{ name: "Leading Team", id: "leading-team", points: 50000, tournaments_played: 639, avg_points: 78.2 }],
     players: [{ name: "Leading Player", id: "LeadingPlayer", points: 25000, tournaments_played: 450, avg_points: 55.5 }]
   },
+  performance_index: {
+    eligible_counts: { teams: 18, players: 42 },
+    teams: [{ id: "leading-team", name: "Leading Team", rank: 1, score: 91.4, battles: 120 }],
+    players: [{ id: "LeadingPlayer", name: "Leading Player", rank: 1, score: 94.2, battles: 80 }]
+  },
   records: {
     teams: [{ key: "most_battles", label: "Most battles played", holder: "Leading Team", holder_id: "leading-team", value: 639, unit: "battles" }],
     players: [{ key: "highest_single_battle", label: "Highest single-battle score", holder: "Leading Player", holder_id: "LeadingPlayer", value: 900, unit: "points" }]
@@ -110,6 +115,19 @@ test("dashboard renderer populates KPIs, charts, rankings and record cards", () 
   assert.match(doc.getElementById("global-top-teams").innerHTML, /Leading Team/);
   assert.match(doc.getElementById("global-top-players").innerHTML, /Leading Player/);
   assert.match(doc.getElementById("global-records").innerHTML, /Most battles played/);
+  assert.match(doc.getElementById("global-pi-teams").innerHTML, /Leading Team/);
+  assert.match(doc.getElementById("global-pi-players").innerHTML, /94.2/);
+});
+
+test("Performance Index leader lists use official ranks and link to profiles", () => {
+  const html = analytics.performanceIndexList([
+    { id: "top-player", name: "Top Player", rank: 1, score: 93.6, battles: 25 }
+  ], "player");
+  assert.match(html, /profile.html\?type=player&amp;id=top-player|profile.html\?type=player&id=top-player/);
+  assert.match(html, /#1/);
+  assert.match(html, /93.6/);
+  assert.match(html, /25 ranked battles/);
+  assert.match(analytics.performanceIndexList([], "team"), /No officially eligible Performance Index results/);
 });
 
 test("leader and record names are escaped before entering dashboard markup", () => {

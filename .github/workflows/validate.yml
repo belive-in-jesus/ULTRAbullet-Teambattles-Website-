@@ -30,5 +30,8 @@ jobs:
           node --check docs/js/achievements.js
           node --check docs/js/contributors.js
           node --check docs/js/dashboard-analytics.js
+          node --check docs/js/performance-index.js
+          node --check docs/js/compare-core.js
+          node --check docs/js/compare.js
       - name: Run analytics regression tests
-        run: node --test scripts/tests/test_analytics.js scripts/tests/test_profile_integration.js scripts/tests/test_dashboard_analytics.js scripts/tests/test_battle_identity.js
+        run: node --test scripts/tests/test_analytics.js scripts/tests/test_profile_integration.js scripts/tests/test_dashboard_analytics.js scripts/tests/test_battle_identity.js scripts/tests/test_compare.js scripts/tests/test_performance_index.js
