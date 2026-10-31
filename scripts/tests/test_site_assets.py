@@ -125,7 +125,7 @@ class WebsiteAssetTests(unittest.TestCase):
                         self.assertTrue(path.is_file(), f"{page_name} references missing asset {reference}")
 
     def test_v2_stylesheets_have_balanced_delimiters(self):
-        for filename in ("v2-visual-system.css", "profile-analytics.css", "dashboard-analytics.css"):
+        for filename in ("v2-visual-system.css", "profile-analytics.css", "dashboard-analytics.css", "battle.css"):
             with self.subTest(stylesheet=filename):
                 source = (DOCS / "css" / filename).read_text(encoding="utf-8")
                 self.assertTrue(
@@ -146,6 +146,11 @@ class WebsiteAssetTests(unittest.TestCase):
         )
         for element_id in (
             "trend-range",
+            "trend-range-wrap",
+            "chart-mode-score",
+            "chart-mode-rank",
+            "chart-legend-primary",
+            "chart-legend-secondary",
             "analytics-recent-average",
             "analytics-recent-podium-rate",
             "analytics-latest-streak",
@@ -156,6 +161,31 @@ class WebsiteAssetTests(unittest.TestCase):
         ):
             self.assertIn(f'id="{element_id}"', source)
 
+
+
+    def test_battle_report_page_has_required_navigation_and_result_controls(self):
+        page = DOCS / "battle.html"
+        parser = PageAssets()
+        source = page.read_text(encoding="utf-8")
+        parser.feed(source)
+        self.assertIn("css/battle.css", parser.stylesheets)
+        self.assertIn("js/battle.js", parser.scripts)
+        self.assertLess(parser.stylesheets.index("css/battle.css"), parser.stylesheets.index("css/navigation-hubs.css"))
+        for element_id in (
+            "battle-title",
+            "battle-status",
+            "battle-summary",
+            "battle-results-panel",
+            "view-teams",
+            "view-players",
+            "result-search",
+            "result-rows",
+            "results-more",
+        ):
+            self.assertIn(f'id="{element_id}"', source)
+        ids = re.findall(r'\bid="([^"]+)"', source)
+        duplicates = sorted({element_id for element_id in ids if ids.count(element_id) > 1})
+        self.assertEqual(duplicates, [], "Battle report page contains duplicate HTML IDs.")
 
     def test_dashboard_analytics_assets_and_dom_hooks_are_present(self):
         page = DOCS / "index.html"
