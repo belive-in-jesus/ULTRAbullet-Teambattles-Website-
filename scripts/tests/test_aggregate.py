@@ -153,9 +153,10 @@ class AggregatePeriodTests(unittest.TestCase):
 
             # Rank history stores compact cumulative all-time checkpoints at
             # the last recorded battle of each fixed-number season.
-            rank_index = json.loads((data_dir / "profiles" / "index" / "players-a.json").read_text(encoding="utf-8"))
-            self.assertEqual(rank_index["alice"]["rank_history"], [[250, 1], [300, 1], [301, 1]])
-            self.assertEqual(rank_index["bob"]["rank_history"], [[301, 2]])
+            alice_rank_index = json.loads((data_dir / "profiles" / "index" / "players-a.json").read_text(encoding="utf-8"))
+            bob_rank_index = json.loads((data_dir / "profiles" / "index" / "players-b.json").read_text(encoding="utf-8"))
+            self.assertEqual(alice_rank_index["alice"]["rank_history"], [[250, 1], [300, 1], [301, 1]])
+            self.assertEqual(bob_rank_index["bob"]["rank_history"], [[301, 2]])
 
             players = json.loads((data_dir / "leaderboard_players.json").read_text(encoding="utf-8"))
             self.assertEqual(players[0]["username"], "alice")
