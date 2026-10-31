@@ -9,8 +9,8 @@ A standalone website for the recurring UltraBullet team battles organised by **N
 - Combined team and individual points across matching finished UltraBullet tournaments
 - Searchable team/player standings with all-time, monthly and 50-battle seasonal rankings, sort controls, pagination and CSV export
 - Homepage dashboard with current-season progress, latest indexed battle, global monthly activity charts, active player/team trends, seasonal comparisons, all-time top-five rankings and career-record highlights
-- Head-to-head team/player comparisons with six performance metrics
-- Performance Index leaderboards, historical profile checkpoints and season-only PI comparisons
+- Head-to-head team/player comparisons with shared-battle results, placement advantages and season-by-season PI history
+- Performance Index leaderboards with historical profile checkpoints and season-only PI comparisons
 - Hall of Fame with season champions, podiums and automatically updated career records
 - Global contributor leaderboard ranking players by listed career contribution points, battle appearances, teams represented and average contribution
 - Dedicated shareable team and player profiles with score-trend charts, finish-distribution donuts, monthly point charts, 52-week activity heatmaps, season-by-season comparisons, period filters, paginated battle history, career achievement badges and historical team-contributor statistics
@@ -29,7 +29,7 @@ A standalone website for the recurring UltraBullet team battles organised by **N
 - `scripts/aggregate.py` — combines scores, calculates career and period statistics, and generates profile shards, the Hall of Fame, the global contributor leaderboard and compact dashboard analytics datasets
 - `.github/workflows/leaderboard.yml` — daily and manual update workflow
 - `.github/workflows/validate.yml` — pull-request checks and aggregation tests
-- `scripts/tests/` — Python aggregation and dashboard-data tests plus Node.js regression tests for profile and dashboard analytics, chart rendering, DOM hooks and browser script syntax
+- `scripts/tests/` — Python aggregation and dashboard-data tests plus Node.js regression tests for profile, dashboard, comparison and Performance Index behavior, chart rendering, DOM hooks and browser script syntax
 
 ## Publish the website
 
