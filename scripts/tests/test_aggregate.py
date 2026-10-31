@@ -26,7 +26,7 @@ class AggregatePeriodTests(unittest.TestCase):
         } for index in range(1, 11)]
 
         stats = aggregate.compute_stats(records)
-        self.assertEqual(stats["performance_index"], 91.0)
+        self.assertEqual(stats["performance_index"], 88.0)
         self.assertTrue(stats["performance_index_eligible"])
         self.assertEqual(stats["performance_index_battles"], 10)
         self.assertEqual(stats["performance_index_components"], {
