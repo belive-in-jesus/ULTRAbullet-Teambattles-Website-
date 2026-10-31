@@ -135,7 +135,7 @@ class WebsiteAssetTests(unittest.TestCase):
         for page_name in PAGES:
             with self.subTest(page=page_name):
                 source = (DOCS / page_name).read_text(encoding="utf-8")
-                nav_match = re.search(r"<nav\\b[\\s\\S]*?</nav>", source)
+                nav_match = re.search(r"<nav\b[\s\S]*?</nav>", source)
                 self.assertIsNotNone(nav_match, "Every public page must have the shared primary navigation.")
                 nav = nav_match.group(0)
                 for href in expected_links:
