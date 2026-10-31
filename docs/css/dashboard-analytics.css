@@ -35,7 +35,7 @@
 .global-analytics-stat:nth-child(2):before { background: linear-gradient(90deg, var(--v2-gold), transparent); }
 .global-analytics-stat:nth-child(3):before { background: linear-gradient(90deg, var(--v2-violet), transparent); }
 .global-analytics-stat:nth-child(4):before { background: linear-gradient(90deg, var(--v2-blue), transparent); }
-.global-analytics-stat span {
+.global-analytics-stat > span {
   display: block;
   color: var(--v2-muted);
   font-size: .72rem;
