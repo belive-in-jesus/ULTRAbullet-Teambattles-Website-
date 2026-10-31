@@ -25,6 +25,28 @@
     const eligible=Boolean(row.performance_index_eligible)&&row.performance_index_rank!=null;
     return '<article class="compare-pi-card"><h3>'+esc(comp.name)+'</h3><strong>'+fmt(row.performance_index)+'</strong><small>Performance Index · '+(eligible?"Rank #"+esc(row.performance_index_rank):"Provisional")+'</small><p>'+esc(row.performance_index_battles||0)+' valid ranked battle results</p></article>';
   }
+  function renderPiHistory(a,b){
+    const rows=window.UBTCompareCore.comparePerformanceIndexHistories(
+      a.entry.performance_index_history,
+      b.entry.performance_index_history
+    );
+    $("pi-history-name-a").textContent=a.name+" · Career PI / rank / season PI";
+    $("pi-history-name-b").textContent=b.name+" · Career PI / rank / season PI";
+    if(!rows.length){
+      $("compare-pi-history").innerHTML='<tr><td colspan="3" class="compare-message">Historical PI data will appear after the next successful full statistics refresh.</td></tr>';
+      return;
+    }
+    const cell=value=>{
+      if(!value)return '<span class="compare-pi-history-missing">—</span>';
+      const rank=value.careerRank==null?"—":"#"+fmt(value.careerRank);
+      const seasonal=value.seasonPI==null?"—":fmt(value.seasonPI);
+      return '<strong>'+fmt(value.careerPI)+'</strong><span>Career rank '+rank+' · Season PI '+seasonal+'</span><small>'+fmt(value.careerBattles)+' career / '+fmt(value.seasonBattles)+' season battles</small>';
+    };
+    $("compare-pi-history").innerHTML=rows.map(row=>
+      '<tr><td>Season '+row.season+'</td><td>'+cell(row.a)+'</td><td>'+cell(row.b)+'</td></tr>'
+    ).join("");
+  }
+
   function render(a,b){
     const summary=window.UBTCompareCore.compareHistories(a.history,b.history);
     const {common,winsA,winsB,draws,pointsA,pointsB,rankWinsA,rankWinsB}=summary;
@@ -39,6 +61,7 @@
       ["Draws",draws]
     ].map(([label,value])=>'<article class="compare-metric"><span>'+esc(label)+'</span><strong>'+fmt(value)+'</strong></article>').join("");
     $("compare-pi").innerHTML=piCard(a)+piCard(b);
+    renderPiHistory(a,b);
     $("compare-name-a").textContent=a.name;$("compare-name-b").textContent=b.name;
     $("shared-count").textContent=common.length+" shared";
     $("shared-battles").innerHTML=common.length?common.slice(0,100).map(row=>{
