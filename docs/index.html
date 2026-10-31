@@ -352,7 +352,6 @@ const num=v=>Number(v||0).toLocaleString();
 const date=v=>{if(!v)return"Not available";const d=new Date(v);return Number.isNaN(d.getTime())?String(v):d.toLocaleString(undefined,{dateStyle:"medium",timeStyle:"short"});};
 const rows=()=>state.periodData?(state.periodData[state.view]||[]):(state.view==="teams"?state.teams:state.players);
 const name=r=>state.view==="teams"?r.team_name:r.username;
-const initialLetter=value=>{const text=String(value??"").trim();const match=text.match(/[\p{L}\p{N}]/u);return (match?match[0]:Array.from(text)[0]||"?").toUpperCase();};
 const entityId=r=>state.view==="teams"?(r.team_id||r.profile_key||""):(r.username||r.profile_key||"");
 const link=r=>{const id=entityId(r);return id?(state.view==="teams"?"https://lichess.org/team/":"https://lichess.org/@/")+encodeURIComponent(id):"";};
 const profileUrl=r=>{const isTeam=Boolean(r&&(r.team_id||(r.team_name&&!r.username)));const id=isTeam?(r.team_id||r.profile_key):(r&& (r.username||r.profile_key));return id?"./profile.html?type="+(isTeam?"team":"player")+"&id="+encodeURIComponent(id):"#";};
@@ -478,7 +477,7 @@ function render(){
   $("page-next").disabled=state.page>=pageCount;
   $("page-size").value=String(state.pageSize);
   pagination.classList.remove("hidden");
-  body.innerHTML=visibleList.map((r,i)=>{const absoluteIndex=start+i;const rank=sort==="rank"?Number(r.rank||absoluteIndex+1):absoluteIndex+1;const n=name(r)||"Unknown";return '<tr tabindex="0" role="button" aria-label="Show details for '+esc(n)+'" data-index="'+i+'"><td class="rank '+(rank<=3?"top":"")+'">'+String(rank).padStart(2,"0")+'</td><td><div class="entity"><span class="mini-mark" aria-hidden="true">'+esc(initialLetter(n))+'</span><span>'+esc(n)+'</span></div></td><td class="optional-col secondary">'+(r.tournaments_played==null?"—":num(r.tournaments_played))+'</td><td class="points">'+num(r.points)+'</td><td class="optional-col points">'+(r.avg_points==null?"—":num(r.avg_points))+'</td></tr>';}).join("");
+  body.innerHTML=visibleList.map((r,i)=>{const absoluteIndex=start+i;const rank=sort==="rank"?Number(r.rank||absoluteIndex+1):absoluteIndex+1;const n=name(r)||"Unknown";return '<tr tabindex="0" role="button" aria-label="Show details for '+esc(n)+'" data-index="'+i+'"><td class="rank '+(rank<=3?"top":"")+'">'+String(rank).padStart(2,"0")+'</td><td><div class="entity"><span class="mini-mark" aria-hidden="true">'+esc(String(n||"?").trim().slice(0,1).toUpperCase())+'</span><span>'+esc(n)+'</span></div></td><td class="optional-col secondary">'+(r.tournaments_played==null?"—":num(r.tournaments_played))+'</td><td class="points">'+num(r.points)+'</td><td class="optional-col points">'+(r.avg_points==null?"—":num(r.avg_points))+'</td></tr>';}).join("");
   Array.from(body.querySelectorAll("tr[data-index]")).forEach(tr=>{const open=()=>details(visibleList[Number(tr.dataset.index)]);tr.addEventListener("click",open);tr.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();open();}});});
 }
 function renderProfileHistory(history){
