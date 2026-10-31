@@ -26,16 +26,8 @@
     return '<article class="compare-pi-card"><h3>'+esc(comp.name)+'</h3><strong>'+fmt(row.performance_index)+'</strong><small>Performance Index · '+(eligible?"Rank #"+esc(row.performance_index_rank):"Provisional")+'</small><p>'+esc(row.performance_index_battles||0)+' valid ranked battle results</p></article>';
   }
   function render(a,b){
-    const mapA=new Map(a.history.filter(x=>x&&x.id).map(x=>[String(x.id),x]));
-    const mapB=new Map(b.history.filter(x=>x&&x.id).map(x=>[String(x.id),x]));
-    const common=[...mapA.keys()].filter(id=>mapB.has(id)).map(id=>({id,a:mapA.get(id),b:mapB.get(id)})).sort((x,y)=>(Number(y.a.startsAt)||0)-(Number(x.a.startsAt)||0));
-    let winsA=0,winsB=0,draws=0,pointsA=0,pointsB=0,rankWinsA=0,rankWinsB=0;
-    common.forEach(row=>{
-      const sa=Number(row.a.score)||0,sb=Number(row.b.score)||0;pointsA+=sa;pointsB+=sb;
-      if(sa>sb)winsA++;else if(sb>sa)winsB++;else draws++;
-      const ra=Number(row.a.rank),rb=Number(row.b.rank);
-      if(Number.isFinite(ra)&&Number.isFinite(rb)){if(ra<rb)rankWinsA++;else if(rb<ra)rankWinsB++;}
-    });
+    const summary=window.UBTCompareCore.compareHistories(a.history,b.history);
+    const {common,winsA,winsB,draws,pointsA,pointsB,rankWinsA,rankWinsB}=summary;
     $("compare-identities").innerHTML=[a,b].map(comp=>{
       const url=state.kind==="team"?"https://lichess.org/team/":"https://lichess.org/@/";
       return '<article class="compare-identity"><strong>'+esc(comp.name)+'</strong><span>'+esc(state.kind==="team"?"Team":"Player")+' · '+esc(comp.id)+'</span><a href="./profile.html?type='+state.kind+'&id='+encodeURIComponent(comp.id)+'">Open statistics profile ↗</a> · <a href="'+url+encodeURIComponent(comp.id)+'" target="_blank" rel="noopener noreferrer">Lichess ↗</a></article>';
@@ -58,7 +50,7 @@
       return '<tr><td><a href="'+link+'" target="_blank" rel="noopener noreferrer">'+esc(battle)+'</a></td><td>'+esc(date)+'</td><td>'+fmt(sa)+' · #'+fmt(row.a.rank)+'</td><td>'+fmt(sb)+' · #'+fmt(row.b.rank)+'</td><td>'+result+'</td></tr>';
     }).join(""):'<tr><td colspan="5" class="compare-message">No shared battle results were found for these two competitors.</td></tr>';
     $("compare-results").classList.remove("hidden");
-    $("compare-message").textContent="Comparison complete · "+common.length+" shared battle(s) found. Score totals across shared battles: "+fmt(pointsA)+" vs "+fmt(pointsB)+". Placement advantages: "+rankWinsA+" vs "+rankWinsB+".";
+    $("compare-message").textContent="Comparison complete · "+common.length+" shared battle(s) found. Score totals: "+fmt(pointsA)+" vs "+fmt(pointsB)+" from "+summary.comparableScoreBattles+" comparable battles. Placement advantages: "+rankWinsA+" vs "+rankWinsB+" from "+summary.comparableRankBattles+" battles with both ranks available.";
   }
   async function compare(){
     $("compare-message").textContent="Loading profiles and matching battle histories…";
