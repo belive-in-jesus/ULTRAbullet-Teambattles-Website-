@@ -15,6 +15,48 @@ SPEC.loader.exec_module(aggregate)
 
 
 class AggregatePeriodTests(unittest.TestCase):
+    def test_worker_errors_abort_before_existing_data_is_modified(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            artifacts = root / "artifacts"
+            output = root / "docs" / "data"
+            artifacts.mkdir()
+            output.mkdir(parents=True)
+            sentinel = output / "leaderboard_players.json"
+            sentinel.write_text('[{"username":"Existing"}]', encoding="utf-8")
+            (artifacts / "partial_0.json").write_text(json.dumps({
+                "processed": 1,
+                "tournament_records": [{"id": "battle-1", "name": "1st ULTRAbullet Team Battle"}],
+                "player_points": {},
+                "player_records": {},
+                "team_points": {},
+                "team_names": {},
+                "team_records": {},
+                "team_member_records": {},
+                "errors": [{
+                    "id": "battle-1",
+                    "name": "1st ULTRAbullet Team Battle",
+                    "stage": "results",
+                    "error": "HTTP 503"
+                }]
+            }), encoding="utf-8")
+
+            old_cwd = os.getcwd()
+            try:
+                os.chdir(root)
+                with (
+                    patch.object(aggregate, "PARTIALS_DIR", "artifacts"),
+                    patch.object(aggregate, "OUTPUT_DIR", "docs/data"),
+                ):
+                    self.assertEqual(aggregate.main(), 1)
+            finally:
+                os.chdir(old_cwd)
+
+            self.assertEqual(sentinel.read_text(encoding="utf-8"), '[{"username":"Existing"}]')
+            errors = json.loads((root / "errors.json").read_text(encoding="utf-8"))
+            self.assertEqual(len(errors), 1)
+            self.assertEqual(errors[0]["error"], "HTTP 503")
+
     def test_only_regular_numbered_battles_are_counted_and_seasons_use_official_numbers(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
