@@ -243,7 +243,7 @@ class WebsiteAssetTests(unittest.TestCase):
         self.assertIn("js/compare-core.js", parser.scripts)
         self.assertIn("js/compare.js", parser.scripts)
         self.assertLess(parser.scripts.index("js/compare-core.js"), parser.scripts.index("js/compare.js"))
-        for element_id in ("compare-form", "compare-a", "compare-b", "compare-results", "compare-pi", "shared-battles"):
+        for element_id in ("compare-form", "compare-a", "compare-b", "compare-results", "compare-pi", "compare-pi-history", "pi-history-name-a", "pi-history-name-b", "shared-battles"):
             self.assertIn(f'id="{element_id}"', source)
         ids = re.findall(r'\bid="([^"]+)"', source)
         duplicates = sorted({element_id for element_id in ids if ids.count(element_id) > 1})
