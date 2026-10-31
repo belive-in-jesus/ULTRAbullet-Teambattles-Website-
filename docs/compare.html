@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#070b12">
+  <meta name="description" content="Compare recorded results, normalized Performance Index scores and shared ULTRAbullet Team Battles.">
+  <title>Head-to-Head Comparison — UltraBullet Team Battles</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="css/design-system.css" rel="stylesheet">
+  <link href="css/design-refresh.css" rel="stylesheet">
+  <link href="css/v2-visual-system.css" rel="stylesheet">
+  <link href="css/compare.css" rel="stylesheet">
+</head>
+<body>
+  <main class="shell compare-shell">
+    <nav class="masthead" aria-label="Main navigation">
+      <a class="brand" href="./index.html"><span class="brand-copy"><strong>ULTRAbullet</strong><small>TEAM BATTLES</small></span></a>
+      <div class="mast-actions primary-nav">
+        <a class="nav-link" href="./index.html">Overview</a>
+        <a class="nav-link" href="./rankings.html">Rankings</a>
+        <a class="nav-link" href="./analytics.html">Analytics</a>
+        <a class="nav-link" href="./records.html">Records & History</a>
+        <a class="nav-link active" href="./compare.html" aria-current="page">Compare</a>
+      </div>
+    </nav>
+    <header class="compare-hero">
+      <span class="eyebrow">HEAD-TO-HEAD · SHARED BATTLE HISTORY</span>
+      <h1>Compare <em>performance.</em></h1>
+      <p>Compare two players or two teams using their published profiles, normalized Performance Index and battles in which both appeared.</p>
+    </header>
+    <section class="compare-form-panel">
+      <div class="compare-kind" role="group" aria-label="Competitor type">
+        <button type="button" class="active" data-kind="player" aria-pressed="true">Players</button>
+        <button type="button" data-kind="team" aria-pressed="false">Teams</button>
+      </div>
+      <form id="compare-form" class="compare-form">
+        <label>First competitor<input id="compare-a" required autocomplete="off" placeholder="Lichess username or team ID"></label>
+        <span class="compare-versus">VS</span>
+        <label>Second competitor<input id="compare-b" required autocomplete="off" placeholder="Lichess username or team ID"></label>
+        <button type="submit" class="compare-submit">Compare results</button>
+      </form>
+      <p class="compare-hint">Enter the exact Lichess username or team ID. Player and team comparisons are kept separate.</p>
+      <p id="compare-message" class="compare-message" role="status" aria-live="polite">Enter two competitors to begin.</p>
+    </section>
+    <section id="compare-results" class="compare-results hidden" aria-live="polite">
+      <div class="compare-identities" id="compare-identities"></div>
+      <div class="compare-summary-grid" id="compare-summary"></div>
+      <section class="compare-panel">
+        <div class="compare-panel-heading"><div><span class="eyebrow">NORMALIZED PERFORMANCE</span><h2>Performance Index</h2></div><a href="./performance-index.html">Methodology ↗</a></div>
+        <div class="compare-pi-grid" id="compare-pi"></div>
+      </section>
+      <section class="compare-panel">
+        <div class="compare-panel-heading"><div><span class="eyebrow">DIRECT RECORD</span><h2>Shared battles</h2></div><span id="shared-count" class="compare-count">—</span></div>
+        <div class="compare-table-wrap"><table class="compare-table"><thead><tr><th>Battle</th><th>Date</th><th id="compare-name-a">Competitor A</th><th id="compare-name-b">Competitor B</th><th>Result</th></tr></thead><tbody id="shared-battles"></tbody></table></div>
+        <p class="compare-hint">A direct win means the competitor recorded the higher score in the same battle. Equal scores count as a draw.</p>
+      </section>
+    </section>
+    <footer class="compare-footer"><span>UltraBullet Team Battles · Head-to-head comparison</span><a href="./rankings.html">Back to rankings ↑</a></footer>
+  </main>
+  <script src="js/compare.js" defer></script>
+</body>
+</html>
