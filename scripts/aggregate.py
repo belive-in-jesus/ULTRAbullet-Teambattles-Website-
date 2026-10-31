@@ -798,6 +798,32 @@ def build_dashboard_analytics(
             "teams": [compact_leader(row, "teams") for row in teams[:5]],
             "players": [compact_leader(row, "players") for row in players[:5]],
         },
+        "performance_index": {
+            "eligible_counts": {
+                "teams": sum(bool(row.get("performance_index_eligible")) for row in teams),
+                "players": sum(bool(row.get("performance_index_eligible")) for row in players),
+            },
+            "teams": [{
+                "id": row.get("team_id"),
+                "name": row.get("team_name"),
+                "rank": row.get("performance_index_rank"),
+                "score": row.get("performance_index"),
+                "battles": row.get("performance_index_battles"),
+            } for row in sorted(
+                (item for item in teams if item.get("performance_index_eligible")),
+                key=lambda item: int(item.get("performance_index_rank") or 10**9),
+            )[:5]],
+            "players": [{
+                "id": row.get("username"),
+                "name": row.get("username"),
+                "rank": row.get("performance_index_rank"),
+                "score": row.get("performance_index"),
+                "battles": row.get("performance_index_battles"),
+            } for row in sorted(
+                (item for item in players if item.get("performance_index_eligible")),
+                key=lambda item: int(item.get("performance_index_rank") or 10**9),
+            )[:5]],
+        },
         "records": {
             "teams": compact_record_bundles(teams, "teams"),
             "players": compact_record_bundles(players, "players"),
@@ -1369,7 +1395,7 @@ def main() -> int:
         "season_count": len(season_index),
         "hall_of_fame_seasons": len(season_hall),
         "dashboard_analytics_schema_version": 1,
-        "performance_index_schema_version": 1,
+        "performance_index_schema_version": 1,\n        "performance_index_history_schema_version": 1,
         "performance_index_minimum_battles": 10,
         "month_count": len(month_index),
         "max_battle_number": max_battle_number,
