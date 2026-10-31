@@ -84,7 +84,7 @@ def fetch_results(tournament: dict, player_points: dict, player_records: dict) -
         response.close()
 
 
-def fetch_teams(tournament: dict, team_points: dict, team_names: dict, team_records: dict) -> None:
+def fetch_teams(tournament: dict, team_points: dict, team_names: dict, team_records: dict, team_member_records: dict) -> None:
     tournament_id = tournament["id"]
     response = get_with_retry(f"https://lichess.org/api/tournament/{tournament_id}/teams")
     try:
@@ -112,6 +112,27 @@ def fetch_teams(tournament: dict, team_points: dict, team_names: dict, team_reco
                 "rank": index + 1,
                 "nbTeams": len(teams),
             })
+
+            # Lichess exposes the players listed in each team's battle standing.
+            # This is a contributor snapshot, not a complete team-membership roster.
+            for member in team.get("players", []) or []:
+                user = member.get("user") or {}
+                player_id = user.get("id") or user.get("name")
+                if not player_id:
+                    continue
+                try:
+                    member_score = float(member.get("score", 0) or 0)
+                except (TypeError, ValueError):
+                    member_score = 0
+                team_member_records.setdefault(team_id, []).append({
+                    "id": tournament_id,
+                    "player_id": str(player_id).lower(),
+                    "player_name": user.get("name") or str(player_id),
+                    "score": member_score,
+                    "startsAt": tournament.get("startsAt"),
+                    "team_rank": index + 1,
+                    "team_name": team.get("name") or team_id,
+                })
     finally:
         response.close()
 
@@ -125,6 +146,7 @@ def main() -> int:
     assigned = tournaments[CHUNK_INDEX::NUM_WORKERS]
     player_points, player_records = {}, {}
     team_points, team_names, team_records = {}, {}, {}
+    team_member_records = {}
     errors = []
 
     print(f"[Worker {CHUNK_INDEX}] assigned {len(assigned)} of {len(tournaments)} tournaments", file=sys.stderr)
@@ -138,7 +160,7 @@ def main() -> int:
         time.sleep(REQUEST_DELAY)
 
         try:
-            fetch_teams(tournament, team_points, team_names, team_records)
+            fetch_teams(tournament, team_points, team_names, team_records, team_member_records)
         except Exception as error:
             errors.append({"id": tournament_id, "name": tournament.get("fullName"), "stage": "teams", "error": str(error)})
             print(f"Could not fetch team results for {tournament_id}: {error}", file=sys.stderr)
@@ -162,6 +184,7 @@ def main() -> int:
         "team_points": team_points,
         "team_names": team_names,
         "team_records": team_records,
+        "team_member_records": team_member_records,
         "errors": errors,
     }
     output_path = f"partial_{CHUNK_INDEX}.json"
