@@ -60,6 +60,40 @@ class AggregatePeriodTests(unittest.TestCase):
         self.assertIsNotNone(stats["performance_index"])
         self.assertEqual(stats["performance_index_components"]["average_performance"], 75.0)
 
+    def test_performance_index_history_tracks_cumulative_and_season_only_checkpoints(self):
+        battles = []
+        records = []
+        for number in list(range(1, 12)) + [51]:
+            suffix = "st" if number % 10 == 1 and number % 100 != 11 else (
+                "nd" if number % 10 == 2 and number % 100 != 12 else (
+                    "rd" if number % 10 == 3 and number % 100 != 13 else "th"
+                )
+            )
+            battle_id = f"battle-{number}"
+            battles.append({
+                "id": battle_id,
+                "name": f"{number}{suffix} ULTRAbullet Team Battle",
+                "battle_number": number,
+            })
+            records.append({
+                "id": battle_id,
+                "name": f"{number}{suffix} ULTRAbullet Team Battle",
+                "startsAt": number * 1000,
+                "rank": 1 if number <= 10 else 2,
+                "nbPlayers": 10,
+                "score": 100,
+            })
+
+        history = aggregate.build_performance_index_history({"Alice": records}, battles)
+        checkpoints = history["alice"]
+        self.assertEqual([row[0] for row in checkpoints], [11, 51])
+        self.assertEqual(checkpoints[0][2], 11)
+        self.assertEqual(checkpoints[0][4], 11)
+        self.assertEqual(checkpoints[1][2], 12)
+        self.assertEqual(checkpoints[1][4], 1)
+        self.assertIsNotNone(checkpoints[0][1])
+        self.assertIsNotNone(checkpoints[1][3])
+
     def test_worker_errors_abort_before_existing_data_is_modified(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
