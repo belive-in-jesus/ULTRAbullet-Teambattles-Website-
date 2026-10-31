@@ -158,7 +158,7 @@ class AggregatePeriodTests(unittest.TestCase):
 
             achievement_data = json.loads((data_dir / "achievements.json").read_text(encoding="utf-8"))
             self.assertEqual(achievement_data["summary"]["players_with_achievements"], 1)
-            self.assertTrue(any(item["id"] == "first_steps" and item["count"] == 1 for item in achievement_data["categories"]["players"]))
+            self.assertTrue(any(item["id"] == "podiums_25" and item["count"] == 1 for item in achievement_data["categories"]["players"]))
 
             months = {item["key"]: item for item in index["months"]}
             self.assertEqual(set(months), {"2026-01", "2026-02"})
