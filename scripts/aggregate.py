@@ -698,7 +698,167 @@ def profile_index_bucket(identifier: str) -> str:
     return re.sub(r"[^a-z0-9]", "_", first) or "_"
 
 
-def write_profile_lookup_indexes(profiles_dir: str, players: list, teams: list) -> int:
+
+
+def build_cumulative_rank_history(records_by_key: dict, numbered_battles: list) -> dict:
+    """Return compact all-time rank checkpoints for each competitor.
+
+    A checkpoint is the last available numbered battle in each fixed season.
+    The ranking is recalculated from cumulative scores recorded up to that
+    battle, so missing battle numbers do not shift the season boundaries.
+    """
+    battle_numbers = {}
+    last_in_season = {}
+    for battle in numbered_battles:
+        battle_id = str(battle.get("id") or "").strip()
+        number = int(battle.get("battle_number") or parse_battle_number(battle.get("name")) or 0)
+        if not battle_id or number < 1:
+            continue
+        battle_numbers[battle_id] = number
+        season = season_number_for_battle(number)
+        last_in_season[season] = max(number, last_in_season.get(season, 0))
+
+    if not battle_numbers:
+        return {}
+
+    checkpoints = set(last_in_season.values())
+    event_scores = defaultdict(dict)
+    for competitor_id, records in records_by_key.items():
+        key = str(competitor_id)
+        for row in records:
+            number = battle_numbers.get(str(row.get("id") or "").strip())
+            if not number:
+                continue
+            try:
+                score = float(row.get("score", 0) or 0)
+            except (TypeError, ValueError):
+                score = 0.0
+            # Keep one result per competitor and battle if old worker files
+            # happen to contain duplicate snapshots.
+            current = event_scores[number].get(key)
+            if current is None or score > current:
+                event_scores[number][key] = score
+
+    cumulative = {}
+    history = defaultdict(list)
+    for number in sorted(event_scores):
+        for competitor_id, score in event_scores[number].items():
+            cumulative[competitor_id] = cumulative.get(competitor_id, 0.0) + score
+
+        if number not in checkpoints:
+            continue
+
+        ordered = sorted(cumulative.items(), key=lambda item: (-item[1], item[0].lower()))
+        for index, (competitor_id, _points) in enumerate(ordered, start=1):
+            history[competitor_id].append([number, index])
+
+    return dict(history)
+
+
+def write_battle_reports(
+    output_dir: str,
+    numbered_battles: list,
+    team_records: dict,
+    team_names: dict,
+    player_records: dict,
+) -> int:
+    """Publish one lazy-loaded, compact report per numbered battle."""
+    reports_dir = os.path.join(output_dir, "battles")
+    if os.path.isdir(reports_dir):
+        shutil.rmtree(reports_dir)
+    os.makedirs(reports_dir, exist_ok=True)
+
+    teams_by_battle = defaultdict(list)
+    for team_id, records in team_records.items():
+        for record in records:
+            battle_id = str(record.get("id") or "").strip()
+            if not battle_id:
+                continue
+            try:
+                score = float(record.get("score", 0) or 0)
+            except (TypeError, ValueError):
+                score = 0.0
+            try:
+                rank = int(record.get("rank")) if record.get("rank") is not None else None
+            except (TypeError, ValueError):
+                rank = None
+            teams_by_battle[battle_id].append({
+                "id": str(team_id),
+                "name": team_names.get(team_id, team_id),
+                "score": round(score, 1),
+                "rank": rank,
+            })
+
+    players_by_battle = defaultdict(list)
+    for username, records in player_records.items():
+        for record in records:
+            battle_id = str(record.get("id") or "").strip()
+            if not battle_id:
+                continue
+            try:
+                score = float(record.get("score", 0) or 0)
+            except (TypeError, ValueError):
+                score = 0.0
+            try:
+                rank = int(record.get("rank")) if record.get("rank") is not None else None
+            except (TypeError, ValueError):
+                rank = None
+            players_by_battle[battle_id].append({
+                "id": str(username),
+                "name": str(username),
+                "score": round(score, 1),
+                "rank": rank,
+            })
+
+    for battle in numbered_battles:
+        battle_id = str(battle.get("id") or "").strip()
+        if not battle_id:
+            continue
+
+        teams = teams_by_battle.get(battle_id, [])
+        players = players_by_battle.get(battle_id, [])
+        teams.sort(key=lambda row: (
+            row["rank"] if row["rank"] and row["rank"] > 0 else 10**9,
+            -row["score"],
+            row["name"].lower(),
+        ))
+        players.sort(key=lambda row: (
+            row["rank"] if row["rank"] and row["rank"] > 0 else 10**9,
+            -row["score"],
+            row["name"].lower(),
+        ))
+        for index, row in enumerate(teams, start=1):
+            if not row["rank"] or row["rank"] < 1:
+                row["rank"] = index
+        for index, row in enumerate(players, start=1):
+            if not row["rank"] or row["rank"] < 1:
+                row["rank"] = index
+
+        payload = {
+            "schema_version": 1,
+            "battle": {
+                "id": battle_id,
+                "name": battle.get("name") or battle.get("fullName") or "UltraBullet Team Battle",
+                "battle_number": int(battle.get("battle_number") or 0),
+                "startsAt": battle.get("startsAt"),
+                "nbPlayers": battle.get("nbPlayers"),
+                "url": battle.get("url") or f"https://lichess.org/tournament/{battle_id}",
+            },
+            "summary": {
+                "teams_count": len(teams),
+                "players_count": len(players),
+                "team_results_available": bool(teams),
+                "player_results_available": bool(players),
+            },
+            "teams": teams,
+            "players": players,
+        }
+        write_json(os.path.join(reports_dir, f"{battle_id}.json"), payload)
+
+    return len(numbered_battles)
+
+
+def write_profile_lookup_indexes(profiles_dir: str, players: list, teams: list, rank_history: dict | None = None) -> int:
     """Write small bucketed indexes so direct profile URLs avoid full leaderboard downloads."""
     index_dir = os.path.join(profiles_dir, "index")
     if os.path.isdir(index_dir):
@@ -719,6 +879,9 @@ def write_profile_lookup_indexes(profiles_dir: str, players: list, teams: list) 
             entry = dict(row)
             entry["id"] = identifier
             entry["name"] = row.get("username") if kind == "players" else row.get("team_name", identifier)
+            checkpoints = (rank_history or {}).get(kind, {}).get(lookup_key)
+            if checkpoints:
+                entry["rank_history"] = checkpoints
             buckets[bucket][lookup_key] = entry
         for bucket, payload in buckets.items():
             write_json(os.path.join(index_dir, f"{kind}-{bucket}.json"), payload)
@@ -791,6 +954,9 @@ def main() -> int:
                    for key, records in team_records.items()}
     player_rank = sorted(player_totals.items(), key=lambda item: (-item[1], item[0].lower()))
     team_rank = sorted(team_totals.items(), key=lambda item: (-item[1], item[0].lower()))
+    numbered_battles = sorted(regular_battles.values(), key=lambda row: (int(row["battle_number"]), str(row.get("id") or "")))
+    player_rank_history = build_cumulative_rank_history(player_records, numbered_battles)
+    team_rank_history = build_cumulative_rank_history(team_records, numbered_battles)
 
     # Resolve Lichess account IDs to the canonical player profile key and build
     # both directions of the team-contributor relationship.
@@ -882,12 +1048,20 @@ def main() -> int:
         for filename, payload in shards.items():
             write_json(os.path.join(profiles_dir, filename), payload)
 
-    profile_lookup_shards = write_profile_lookup_indexes(profiles_dir, players, teams)
+    profile_lookup_shards = write_profile_lookup_indexes(
+        profiles_dir,
+        players,
+        teams,
+        {
+            "players": {str(key).lower(): value for key, value in player_rank_history.items()},
+            "teams": {str(key).lower(): value for key, value in team_rank_history.items()},
+        },
+    )
 
     # Monthly tables use regular numbered battles only. Seasons are fixed to
     # official battle-number ranges, not the count/order of available records.
-    numbered_battles = sorted(regular_battles.values(), key=lambda row: (int(row["battle_number"]), str(row.get("id") or "")))
     max_battle_number = max((int(row["battle_number"]) for row in numbered_battles), default=0)
+    battle_reports_count = write_battle_reports(OUTPUT_DIR, numbered_battles, team_records, team_names, player_records)
     dated_battles = [row for row in numbered_battles if row.get("startsAt") is not None]
 
     period_dir = os.path.join(OUTPUT_DIR, "periods")
@@ -1051,6 +1225,9 @@ def main() -> int:
         "contributor_leaderboard_schema_version": 1,
         "teams_with_member_data_count": teams_with_member_data,
         "achievement_catalog_schema_version": 1,
+        "rank_history_schema_version": 1,
+        "battle_reports_schema_version": 1,
+        "battle_reports_count": battle_reports_count,
     }
     for filename, payload in (
         ("leaderboard_players.json", players),
