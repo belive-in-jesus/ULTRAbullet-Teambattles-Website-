@@ -48,8 +48,8 @@
     if (element) element.textContent = value == null || value === "" ? "—" : String(value);
   }
 
-  function buildBarChart(items, field, ariaLabel, unitLabel) {
-    const rows = Array.isArray(items) ? items.slice(-12) : [];
+  function buildBarChart(items, field, ariaLabel, unitLabel, maxItems = 12) {
+    const rows = Array.isArray(items) ? (maxItems ? items.slice(-maxItems) : items) : [];
     if (!rows.length || !rows.some(row => Number.isFinite(Number(row[field])))) {
       return '<div class="global-analytics-empty">Not enough published data to draw this chart yet.</div>';
     }
@@ -154,7 +154,7 @@
       ["global-seasons-chart", seasons.map(row => ({
         ...row,
         label: "S" + row.season_number
-      })), "battle_count", "Recorded battles per fixed 50-battle season", "battles"]
+      })), "battle_count", "Recorded battles per fixed 50-battle season", "battles", 20]
     ];
     for (const [id, rows, field, label, unit] of chartData) {
       const element = documentObject.getElementById(id);
