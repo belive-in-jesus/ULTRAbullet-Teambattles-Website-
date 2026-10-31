@@ -43,3 +43,8 @@
 [hidden]{display:none!important}
 @media(max-width:700px){.battle-shell{width:calc(100% - 28px)}.battle-results-heading{align-items:flex-start;flex-direction:column}.battle-view-switch{width:100%}.battle-view-button{flex:1}.battle-table-controls{align-items:flex-start;flex-wrap:wrap;padding:13px 15px}.battle-search-label{width:100%}#result-search{width:100%}.battle-result-count{margin-left:0}.battle-table th,.battle-table td{padding:11px 12px}.battle-summary{gap:8px}.battle-summary-card{padding:13px}.battle-summary-card strong{font-size:1.05rem}.battle-results-heading{padding:19px 16px 15px}}
 @media(max-width:440px){.battle-summary{grid-template-columns:1fr 1fr}.battle-summary-card:last-child{grid-column:1/-1}.battle-hero h1{font-size:2.5rem}}
+
+/* First-letter marks keep team and player rows visually easy to scan. */
+.battle-table .result-identity{display:flex;align-items:center;gap:10px;min-width:0}
+.battle-table .result-initial{display:grid;flex:0 0 29px;width:29px;height:29px;place-items:center;border:1px solid rgba(114,224,231,.23);border-radius:9px;background:rgba(114,224,231,.065);color:#8de2e7;font-family:"DM Mono",monospace;font-size:.65rem;font-weight:800}
+.battle-table .result-name-text{min-width:0;overflow-wrap:anywhere}
