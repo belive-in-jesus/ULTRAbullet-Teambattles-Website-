@@ -1299,6 +1299,8 @@ def main() -> int:
         "season_count": len(season_index),
         "hall_of_fame_seasons": len(season_hall),
         "dashboard_analytics_schema_version": 1,
+        "performance_index_schema_version": 1,
+        "performance_index_minimum_battles": 10,
         "month_count": len(month_index),
         "max_battle_number": max_battle_number,
         "excluded_events_count": len(battle_history) - len(regular_battles),
