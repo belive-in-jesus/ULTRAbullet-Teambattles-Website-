@@ -77,9 +77,18 @@ const ACHIEVEMENT_LABELS={
   podium_streak:{name:type==="team"?"Unbroken Form":"Podium Streak",description:"Reached the podium in five consecutive numbered battles.",icon:"STREAK"}
 };
 function renderAchievements(){
-  const earned=Array.isArray(state.entry?.achievements)?state.entry.achievements:[];
+  const row=state.entry||{};
+  const earned=[
+    ["first_steps",Number(row.tournaments_played||0)>=10],
+    ["battle_veteran",Number(row.tournaments_played||0)>=50],
+    ["century_club",Number(row.tournaments_played||0)>=100],
+    ["podium_finisher",Number(row.podiums||0)>=5],
+    ["podium_collector",Number(row.podiums||0)>=25],
+    ["multi_champion",Number(row.first_places||0)>=5],
+    ["podium_streak",Number(row.longest_podium_streak||0)>=5]
+  ].filter(([,qualified])=>qualified).map(([id])=>id);
   if(!earned.length){
-    $("profile-achievements").innerHTML='<div class="profile-empty">Achievement data will appear after the next successful full data refresh. Milestones are calculated from the all-time record.</div>';
+    $("profile-achievements").innerHTML='<div class="profile-empty">No career badges earned yet. Achievement thresholds are calculated from this profile’s all-time record.</div>';
     return;
   }
   $("profile-achievements").innerHTML=earned.map(id=>{
