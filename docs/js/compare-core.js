@@ -62,5 +62,34 @@
     return totals;
   }
 
-  return { compareHistories };
+  function comparePerformanceIndexHistories(historyA, historyB, seasonSize = 50) {
+    const toSeasonMap = checkpoints => {
+      const map = new Map();
+      for (const item of Array.isArray(checkpoints) ? checkpoints : []) {
+        const battle = Number(item && item[0]);
+        if (!Number.isFinite(battle) || battle < 1) continue;
+        const season = Math.floor((battle - 1) / seasonSize) + 1;
+        map.set(season, {
+          checkpoint: battle,
+          careerPI: item[1] == null ? null : Number(item[1]),
+          careerBattles: Number(item[2]) || 0,
+          seasonPI: item[3] == null ? null : Number(item[3]),
+          seasonBattles: Number(item[4]) || 0,
+          careerRank: item[5] == null ? null : Number(item[5])
+        });
+      }
+      return map;
+    };
+
+    const mapA = toSeasonMap(historyA);
+    const mapB = toSeasonMap(historyB);
+    const seasons = [...new Set([...mapA.keys(), ...mapB.keys()])].sort((a, b) => a - b);
+    return seasons.map(season => ({
+      season,
+      a: mapA.get(season) || null,
+      b: mapB.get(season) || null
+    }));
+  }
+
+  return { compareHistories, comparePerformanceIndexHistories };
 });
