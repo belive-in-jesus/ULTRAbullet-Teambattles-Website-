@@ -141,13 +141,11 @@ class AggregatePeriodTests(unittest.TestCase):
             )
 
             players = json.loads((data_dir / "leaderboard_players.json").read_text(encoding="utf-8"))
-            self.assertIn("century_club", players[0]["achievements"]) if players[0]["tournaments_played"] >= 100 else self.assertIn("first_steps", players[0]["achievements"])
             self.assertEqual(players[0]["username"], "alice")
             self.assertEqual(players[0]["points"], 520)
             self.assertEqual(players[0]["tournaments_played"], 52)
             self.assertEqual(players[0]["avg_points"], 10)
             self.assertIn("first_steps", players[0]["achievements"])
-            self.assertEqual(meta["team_member_records_count"], 52)
 
             player_profile = json.loads((data_dir / players[0]["profile_file"]).read_text(encoding="utf-8"))[players[0]["profile_key"]]
             self.assertEqual(player_profile["teams"][0]["id"], "club-id")
@@ -184,6 +182,7 @@ class AggregatePeriodTests(unittest.TestCase):
             self.assertEqual(team_records["highest_average"]["battles_required"], 25)
 
             meta = json.loads((data_dir / "meta.json").read_text(encoding="utf-8"))
+            self.assertEqual(meta["team_member_records_count"], 52)
             self.assertEqual(meta["hall_of_fame_seasons"], 7)
             self.assertEqual(meta["tournaments_processed"], 52)
             self.assertEqual(meta["excluded_events_count"], 1)
