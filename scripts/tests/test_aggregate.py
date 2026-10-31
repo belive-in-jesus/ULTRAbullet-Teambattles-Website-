@@ -45,6 +45,19 @@ class AggregatePeriodTests(unittest.TestCase):
         self.assertEqual(rows[0]["performance_index_rank"], 1)
         self.assertIsNone(rows[1]["performance_index_rank"])
 
+    def test_performance_index_uses_player_and_team_field_sizes(self):
+        player = aggregate.performance_index_stats([{
+            "startsAt": 1000, "rank": 2, "nbPlayers": 12, "score": 10,
+        }])
+        team = aggregate.performance_index_stats([{
+            "startsAt": 1000, "rank": 2, "nbTeams": 4, "score": 10,
+        }])
+
+        self.assertEqual(player["performance_index_components"]["average_performance"], 90.9)
+        self.assertEqual(team["performance_index_components"]["average_performance"], 66.7)
+        self.assertEqual(player["performance_index_battles"], 1)
+        self.assertEqual(team["performance_index_battles"], 1)
+
     def test_performance_index_is_provisional_below_ten_ranked_battles(self):
         records = [{
             "id": f"battle-{index}",
