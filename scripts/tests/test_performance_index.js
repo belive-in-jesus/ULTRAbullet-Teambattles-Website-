@@ -77,6 +77,11 @@ function playerRows(count) {
   }));
 }
 
+test("older leaderboard snapshots show an unpublished-data notice", async () => {
+  const { elements } = await startPage([{ username: "Legacy Player" }]);
+  assert.match(elements.get("pi-rows").innerHTML, /has not been published yet/);
+});
+
 test("Performance Index pagination renders every eligible competitor in 100-row pages", async () => {
   const { elements } = await startPage(playerRows(235));
   const get = id => elements.get(id);
