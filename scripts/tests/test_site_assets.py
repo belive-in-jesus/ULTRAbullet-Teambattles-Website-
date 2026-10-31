@@ -210,6 +210,8 @@ class WebsiteAssetTests(unittest.TestCase):
             "global-seasons-chart",
             "global-top-teams",
             "global-top-players",
+            "global-pi-teams",
+            "global-pi-players",
             "global-records",
             "global-analytics-method",
         ):
