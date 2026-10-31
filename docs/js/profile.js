@@ -353,6 +353,7 @@ async function init(){
   $("profile-rank-caption").textContent=type==="team"?"All-time team ranking":"All-time player ranking";
   $("profile-last-active").textContent=formatDate(entry.last_played);
   $("lichess-profile-link").href=type==="team"?"https://lichess.org/team/"+encodeURIComponent(canonicalId):"https://lichess.org/@/"+encodeURIComponent(canonicalId);
+  $("compare-profile-link").href="./compare.html?type="+(type==="team"?"team":"player")+"&a="+encodeURIComponent(canonicalId);
   $("share-profile").addEventListener("click",async()=>{
     try{await navigator.clipboard.writeText(window.location.href);$("profile-feedback").textContent="Profile link copied to clipboard.";}
     catch(error){$("profile-feedback").textContent="Copy is unavailable in this browser. Copy the page address from the address bar.";}
