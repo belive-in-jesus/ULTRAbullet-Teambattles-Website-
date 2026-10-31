@@ -22,6 +22,7 @@ class FakeElement {
     this.disabled = false;
     this.listeners = {};
     this.options = [];
+    this.attributes = {};
     this.classList = {
       add: () => {},
       remove: () => {},
@@ -31,6 +32,10 @@ class FakeElement {
 
   addEventListener(name, callback) {
     this.listeners[name] = callback;
+  }
+
+  setAttribute(name, value) {
+    this.attributes[name] = String(value);
   }
 
   appendChild(option) {
@@ -136,11 +141,19 @@ test("full player-profile startup renders every new analytics module", async () 
     points: 5000,
     last_played: Date.parse("2026-10-30T12:00:00Z"),
     profile_file: "profiles/players-000.json",
-    profile_key: "TestPlayer"
+    profile_key: "TestPlayer",
+    rank_history: [[550, 3], [600, 2], [643, 1]]
   };
   const { elements } = await runProfile("player", "TestPlayer", entry, history);
 
   assert.match(elements.get("profile-chart").innerHTML, /<svg/);
+  elements.get("chart-mode-rank").listeners.click();
+  assert.match(elements.get("profile-chart").innerHTML, /Cumulative all-time rank history/);
+  assert.match(elements.get("profile-chart").innerHTML, /After Battle 643/);
+  assert.equal(elements.get("chart-mode-rank").attributes["aria-pressed"], "true");
+  elements.get("chart-mode-score").listeners.click();
+  assert.match(elements.get("profile-chart").innerHTML, /<svg/);
+  assert.equal(elements.get("chart-mode-score").attributes["aria-pressed"], "true");
   assert.match(elements.get("analytics-donut").innerHTML, /<svg/);
   assert.match(elements.get("analytics-monthly-chart").innerHTML, /<svg/);
   assert.match(elements.get("analytics-heatmap").innerHTML, /<svg/);
