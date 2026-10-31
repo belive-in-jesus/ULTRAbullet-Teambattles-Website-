@@ -120,8 +120,8 @@ async function runProfileWithPayloads(type, id, entry, shard, periods, directory
 }
 
 
-async function runProfile(type, id, entry, history) {
-  const shard = { [entry.profile_key]: { history } };
+async function runProfile(type, id, entry, history, profileExtras = {}) {
+  const shard = { [entry.profile_key]: { history, ...profileExtras } };
   const periods = {
     months: [{ key: "2026-10", label: "October 2026", battle_count: history.length }],
     seasons: [{ key: "season-13", label: "Season 13", battle_count: history.length, complete: false }]
@@ -144,7 +144,9 @@ test("full player-profile startup renders every new analytics module", async () 
     profile_key: "TestPlayer",
     rank_history: [[550, 3], [600, 2], [643, 1]]
   };
-  const { elements } = await runProfile("player", "TestPlayer", entry, history);
+  const { elements } = await runProfile("player", "TestPlayer", entry, history, {
+    teams: [{ id: "sample-team", name: "🏆 The House", battles_listed: 3, contribution_points: 120, avg_contribution: 40, last_seen: Date.parse("2026-10-30T12:00:00Z") }]
+  });
 
   assert.match(elements.get("profile-chart").innerHTML, /<svg/);
   elements.get("chart-mode-rank").listeners.click();
@@ -161,6 +163,8 @@ test("full player-profile startup renders every new analytics module", async () 
   assert.notEqual(elements.get("analytics-recent-average").textContent, "—");
   assert.notEqual(elements.get("analytics-recent-podium-rate").textContent, "—");
   assert.equal(elements.get("profile-name").textContent, "TestPlayer");
+  assert.equal(elements.get("profile-initial").textContent, "T");
+  assert.ok(elements.get("member-stat-rows").innerHTML.includes('member-profile-mark" aria-hidden="true">T</span>'));
   assert.equal(elements.get("history-rows").innerHTML.includes("Loading"), false);
 });
 
@@ -178,7 +182,9 @@ test("full team-profile startup renders the same analytics modules", async () =>
     profile_file: "profiles/teams-000.json",
     profile_key: "test-team"
   };
-  const { elements } = await runProfile("team", "test-team", entry, history);
+  const { elements } = await runProfile("team", "test-team", entry, history, {
+    members: [{ id: "sample-player", name: "Alice", battles_listed: 2, contribution_points: 80, avg_contribution: 40, last_seen: Date.parse("2026-10-30T12:00:00Z") }]
+  });
 
   assert.match(elements.get("profile-chart").innerHTML, /<svg/);
   assert.match(elements.get("analytics-donut").innerHTML, /<svg/);
@@ -186,6 +192,8 @@ test("full team-profile startup renders the same analytics modules", async () =>
   assert.match(elements.get("analytics-heatmap").innerHTML, /<svg/);
   assert.match(elements.get("analytics-season-rows").innerHTML, /Season 13/);
   assert.equal(elements.get("profile-name").textContent, "Test Team");
+  assert.equal(elements.get("profile-initial").textContent, "T");
+  assert.ok(elements.get("member-stat-rows").innerHTML.includes('member-profile-mark" aria-hidden="true">A</span>'));
 });
 
 
