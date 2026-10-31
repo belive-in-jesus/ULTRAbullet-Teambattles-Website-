@@ -92,6 +92,8 @@ class WebsiteAssetTests(unittest.TestCase):
                 expected_last = (
                     "css/profile-analytics.css"
                     if page_name == "profile.html"
+                    else "css/dashboard-analytics.css"
+                    if page_name == "index.html"
                     else "css/v2-visual-system.css"
                 )
                 self.assertEqual(
@@ -111,7 +113,7 @@ class WebsiteAssetTests(unittest.TestCase):
                         self.assertTrue(path.is_file(), f"{page_name} references missing asset {reference}")
 
     def test_v2_stylesheets_have_balanced_delimiters(self):
-        for filename in ("v2-visual-system.css", "profile-analytics.css"):
+        for filename in ("v2-visual-system.css", "profile-analytics.css", "dashboard-analytics.css"):
             with self.subTest(stylesheet=filename):
                 source = (DOCS / "css" / filename).read_text(encoding="utf-8")
                 self.assertTrue(
@@ -141,6 +143,35 @@ class WebsiteAssetTests(unittest.TestCase):
             "analytics-season-rows",
         ):
             self.assertIn(f'id="{element_id}"', source)
+
+
+    def test_dashboard_analytics_assets_and_dom_hooks_are_present(self):
+        page = DOCS / "index.html"
+        parser = PageAssets()
+        source = page.read_text(encoding="utf-8")
+        parser.feed(source)
+        self.assertIn("css/dashboard-analytics.css", parser.stylesheets)
+        self.assertIn("js/dashboard-analytics.js", parser.scripts)
+        for element_id in (
+            "global-analytics-updated",
+            "global-avg-participants",
+            "global-peak-participants",
+            "global-month-label",
+            "global-latest-active-players",
+            "global-latest-active-teams",
+            "global-battles-chart",
+            "global-players-chart",
+            "global-teams-chart",
+            "global-seasons-chart",
+            "global-top-teams",
+            "global-top-players",
+            "global-records",
+            "global-analytics-method",
+        ):
+            self.assertIn(f'id="{element_id}"', source)
+        ids = re.findall(r'\bid="([^"]+)"', source)
+        duplicates = sorted({element_id for element_id in ids if ids.count(element_id) > 1})
+        self.assertEqual(duplicates, [], "Dashboard page contains duplicate HTML IDs.")
 
     def test_planned_special_events_remain_explicitly_disabled(self):
         for page_name in PAGES:
