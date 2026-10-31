@@ -119,7 +119,7 @@ def assign_performance_index_ranks(rows: list) -> None:
 
 
 
-def build_performance_index_history(records_by_key: dict, numbered_battles: list) -> dict:
+def build_performance_index_history(records_by_key: dict, numbered_battles: list, names_by_key: dict | None = None) -> dict:
     """Build cumulative and season-only PI checkpoints and historical PI ranks.
 
     A checkpoint is recorded at each season boundary for competitors with any
@@ -182,6 +182,7 @@ def build_performance_index_history(records_by_key: dict, numbered_battles: list
         if checkpoints:
             history[key] = checkpoints
 
+    display_names = {str(key).lower(): str(value) for key, value in (names_by_key or {}).items()}
     for checkpoint_entries in entries_by_checkpoint.values():
         eligible = [
             (key, entry) for key, entry in checkpoint_entries
@@ -190,7 +191,7 @@ def build_performance_index_history(records_by_key: dict, numbered_battles: list
         eligible.sort(key=lambda item: (
             -float(item[1][1]),
             -int(item[1][2] or 0),
-            item[0],
+            display_names.get(item[0], item[0]).lower(),
         ))
         for rank, (_key, entry) in enumerate(eligible, 1):
             entry[5] = rank
@@ -1239,8 +1240,10 @@ def main() -> int:
         for filename, payload in shards.items():
             write_json(os.path.join(profiles_dir, filename), payload)
 
-    player_pi_history = build_performance_index_history(player_records, numbered_battles)
-    team_pi_history = build_performance_index_history(team_records, numbered_battles)
+    player_pi_history = build_performance_index_history(
+        player_records, numbered_battles, {key: key for key in player_records}
+    )
+    team_pi_history = build_performance_index_history(team_records, numbered_battles, team_names)
     profile_lookup_shards = write_profile_lookup_indexes(
         profiles_dir,
         players,
