@@ -93,6 +93,8 @@ class AggregatePeriodTests(unittest.TestCase):
         self.assertEqual(checkpoints[1][4], 1)
         self.assertIsNotNone(checkpoints[0][1])
         self.assertIsNotNone(checkpoints[1][3])
+        self.assertEqual(checkpoints[0][5], 1)
+        self.assertEqual(checkpoints[1][5], 1)
 
     def test_worker_errors_abort_before_existing_data_is_modified(self):
         with tempfile.TemporaryDirectory() as temporary:
