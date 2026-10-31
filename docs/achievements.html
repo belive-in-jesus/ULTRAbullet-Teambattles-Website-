@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#070b12">
+  <meta name="description" content="Career achievements for players and teams in the UltraBullet Team Battles.">
+  <title>Achievements — UltraBullet Team Battles</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="css/design-system.css" rel="stylesheet">
+  <link href="css/design-refresh.css" rel="stylesheet">
+  <link href="css/v2-visual-system.css" rel="stylesheet">
+  <link href="css/achievements.css" rel="stylesheet">
+</head>
+<body class="page-achievements">
+  <main class="shell">
+    <nav class="masthead" aria-label="Site navigation">
+      <a class="brand" href="./index.html" aria-label="UltraBullet Team Battles home">
+        <span class="brand-emblem"><img class="brand-logo" src="https://i.imgur.com/Zo7BRdZ.gif" alt="UltraBullet Team Battles logo" width="84" height="84" loading="eager" decoding="async" onerror="this.hidden=true"></span>
+        <span class="brand-copy"><strong>ULTRAbullet</strong><small>TEAM BATTLES</small></span>
+      </a>
+      <div class="mast-actions">
+        <a class="nav-link" href="./index.html#leaderboard">Leaderboard</a>
+        <a class="nav-link" href="./index.html#compare">Compare</a>
+        <a class="nav-link" href="./hall-of-fame.html">Hall of Fame</a>
+        <a class="nav-link active" href="./achievements.html" aria-current="page">Achievements</a>
+        <span class="nav-link upcoming" aria-disabled="true" title="Planned after Special Events have been finalised on Lichess">Special Events</span>
+        <a class="nav-link" href="./information.html">Information</a>
+      </div>
+    </nav>
+
+    <section class="achievements-hero">
+      <span class="eyebrow">CAREER MILESTONES</span>
+      <h1>Earn your <em>place in history.</em></h1>
+      <p>Achievements recognise measurable career milestones in official numbered ULTRAbullet Team Battles. Player and team badges are calculated automatically from the published all-time results.</p>
+    </section>
+
+    <section class="achievement-summary" id="achievement-summary" aria-label="Achievement totals">
+      <div class="achievement-loading">Loading achievement data…</div>
+    </section>
+
+    <section class="achievement-section">
+      <span class="eyebrow">INDIVIDUAL ACHIEVEMENTS</span>
+      <h2>Player badges</h2>
+      <p>Milestones based on a player's recorded official battles, wins, podium finishes and consecutive podium streaks.</p>
+      <div class="achievement-cards" id="player-achievements"><div class="achievement-loading">Loading player achievements…</div></div>
+    </section>
+
+    <section class="achievement-section">
+      <span class="eyebrow">TEAM ACHIEVEMENTS</span>
+      <h2>Team badges</h2>
+      <p>Equivalent milestones calculated from each team's historical battle results.</p>
+      <div class="achievement-cards" id="team-achievements"><div class="achievement-loading">Loading team achievements…</div></div>
+    </section>
+
+    <section class="achievement-section">
+      <span class="eyebrow">MOST DECORATED</span>
+      <h2>Achievement leaders</h2>
+      <p>Players and teams with the highest number of earned career badges.</p>
+      <div class="achievement-leaders">
+        <article class="achievement-leader-panel"><h3>Players</h3><div id="player-achievement-leaders"></div></article>
+        <article class="achievement-leader-panel"><h3>Teams</h3><div id="team-achievement-leaders"></div></article>
+      </div>
+    </section>
+
+    <footer class="achievement-footer">
+      <span id="achievement-updated">Waiting for achievement data.</span><br>
+      Only regular numbered ULTRAbullet Team Battles are included. Team-contributor statistics are separate and represent the players listed by Lichess in historical team standings, not a complete membership roster.
+    </footer>
+  </main>
+  <script src="js/achievements.js" defer></script>
+</body>
+</html>
