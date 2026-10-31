@@ -26,6 +26,7 @@ jobs:
         run: |
           node --check docs/js/analytics.js
           node --check docs/js/profile.js
+          node --check docs/js/battle.js
           node --check docs/js/achievements.js
           node --check docs/js/contributors.js
           node --check docs/js/dashboard-analytics.js
