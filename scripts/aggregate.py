@@ -118,6 +118,67 @@ def assign_performance_index_ranks(rows: list) -> None:
         row["performance_index_rank"] = index
 
 
+
+def build_performance_index_history(records_by_key: dict, numbered_battles: list) -> dict:
+    """Build cumulative and season-only PI checkpoints for each competitor.
+
+    A checkpoint is emitted only for seasons in which the competitor has a
+    recorded result. Each entry is [last_battle_number, cumulative_PI,
+    cumulative_ranked_battles, season_PI, season_ranked_battles].
+    """
+    battle_numbers = {}
+    last_in_season = {}
+    for battle in numbered_battles:
+        battle_id = str(battle.get("id") or "").strip()
+        number = int(battle.get("battle_number") or parse_battle_number(battle.get("name")) or 0)
+        if not battle_id or number < 1:
+            continue
+        battle_numbers[battle_id] = number
+        season = season_number_for_battle(number)
+        last_in_season[season] = max(number, last_in_season.get(season, 0))
+
+    history = {}
+    for competitor_id, records in records_by_key.items():
+        numbered_records = []
+        seen = {}
+        for row in records:
+            number = battle_numbers.get(str(row.get("id") or "").strip())
+            if not number:
+                continue
+            current = seen.get(number)
+            try:
+                score = float(row.get("score", 0) or 0)
+            except (TypeError, ValueError):
+                score = 0.0
+            if current is None or score > float(current.get("score", 0) or 0):
+                seen[number] = row
+        numbered_records = [(number, row) for number, row in seen.items()]
+        if not numbered_records:
+            continue
+
+        checkpoints = []
+        for season, checkpoint in sorted(last_in_season.items()):
+            season_rows = [row for number, row in numbered_records
+                           if (season - 1) * SEASON_SIZE < number <= season * SEASON_SIZE]
+            if not season_rows:
+                continue
+            cumulative_rows = [row for number, row in numbered_records if number <= checkpoint]
+            cumulative_stats = performance_index_stats(cumulative_rows)
+            season_stats = performance_index_stats(season_rows)
+            if cumulative_stats.get("performance_index") is None:
+                continue
+            checkpoints.append([
+                checkpoint,
+                cumulative_stats["performance_index"],
+                cumulative_stats["performance_index_battles"],
+                season_stats.get("performance_index"),
+                season_stats.get("performance_index_battles", 0),
+            ])
+        if checkpoints:
+            history[str(competitor_id).lower()] = checkpoints
+    return history
+
+
 def compute_stats(records: list) -> dict:
     if not records:
         return {}
@@ -924,7 +985,7 @@ def write_battle_reports(
     return len(numbered_battles)
 
 
-def write_profile_lookup_indexes(profiles_dir: str, players: list, teams: list, rank_history: dict | None = None) -> int:
+def write_profile_lookup_indexes(profiles_dir: str, players: list, teams: list, rank_history: dict | None = None, performance_index_history: dict | None = None) -> int:
     """Write small bucketed indexes so direct profile URLs avoid full leaderboard downloads."""
     index_dir = os.path.join(profiles_dir, "index")
     if os.path.isdir(index_dir):
@@ -948,6 +1009,9 @@ def write_profile_lookup_indexes(profiles_dir: str, players: list, teams: list, 
             checkpoints = (rank_history or {}).get(kind, {}).get(lookup_key)
             if checkpoints:
                 entry["rank_history"] = checkpoints
+            pi_checkpoints = (performance_index_history or {}).get(kind, {}).get(lookup_key)
+            if pi_checkpoints:
+                entry["performance_index_history"] = pi_checkpoints
             buckets[bucket][lookup_key] = entry
         for bucket, payload in buckets.items():
             write_json(os.path.join(index_dir, f"{kind}-{bucket}.json"), payload)
@@ -1131,6 +1195,8 @@ def main() -> int:
         for filename, payload in shards.items():
             write_json(os.path.join(profiles_dir, filename), payload)
 
+    player_pi_history = build_performance_index_history(player_records, numbered_battles)
+    team_pi_history = build_performance_index_history(team_records, numbered_battles)
     profile_lookup_shards = write_profile_lookup_indexes(
         profiles_dir,
         players,
@@ -1138,6 +1204,10 @@ def main() -> int:
         {
             "players": {str(key).lower(): value for key, value in player_rank_history.items()},
             "teams": {str(key).lower(): value for key, value in team_rank_history.items()},
+        },
+        {
+            "players": player_pi_history,
+            "teams": team_pi_history,
         },
     )
 
