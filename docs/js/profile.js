@@ -6,6 +6,7 @@ const requestedId=(params.get("id")||"").trim();
 const state={entry:null,history:[],periods:null,period:"all",specific:"",query:"",page:1,pageSize:25,filtered:[],chartRange:25,chartMode:"score"};
 const number=v=>Number(v||0).toLocaleString(undefined,{maximumFractionDigits:1});
 const escapeHtml=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const initialLetter=value=>{const text=String(value??"").trim();const match=text.match(/[\p{L}\p{N}]/u);return (match?match[0]:Array.from(text)[0]||"?").toUpperCase();};
 const formatDate=v=>{if(v===null||v===undefined||v==="")return"Not available";const d=new Date(Number(v));return Number.isNaN(d.getTime())?"Not available":d.toLocaleDateString(undefined,{year:"numeric",month:"short",day:"numeric"});};
 async function load(path){const response=await fetch(path,{cache:"no-cache"});if(!response.ok)throw new Error("Could not load "+path+" ("+response.status+")");return response.json();}
 function profileBucket(id){return String(id).trim().toLowerCase().replace(/[^a-z0-9]/g,"_")[0]||"_";}
@@ -161,7 +162,8 @@ function renderMemberStatistics(profile){
   $("member-stat-rows").innerHTML=rows.map(row=>{
     const id=String(row.id||"");
     const href="./profile.html?type="+(isTeam?"player":"team")+"&id="+encodeURIComponent(id);
-    return '<tr><td><a class="member-profile-link" href="'+escapeHtml(href)+'">'+escapeHtml(row.name||id)+'</a></td><td class="number-cell">'+number(row.battles_listed)+'</td><td class="number-cell">'+number(row.contribution_points)+'</td><td class="number-cell">'+number(row.avg_contribution)+'</td><td>'+escapeHtml(formatDate(row.last_seen))+'</td></tr>';
+    const label=String(row.name||id||"Unknown");
+    return '<tr><td><div class="member-profile-identity"><span class="member-profile-mark" aria-hidden="true">'+escapeHtml(initialLetter(label))+'</span><a class="member-profile-link" href="'+escapeHtml(href)+'">'+escapeHtml(label)+'</a></div></td><td class="number-cell">'+number(row.battles_listed)+'</td><td class="number-cell">'+number(row.contribution_points)+'</td><td class="number-cell">'+number(row.avg_contribution)+'</td><td>'+escapeHtml(formatDate(row.last_seen))+'</td></tr>';
   }).join("");
 }
 
@@ -320,6 +322,7 @@ async function init(){
   const displayName=type==="team"?(entry.team_name||entry.name||canonicalId):(entry.username||entry.name||canonicalId);
   document.title=displayName+" — UltraBullet Team Battles";
   $("profile-name").textContent=displayName;
+  $("profile-initial").textContent=initialLetter(displayName);
   $("profile-description").textContent=type==="team"?"Historical team performance across the numbered ULTRAbullet Team Battles.":"Individual performance across the numbered ULTRAbullet Team Battles.";
   $("profile-rank").textContent="#"+number(entry.rank);
   $("profile-rank-caption").textContent=type==="team"?"All-time team ranking":"All-time player ranking";
