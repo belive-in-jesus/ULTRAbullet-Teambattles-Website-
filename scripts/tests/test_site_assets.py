@@ -125,7 +125,7 @@ class WebsiteAssetTests(unittest.TestCase):
                         self.assertTrue(path.is_file(), f"{page_name} references missing asset {reference}")
 
     def test_v2_stylesheets_have_balanced_delimiters(self):
-        for filename in ("v2-visual-system.css", "profile-analytics.css", "dashboard-analytics.css", "battle.css"):
+        for filename in ("v2-visual-system.css", "profile.css", "profile-analytics.css", "dashboard-analytics.css", "battle.css"):
             with self.subTest(stylesheet=filename):
                 source = (DOCS / "css" / filename).read_text(encoding="utf-8")
                 self.assertTrue(
@@ -145,6 +145,7 @@ class WebsiteAssetTests(unittest.TestCase):
             parser.scripts.index("js/profile.js"),
         )
         for element_id in (
+            "profile-initial",
             "trend-range",
             "trend-range-wrap",
             "chart-mode-score",
@@ -236,6 +237,11 @@ class WebsiteAssetTests(unittest.TestCase):
         self.assertEqual(overview["current_season"]["season_number"], 13)
         self.assertTrue(overview["current_season"]["in_progress"])
         self.assertEqual(overview["latest_battle"]["battle_number"], 643)
+
+    def test_guide_documents_competitor_initial_marks(self):
+        source = (DOCS / "information.html").read_text(encoding="utf-8")
+        self.assertIn("first letter of each player or team name", source)
+        self.assertIn("Lichess profile or team flair", source)
 
     def test_planned_special_events_remain_explicitly_disabled(self):
         source = (DOCS / "records.html").read_text(encoding="utf-8")
