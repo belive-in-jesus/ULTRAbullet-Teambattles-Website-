@@ -9,7 +9,7 @@ A standalone website for the recurring UltraBullet team battles organised by **N
 - Combined team and individual points across matching finished UltraBullet tournaments
 - Searchable team/player standings with all-time, monthly and 50-battle seasonal rankings, sort controls, pagination and CSV export
 - Homepage dashboard with current-season progress, latest indexed battle, global monthly activity charts, active player/team trends, seasonal comparisons, all-time top-five rankings and career-record highlights
-- Head-to-head team/player comparisons with six performance metrics
+- Head-to-head team/player comparisons with six performance metrics\n- Performance Index leaderboards, historical profile checkpoints and season-only PI comparisons
 - Hall of Fame with season champions, podiums and automatically updated career records
 - Global contributor leaderboard ranking players by listed career contribution points, battle appearances, teams represented and average contribution
 - Dedicated shareable team and player profiles with score-trend charts, finish-distribution donuts, monthly point charts, 52-week activity heatmaps, season-by-season comparisons, period filters, paginated battle history, career achievement badges and historical team-contributor statistics
@@ -62,6 +62,6 @@ An optional Lichess API token may be added as a repository Actions secret named 
 - Monthly rankings use UTC calendar months and include only eligible regular numbered battles.
 - Points are summed across the discovered tournaments, so the leaderboard is cumulative, not a single-day ranking.
 - Generated result files are written into `docs/data/` and committed by the workflow.
-- Competitor histories are stored in `docs/data/profiles/` in shards of 200 competitors and fetched only when a profile is opened. The next successful leaderboard workflow run regenerates the compact indexes and these shards.
+- Competitor histories are stored in `docs/data/profiles/` in shards of 200 competitors and fetched only when a profile is opened. The next successful leaderboard workflow run regenerates the compact indexes and these shards. Compact profile indexes also store cumulative PI checkpoints and season-only PI values at the last recorded battle of each active season.
 - Period summaries are stored separately under `docs/data/periods/`; the frontend loads only the selected month or season.
 - Global dashboard summaries are precomputed as `docs/data/analytics/overview.json` and `docs/data/analytics/timeseries.json`. Monthly active competitor counts are distinct teams or players with at least one recorded result during that UTC month; participant counts use the Lichess `nbPlayers` value and are not unique monthly users.
