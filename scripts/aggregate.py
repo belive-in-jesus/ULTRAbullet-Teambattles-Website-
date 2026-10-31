@@ -120,11 +120,12 @@ def assign_performance_index_ranks(rows: list) -> None:
 
 
 def build_performance_index_history(records_by_key: dict, numbered_battles: list) -> dict:
-    """Build cumulative and season-only PI checkpoints for each competitor.
+    """Build cumulative and season-only PI checkpoints and historical PI ranks.
 
-    A checkpoint is emitted only for seasons in which the competitor has a
-    recorded result. Each entry is [last_battle_number, cumulative_PI,
-    cumulative_ranked_battles, season_PI, season_ranked_battles].
+    A checkpoint is recorded at each season boundary for competitors with any
+    result up to that point. Each entry is [last_battle_number, cumulative_PI,
+    cumulative_ranked_battles, season_PI, season_ranked_battles, cumulative_PI_rank].
+    Official historical ranks require at least ten cumulative ranked results.
     """
     battle_numbers = {}
     last_in_season = {}
@@ -138,8 +139,8 @@ def build_performance_index_history(records_by_key: dict, numbered_battles: list
         last_in_season[season] = max(number, last_in_season.get(season, 0))
 
     history = {}
+    entries_by_checkpoint = defaultdict(list)
     for competitor_id, records in records_by_key.items():
-        numbered_records = []
         seen = {}
         for row in records:
             number = battle_numbers.get(str(row.get("id") or "").strip())
@@ -152,32 +153,49 @@ def build_performance_index_history(records_by_key: dict, numbered_battles: list
                 score = 0.0
             if current is None or score > float(current.get("score", 0) or 0):
                 seen[number] = row
-        numbered_records = [(number, row) for number, row in seen.items()]
+        numbered_records = list(seen.items())
         if not numbered_records:
             continue
 
+        key = str(competitor_id).lower()
         checkpoints = []
         for season, checkpoint in sorted(last_in_season.items()):
+            cumulative_rows = [row for number, row in numbered_records if number <= checkpoint]
+            if not cumulative_rows:
+                continue
             season_rows = [row for number, row in numbered_records
                            if (season - 1) * SEASON_SIZE < number <= season * SEASON_SIZE]
-            if not season_rows:
-                continue
-            cumulative_rows = [row for number, row in numbered_records if number <= checkpoint]
             cumulative_stats = performance_index_stats(cumulative_rows)
             season_stats = performance_index_stats(season_rows)
             if cumulative_stats.get("performance_index") is None:
                 continue
-            checkpoints.append([
+            entry = [
                 checkpoint,
                 cumulative_stats["performance_index"],
                 cumulative_stats["performance_index_battles"],
                 season_stats.get("performance_index"),
                 season_stats.get("performance_index_battles", 0),
-            ])
+                None,
+            ]
+            checkpoints.append(entry)
+            entries_by_checkpoint[checkpoint].append((key, entry))
         if checkpoints:
-            history[str(competitor_id).lower()] = checkpoints
-    return history
+            history[key] = checkpoints
 
+    for checkpoint_entries in entries_by_checkpoint.values():
+        eligible = [
+            (key, entry) for key, entry in checkpoint_entries
+            if int(entry[2] or 0) >= 10 and entry[1] is not None
+        ]
+        eligible.sort(key=lambda item: (
+            -float(item[1][1]),
+            -int(item[1][2] or 0),
+            item[0],
+        ))
+        for rank, (_key, entry) in enumerate(eligible, 1):
+            entry[5] = rank
+
+    return history
 
 def compute_stats(records: list) -> dict:
     if not records:
