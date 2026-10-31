@@ -48,8 +48,9 @@
     if (element) element.textContent = value == null || value === "" ? "—" : String(value);
   }
 
-  function buildBarChart(items, field, ariaLabel, unitLabel, maxItems = 12) {
+  function buildBarChart(items, field, ariaLabel, unitLabel, maxItems = 12, chartId = "global") {
     const rows = Array.isArray(items) ? (maxItems ? items.slice(-maxItems) : items) : [];
+    const gradientId = "global-gradient-" + String(chartId).replace(/[^a-z0-9_-]/gi, "-");
     if (!rows.length || !rows.some(row => Number.isFinite(Number(row[field])))) {
       return '<div class="global-analytics-empty">Not enough published data to draw this chart yet.</div>';
     }
@@ -75,18 +76,21 @@
       const x = left + index * step + (step - barWidth) / 2;
       const y = top + plotHeight - barHeight;
       const label = String(row.label || row.key || "");
+      const axisLabel = /^\d{4}-\d{2}$/.test(String(row.key || ""))
+        ? new Date(String(row.key) + "-01T00:00:00Z").toLocaleDateString("en", { month: "short", timeZone: "UTC" })
+        : label;
       const tooltip = label + " · " + number(value) + (unitLabel ? " " + unitLabel : "");
       return '<g><rect x="' + x.toFixed(1) + '" y="' + y.toFixed(1) + '" width="' +
         barWidth.toFixed(1) + '" height="' + Math.max(2, barHeight).toFixed(1) +
-        '" rx="5" fill="url(#global-chart-gradient)"><title>' + escapeHtml(tooltip) +
+        '" rx="5" fill="url(#' + gradientId + ')"><title>' + escapeHtml(tooltip) +
         '</title></rect><text x="' + (x + barWidth / 2).toFixed(1) + '" y="' +
         (height - 16) + '" text-anchor="middle" class="global-chart-axis">' +
-        escapeHtml(label.replace(/(\w{3})\s+\d{4}/, "$1")) + '</text></g>';
+        escapeHtml(axisLabel) + '</text></g>';
     }).join("");
 
     return '<svg class="global-analytics-svg" viewBox="0 0 ' + width + " " + height +
       '" role="img" aria-label="' + escapeHtml(ariaLabel) + '">' +
-      '<defs><linearGradient id="global-chart-gradient" x1="0" y1="0" x2="0" y2="1">' +
+      '<defs><linearGradient id="' + gradientId + '" x1="0" y1="0" x2="0" y2="1">' +
       '<stop offset="0%" stop-color="' + COLORS.cyan + '"/><stop offset="100%" stop-color="' +
       COLORS.violet + '" stop-opacity=".52"/></linearGradient></defs>' + ticks + bars + '</svg>';
   }
@@ -158,7 +162,7 @@
     ];
     for (const [id, rows, field, label, unit, maxItems] of chartData) {
       const element = documentObject.getElementById(id);
-      if (element) element.innerHTML = buildBarChart(rows, field, label, unit, maxItems);
+      if (element) element.innerHTML = buildBarChart(rows, field, label, unit, maxItems, id);
     }
 
     const teamList = documentObject.getElementById("global-top-teams");
