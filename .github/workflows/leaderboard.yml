@@ -131,6 +131,7 @@ jobs:
             docs/data/battle_history.json
             docs/data/periods_index.json
             docs/data/hall_of_fame.json
+            docs/data/analytics/
             docs/data/periods/
             docs/data/profiles/
             errors.json

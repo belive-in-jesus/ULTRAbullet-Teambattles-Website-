@@ -184,6 +184,222 @@ def build_hall_of_fame(teams: list, players: list, seasons: list, generated_at: 
 
 
 
+
+def build_dashboard_analytics(
+    numbered_battles: list,
+    teams: list,
+    players: list,
+    team_records: dict,
+    player_records: dict,
+    season_summaries: list,
+    generated_at: str,
+) -> tuple[dict, dict]:
+    """Build small pre-aggregated dashboard datasets from eligible battle results."""
+    monthly_battles = defaultdict(list)
+    monthly_teams = defaultdict(set)
+    monthly_players = defaultdict(set)
+    monthly_team_points = defaultdict(float)
+    monthly_player_points = defaultdict(float)
+    team_months = defaultdict(set)
+    player_months = defaultdict(set)
+
+    seasonal_battles = defaultdict(list)
+    seasonal_teams = defaultdict(set)
+    seasonal_players = defaultdict(set)
+    seasonal_team_points = defaultdict(float)
+    seasonal_player_points = defaultdict(float)
+
+    for battle in numbered_battles:
+        starts_at = battle.get("startsAt")
+        if starts_at is None:
+            continue
+        try:
+            moment = datetime.fromtimestamp(int(starts_at) / 1000, tz=timezone.utc)
+        except (TypeError, ValueError, OverflowError, OSError):
+            continue
+        month_key = moment.strftime("%Y-%m")
+        monthly_battles[month_key].append(battle)
+        number = int(battle.get("battle_number") or parse_battle_number(battle.get("name")) or 0)
+        if number > 0:
+            seasonal_battles[season_number_for_battle(number)].append(battle)
+
+    def collect_competitor_rows(records_by_key: dict, kind: str) -> None:
+        for competitor_id, records in records_by_key.items():
+            for row in records:
+                starts_at = row.get("startsAt")
+                if starts_at is None:
+                    continue
+                try:
+                    moment = datetime.fromtimestamp(int(starts_at) / 1000, tz=timezone.utc)
+                except (TypeError, ValueError, OverflowError, OSError):
+                    continue
+                month_key = moment.strftime("%Y-%m")
+                number = parse_battle_number(row.get("name"))
+                if kind == "teams":
+                    monthly_teams[month_key].add(competitor_id)
+                    monthly_team_points[month_key] += float(row.get("score", 0) or 0)
+                    team_months[competitor_id].add(month_key)
+                    if number:
+                        seasonal_teams[season_number_for_battle(number)].add(competitor_id)
+                        seasonal_team_points[season_number_for_battle(number)] += float(row.get("score", 0) or 0)
+                else:
+                    monthly_players[month_key].add(competitor_id)
+                    monthly_player_points[month_key] += float(row.get("score", 0) or 0)
+                    player_months[competitor_id].add(month_key)
+                    if number:
+                        seasonal_players[season_number_for_battle(number)].add(competitor_id)
+                        seasonal_player_points[season_number_for_battle(number)] += float(row.get("score", 0) or 0)
+
+    collect_competitor_rows(team_records, "teams")
+    collect_competitor_rows(player_records, "players")
+
+    months = []
+    seen_teams, seen_players = set(), set()
+    for month_key in sorted(monthly_battles):
+        battles = monthly_battles[month_key]
+        participant_counts = []
+        for battle in battles:
+            try:
+                count = int(battle.get("nbPlayers"))
+                if count >= 0:
+                    participant_counts.append(count)
+            except (TypeError, ValueError):
+                continue
+        active_team_ids = monthly_teams[month_key]
+        active_player_ids = monthly_players[month_key]
+        new_teams = active_team_ids - seen_teams
+        new_players = active_player_ids - seen_players
+        seen_teams.update(active_team_ids)
+        seen_players.update(active_player_ids)
+        months.append({
+            "key": month_key,
+            "label": datetime.strptime(month_key, "%Y-%m").strftime("%b %Y"),
+            "battle_count": len(battles),
+            "active_teams": len(active_team_ids),
+            "active_players": len(active_player_ids),
+            "new_teams": len(new_teams),
+            "new_players": len(new_players),
+            "participant_entries": sum(participant_counts),
+            "avg_participants_per_battle": round(sum(participant_counts) / len(participant_counts), 1) if participant_counts else None,
+            "max_participants": max(participant_counts) if participant_counts else None,
+            "team_points_total": round(monthly_team_points[month_key], 1),
+            "player_points_total": round(monthly_player_points[month_key], 1),
+        })
+
+    season_lookup = {int(item["season_number"]): item for item in season_summaries}
+    seasons = []
+    season_numbers = sorted(set(seasonal_battles) | set(season_lookup))
+    for season_number in season_numbers:
+        metadata = season_lookup.get(season_number, {})
+        battles = seasonal_battles.get(season_number, [])
+        participant_counts = []
+        for battle in battles:
+            try:
+                count = int(battle.get("nbPlayers"))
+                if count >= 0:
+                    participant_counts.append(count)
+            except (TypeError, ValueError):
+                continue
+        seasons.append({
+            "season_number": season_number,
+            "key": metadata.get("key", f"season-{season_number:02d}"),
+            "label": metadata.get("label", f"Season {season_number}"),
+            "first_battle": metadata.get("first_battle", (season_number - 1) * SEASON_SIZE + 1),
+            "last_battle": metadata.get("last_battle", season_number * SEASON_SIZE),
+            "battle_count": len(battles),
+            "expected_battles": metadata.get("expected_battles", SEASON_SIZE),
+            "complete": bool(metadata.get("complete", False)),
+            "in_progress": bool(metadata.get("in_progress", False)),
+            "missing_battles": len(metadata.get("missing_battle_numbers", [])),
+            "active_teams": len(seasonal_teams[season_number]),
+            "active_players": len(seasonal_players[season_number]),
+            "avg_participants_per_battle": round(sum(participant_counts) / len(participant_counts), 1) if participant_counts else None,
+            "team_points_total": round(seasonal_team_points[season_number], 1),
+            "player_points_total": round(seasonal_player_points[season_number], 1),
+            "team_champion": metadata.get("team_champion"),
+            "player_champion": metadata.get("player_champion"),
+        })
+
+    dated_battles = [battle for rows in monthly_battles.values() for battle in rows]
+    participant_battles = []
+    for battle in dated_battles:
+        try:
+            count = int(battle.get("nbPlayers"))
+            if count >= 0:
+                participant_battles.append((count, battle))
+        except (TypeError, ValueError):
+            continue
+    average_participants = (
+        round(sum(count for count, _ in participant_battles) / len(participant_battles), 1)
+        if participant_battles else None
+    )
+    peak = max(participant_battles, key=lambda item: (item[0], int(item[1].get("startsAt") or 0))) if participant_battles else None
+    latest_battle = max(
+        numbered_battles,
+        key=lambda battle: (int(battle.get("startsAt") or 0), int(battle.get("battle_number") or 0)),
+        default=None,
+    )
+    latest_month = months[-1] if months else None
+    current_season = seasons[-1] if seasons else None
+
+    def compact_record_bundles(rows: list, kind: str) -> list:
+        wanted = {"most_battles", "most_podiums", "highest_single_battle", "longest_podium_streak"}
+        return [record for record in build_record_holders(rows, kind) if record.get("key") in wanted]
+
+    overview = {
+        "schema_version": 1,
+        "generated_at": generated_at,
+        "totals": {
+            "numbered_battles": len(numbered_battles),
+            "dated_battles": len(dated_battles),
+            "teams": len(teams),
+            "players": len(players),
+            "avg_participants_per_battle": average_participants,
+            "total_participant_entries": sum(count for count, _ in participant_battles),
+            "highest_participation": peak[0] if peak else None,
+            "highest_participation_battle": ({
+                "name": peak[1].get("name"),
+                "battle_number": peak[1].get("battle_number"),
+                "id": peak[1].get("id"),
+                "startsAt": peak[1].get("startsAt"),
+                "url": peak[1].get("url"),
+            } if peak else None),
+        },
+        "latest_battle": ({
+            "name": latest_battle.get("name"),
+            "battle_number": latest_battle.get("battle_number"),
+            "id": latest_battle.get("id"),
+            "startsAt": latest_battle.get("startsAt"),
+            "nbPlayers": latest_battle.get("nbPlayers"),
+            "url": latest_battle.get("url"),
+        } if latest_battle else None),
+        "current_month": latest_month,
+        "current_season": current_season,
+        "leaders": {
+            "teams": [compact_leader(row, "teams") for row in teams[:5]],
+            "players": [compact_leader(row, "players") for row in players[:5]],
+        },
+        "records": {
+            "teams": compact_record_bundles(teams, "teams"),
+            "players": compact_record_bundles(players, "players"),
+        },
+        "methodology": {
+            "eligibility": "Only finished regular numbered ULTRAbullet Team Battles are included; special and unnumbered events are excluded.",
+            "monthly_activity": "Active teams and players are distinct competitors with at least one recorded result in the UTC calendar month.",
+            "new_competitors": "New teams and players are counted in the first UTC month in which they appear in the recorded archive.",
+            "participation": "Participants per battle use Lichess tournament nbPlayers; the monthly average excludes battles with no participant count.",
+            "seasons": f"Fixed official battle-number ranges of {SEASON_SIZE} battles; missing battle numbers do not shift season boundaries.",
+        },
+    }
+    timeseries = {
+        "schema_version": 1,
+        "generated_at": generated_at,
+        "months": months,
+        "seasons": seasons,
+    }
+    return overview, timeseries
+
+
 def profile_index_bucket(identifier: str) -> str:
     """Return the one-character bucket shared by the profile page lookup."""
     first = str(identifier or "").strip().lower()[:1]
@@ -449,6 +665,12 @@ def main() -> int:
     hall_of_fame["totals"]["numbered_battles"] = len(numbered_battles)
     write_json(os.path.join(OUTPUT_DIR, "hall_of_fame.json"), hall_of_fame)
 
+    dashboard_overview, dashboard_timeseries = build_dashboard_analytics(
+        numbered_battles, teams, players, team_records, player_records, season_hall, generated_at
+    )
+    write_json(os.path.join(OUTPUT_DIR, "analytics", "overview.json"), dashboard_overview)
+    write_json(os.path.join(OUTPUT_DIR, "analytics", "timeseries.json"), dashboard_timeseries)
+
     meta = {
         "generated_at": generated_at,
         "tournaments_processed": len(numbered_battles),
@@ -462,6 +684,7 @@ def main() -> int:
         "season_size": SEASON_SIZE,
         "season_count": len(season_index),
         "hall_of_fame_seasons": len(season_hall),
+        "dashboard_analytics_schema_version": 1,
         "month_count": len(month_index),
         "max_battle_number": max_battle_number,
         "excluded_events_count": len(battle_history) - len(regular_battles),

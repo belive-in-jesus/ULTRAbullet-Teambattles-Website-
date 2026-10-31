@@ -164,6 +164,33 @@ class AggregatePeriodTests(unittest.TestCase):
             self.assertEqual(meta["tournaments_processed"], 52)
             self.assertEqual(meta["excluded_events_count"], 1)
             self.assertEqual(meta["selection_rule"], "Numbered regular ULTRAbullet Team Battles only; special and unnumbered events excluded.")
+            self.assertEqual(meta["dashboard_analytics_schema_version"], 1)
+
+            dashboard_dir = data_dir / "analytics"
+            overview = json.loads((dashboard_dir / "overview.json").read_text(encoding="utf-8"))
+            timeline = json.loads((dashboard_dir / "timeseries.json").read_text(encoding="utf-8"))
+            self.assertEqual(overview["schema_version"], 1)
+            self.assertEqual(overview["totals"]["numbered_battles"], 52)
+            self.assertEqual(overview["totals"]["teams"], 1)
+            self.assertEqual(overview["totals"]["players"], 2)
+            self.assertEqual(overview["totals"]["avg_participants_per_battle"], 12)
+            self.assertEqual(overview["totals"]["highest_participation"], 12)
+            self.assertEqual(overview["latest_battle"]["battle_number"], 301)
+            self.assertEqual(overview["current_month"]["key"], "2026-02")
+            self.assertEqual(overview["current_month"]["battle_count"], 21)
+            self.assertEqual(overview["current_month"]["active_players"], 2)
+            self.assertEqual(overview["current_month"]["active_teams"], 1)
+            self.assertEqual([item["key"] for item in timeline["months"]], ["2026-01", "2026-02"])
+            self.assertEqual(timeline["months"][0]["new_players"], 1)
+            self.assertEqual(timeline["months"][1]["new_players"], 1)
+            self.assertEqual(timeline["months"][0]["battle_count"], 31)
+            self.assertEqual(timeline["months"][1]["battle_count"], 21)
+            season_6_analytics = next(item for item in timeline["seasons"] if item["season_number"] == 6)
+            self.assertEqual(season_6_analytics["battle_count"], 49)
+            self.assertEqual(season_6_analytics["active_players"], 1)
+            season_7_analytics = next(item for item in timeline["seasons"] if item["season_number"] == 7)
+            self.assertEqual(season_7_analytics["active_players"], 2)
+            self.assertEqual(season_7_analytics["player_champion"], None)
 
     def test_profile_lookup_indexes_are_bucketed_and_case_insensitive(self):
         with tempfile.TemporaryDirectory() as temporary:
