@@ -54,6 +54,16 @@
         <div class="compare-pi-grid" id="compare-pi"></div>
       </section>
       <section class="compare-panel">
+        <div class="compare-panel-heading"><div><span class="eyebrow">SEASON-BY-SEASON</span><h2>Performance Index history</h2></div><span class="compare-count">Fixed 50-battle seasons</span></div>
+        <div class="compare-table-wrap">
+          <table class="compare-table compare-pi-history-table">
+            <thead><tr><th>Season</th><th id="pi-history-name-a">Competitor A · career PI / rank / season PI</th><th id="pi-history-name-b">Competitor B · career PI / rank / season PI</th></tr></thead>
+            <tbody id="compare-pi-history"><tr><td colspan="3" class="compare-message">Historical PI data will appear after the next successful full statistics refresh.</td></tr></tbody>
+          </table>
+        </div>
+        <p class="compare-hint">Career PI is cumulative through the season checkpoint. Season PI uses only ranked results from that season and becomes official from ten ranked battles.</p>
+      </section>
+      <section class="compare-panel">
         <div class="compare-panel-heading"><div><span class="eyebrow">DIRECT RECORD</span><h2>Shared battles</h2></div><span id="shared-count" class="compare-count">—</span></div>
         <div class="compare-table-wrap"><table class="compare-table"><thead><tr><th>Battle</th><th>Date</th><th id="compare-name-a">Competitor A</th><th id="compare-name-b">Competitor B</th><th>Result</th></tr></thead><tbody id="shared-battles"></tbody></table></div>
         <p class="compare-hint">A direct win means the competitor recorded the higher score in the same battle. Equal scores count as a draw.</p>
