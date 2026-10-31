@@ -135,6 +135,7 @@ jobs:
             docs/data/analytics/
             docs/data/periods/
             docs/data/profiles/
+            docs/data/battles/
             errors.json
           if-no-files-found: error
           retention-days: 7
