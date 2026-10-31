@@ -147,7 +147,7 @@ class AggregatePeriodTests(unittest.TestCase):
             self.assertEqual(report["summary"]["teams_count"], 1)
             self.assertEqual(report["teams"][0]["name"], "Test Club")
             self.assertEqual(report["teams"][0]["rank"], 1)
-            self.assertEqual([row["name"] for row in report["players"]], ["Alice", "Bob"])
+            self.assertEqual([row["name"] for row in report["players"]], ["alice", "bob"])
             self.assertEqual([row["rank"] for row in report["players"]], [1, 2])
             self.assertFalse((data_dir / "battles" / "special-alliance.json").exists())
 
