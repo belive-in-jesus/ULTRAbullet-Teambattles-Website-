@@ -72,6 +72,13 @@ class AggregatePeriodTests(unittest.TestCase):
                 "startsAt": special_timestamp, "score": 25000, "rank": 1,
             })
 
+            member_rows = [{
+                "id": battle["id"],
+                "player_id": "alice",
+                "player_name": "Alice",
+                "score": 10,
+                "startsAt": battle.get("startsAt"),
+            } for battle in battles]
             worker = {
                 "processed": len(battles),
                 "tournament_records": battles,
@@ -80,6 +87,7 @@ class AggregatePeriodTests(unittest.TestCase):
                 "team_points": {"club-id": 26300},
                 "team_names": {"club-id": "Test Club"},
                 "team_records": {"club-id": club_records},
+                "team_member_records": {"club-id": member_rows},
                 "errors": [],
             }
             (artifacts / "partial_0.json").write_text(json.dumps(worker), encoding="utf-8")
@@ -133,10 +141,26 @@ class AggregatePeriodTests(unittest.TestCase):
             )
 
             players = json.loads((data_dir / "leaderboard_players.json").read_text(encoding="utf-8"))
+            self.assertIn("century_club", players[0]["achievements"]) if players[0]["tournaments_played"] >= 100 else self.assertIn("first_steps", players[0]["achievements"])
             self.assertEqual(players[0]["username"], "alice")
             self.assertEqual(players[0]["points"], 520)
             self.assertEqual(players[0]["tournaments_played"], 52)
             self.assertEqual(players[0]["avg_points"], 10)
+            self.assertIn("first_steps", players[0]["achievements"])
+            self.assertEqual(meta["team_member_records_count"], 52)
+
+            player_profile = json.loads((data_dir / players[0]["profile_file"]).read_text(encoding="utf-8"))[players[0]["profile_key"]]
+            self.assertEqual(player_profile["teams"][0]["id"], "club-id")
+            self.assertEqual(player_profile["teams"][0]["battles_listed"], 52)
+
+            teams = json.loads((data_dir / "leaderboard_teams.json").read_text(encoding="utf-8"))
+            team_profile = json.loads((data_dir / teams[0]["profile_file"]).read_text(encoding="utf-8"))[teams[0]["profile_key"]]
+            self.assertEqual(team_profile["members"][0]["id"], "alice")
+            self.assertEqual(team_profile["members"][0]["battles_listed"], 52)
+
+            achievement_data = json.loads((data_dir / "achievements.json").read_text(encoding="utf-8"))
+            self.assertEqual(achievement_data["summary"]["players_with_achievements"], 1)
+            self.assertTrue(any(item["id"] == "first_steps" and item["count"] == 1 for item in achievement_data["categories"]["players"]))
 
             months = {item["key"]: item for item in index["months"]}
             self.assertEqual(set(months), {"2026-01", "2026-02"})
@@ -249,6 +273,31 @@ class AggregatePeriodTests(unittest.TestCase):
         ]
         self.assertEqual(aggregate.longest_podium_streak(records), 2)
         self.assertEqual(aggregate.longest_podium_streak([]), 0)
+
+    def test_achievement_thresholds_are_explicit_and_all_time_based(self):
+        stats = {
+            "tournaments_played": 100,
+            "podiums": 25,
+            "first_places": 5,
+            "longest_podium_streak": 5,
+        }
+        earned = aggregate.achievements_for(stats, "players")
+        self.assertEqual(
+            set(earned),
+            {"first_steps", "battle_veteran", "century_club", "podium_finisher", "podium_collector", "multi_champion", "podium_streak"},
+        )
+
+    def test_member_summaries_deduplicate_repeated_battle_snapshots(self):
+        rows = [
+            {"id": "battle-1", "player_id": "alice", "player_name": "Alice", "score": 10, "startsAt": 100},
+            {"id": "battle-1", "player_id": "alice", "player_name": "Alice", "score": 10, "startsAt": 100},
+            {"id": "battle-2", "player_id": "alice", "player_name": "Alice", "score": 20, "startsAt": 200},
+        ]
+        summary = aggregate.summarize_member_records(rows, "player_id", "player_name")
+        self.assertEqual(len(summary), 1)
+        self.assertEqual(summary[0]["battles_listed"], 2)
+        self.assertEqual(summary[0]["contribution_points"], 30)
+        self.assertEqual(summary[0]["avg_contribution"], 15)
 
     def test_compute_stats_uses_only_the_supplied_period_records(self):
         stats = aggregate.compute_stats([
