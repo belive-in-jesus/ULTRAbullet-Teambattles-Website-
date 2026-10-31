@@ -66,3 +66,16 @@
 @media(max-width:820px){.profile-hero{grid-template-columns:1fr}.profile-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.profile-record-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:520px){.profile-shell{width:calc(100% - 28px)}.profile-hero h1{font-size:2.75rem}.profile-section-heading{align-items:start;flex-direction:column}.profile-section-note{text-align:left}.profile-record-grid{grid-template-columns:1fr 1fr}.profile-stat{padding:14px}.profile-stat strong{font-size:1.2rem}.history-controls{align-items:stretch;flex-direction:column}.history-control,.history-search{min-width:0}.history-pagination{align-items:flex-start;flex-direction:column}.profile-history-table th,.profile-history-table td{padding:11px 10px}.profile-history-table .battle-name{min-width:155px}}
 @media(prefers-reduced-motion:reduce){.chart-bar{transition:none}}
+
+
+/* Career achievements and historical team-contributor tables */
+.achievement-badge-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:11px}
+.achievement-badge-card{display:flex;align-items:center;gap:13px;min-width:0;padding:15px;border:1px solid rgba(111,148,182,.24);border-radius:13px;background:linear-gradient(145deg,rgba(20,39,59,.8),rgba(13,24,39,.82))}
+.achievement-badge-icon{display:grid;place-items:center;flex:0 0 52px;width:52px;height:52px;border:1px solid rgba(72,214,231,.24);border-radius:12px;background:rgba(72,214,231,.07);color:#91e8ed;font-family:var(--font-mono);font-size:.72rem;font-weight:800;text-align:center}
+.achievement-badge-copy{display:flex;min-width:0;flex-direction:column;gap:5px}
+.achievement-badge-copy strong{font-size:.83rem}
+.achievement-badge-copy small{color:var(--muted);font-size:.68rem;line-height:1.5}
+.member-profile-link{color:var(--cyan);font-weight:750;text-decoration:none}
+.member-profile-link:hover{text-decoration:underline;text-underline-offset:3px}
+@media(max-width:820px){.achievement-badge-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:520px){.achievement-badge-grid{grid-template-columns:1fr}.achievement-badge-card{padding:12px}}
