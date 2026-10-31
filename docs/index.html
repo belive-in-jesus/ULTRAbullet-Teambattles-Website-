@@ -52,23 +52,21 @@
   <link href="css/design-refresh.css" rel="stylesheet">
   <link href="css/v2-visual-system.css" rel="stylesheet">
   <link href="css/dashboard-analytics.css" rel="stylesheet">
+  <link href="css/navigation-hubs.css" rel="stylesheet">
 </head>
 <body class="page-dashboard">
   <main class="shell">
-    <nav class="masthead" aria-label="Site navigation">
-      <a class="brand" href="./" aria-label="UltraBullet Team Battles home">
+    <nav class="masthead" aria-label="Main navigation">
+      <a class="brand" href="./index.html" aria-label="UltraBullet Team Battles home">
         <span class="brand-emblem"><img class="brand-logo" src="https://i.imgur.com/Zo7BRdZ.gif" alt="UltraBullet Team Battles logo" width="84" height="84" loading="eager" decoding="async" onerror="this.hidden=true"></span>
         <span class="brand-copy"><strong>ULTRAbullet</strong><small>TEAM BATTLES</small></span>
       </a>
-      <div class="mast-actions">
-        <a class="nav-link active" href="#leaderboard" aria-current="page">Leaderboard</a>
-        <a class="nav-link" href="#compare">Compare</a>
-        <a class="nav-link" href="#analytics">Analytics</a>
-        <a class="nav-link" href="./hall-of-fame.html">Hall of Fame</a>
-        <a class="nav-link" href="./achievements.html">Achievements</a>
-        <a class="nav-link" href="./contributors.html">Contributors</a>
-        <span class="nav-link upcoming" aria-disabled="true" title="Planned for a future update">Special Events</span>
-        <a class="nav-link" href="./information.html">Information</a>
+      <div class="mast-actions primary-nav">
+        <a class="nav-link active" href="./index.html" aria-current="page">Overview</a>
+        <a class="nav-link" href="./rankings.html">Rankings</a>
+        <a class="nav-link" href="./analytics.html">Analytics</a>
+        <a class="nav-link" href="./records.html">Records & History</a>
+        <a class="nav-link" href="./information.html">Guide</a>
         <span class="pill status-pill" id="status-pill">LOADING DATA</span>
       </div>
     </nav>
@@ -79,8 +77,8 @@
         <h1>Every battle.<br><em>One leaderboard.</em></h1>
         <p class="lede">Follow teams and players across the ULTRAbullet Team Battles. Explore long-term standings, compare seasonal performance and revisit the tournament archive.</p>
         <div class="hero-actions">
-          <a class="primary-action" href="#leaderboard">Explore rankings <span aria-hidden="true">↗</span></a>
-          <a class="secondary-action" href="#battle-history">Browse battle history</a>
+          <a class="primary-action" href="./rankings.html">Explore rankings <span aria-hidden="true">↗</span></a>
+          <a class="secondary-action" href="./records.html">Browse records &amp; history</a>
         </div>
       </div>
       <aside class="hero-note arena-panel" aria-label="About the leaderboard">
@@ -104,6 +102,33 @@
       <div class="stat"><span class="stat-label">Battles indexed</span><strong class="stat-value" id="stat-battles">—</strong></div>
       <div class="stat"><span class="stat-label">Teams ranked</span><strong class="stat-value" id="stat-teams">—</strong></div>
       <div class="stat"><span class="stat-label">Players ranked</span><strong class="stat-value" id="stat-players">—</strong></div>
+    </section>
+
+    <section class="home-pathways" aria-labelledby="home-pathways-title">
+      <div class="home-pathways-heading">
+        <div><span class="eyebrow">FIND YOUR WAY</span><h2 id="home-pathways-title">Explore the archive</h2></div>
+        <p>Choose the area that matches what you are looking for. Detailed statistics remain available in each section.</p>
+      </div>
+      <div class="home-pathways-grid">
+        <a class="home-pathway-card" href="./rankings.html">
+          <span class="pathway-kicker">01 / RESULTS</span>
+          <strong>Rankings</strong>
+          <span>Team and player standings, time periods and the global contributor table.</span>
+          <span class="pathway-cta">Explore rankings <span aria-hidden="true">↗</span></span>
+        </a>
+        <a class="home-pathway-card" href="./analytics.html">
+          <span class="pathway-kicker">02 / PERFORMANCE</span>
+          <strong>Analytics</strong>
+          <span>Competition trends, head-to-head comparisons and individual career profiles.</span>
+          <span class="pathway-cta">Explore analytics <span aria-hidden="true">↗</span></span>
+        </a>
+        <a class="home-pathway-card" href="./records.html">
+          <span class="pathway-kicker">03 / HISTORY</span>
+          <strong>Records &amp; History</strong>
+          <span>Season champions, career achievements and the complete battle archive.</span>
+          <span class="pathway-cta">Explore records <span aria-hidden="true">↗</span></span>
+        </a>
+      </div>
     </section>
 
     <section class="dashboard-grid" id="overview" aria-label="Competition overview">
