@@ -27,4 +27,4 @@ jobs:
           node --check docs/js/analytics.js
           node --check docs/js/profile.js
       - name: Run analytics regression tests
-        run: node --test scripts/tests/test_analytics.js
+        run: node --test scripts/tests/test_analytics.js scripts/tests/test_profile_integration.js
