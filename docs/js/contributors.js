@@ -4,7 +4,6 @@
   const state={all:[],query:"",sort:"contribution_points",page:1,pageSize:50};
   const number=value=>Number(value||0).toLocaleString(undefined,{maximumFractionDigits:1});
   const escapeHtml=value=>String(value??"").replace(/[&<>"']/g,char=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[char]));
-  const initialLetter=value=>{const text=String(value??"").trim();const match=text.match(/[\p{L}\p{N}]/u);return (match?match[0]:Array.from(text)[0]||"?").toUpperCase();};
   const formatDate=value=>{
     if(value===null||value===undefined||value==="")return "—";
     const date=new Date(Number(value));
@@ -60,7 +59,7 @@
     $("contributors-rows").innerHTML=pageRows.map(row=>{
       const teamRows=(row.teams||[]).map(team=>'<li><a href="'+escapeHtml(teamProfileUrl(team.id))+'">'+escapeHtml(team.name||team.id)+'</a><span>'+number(team.contribution_points)+' pts</span></li>').join("");
       const teamCell='<details class="contributor-team-details"><summary>'+number(row.teams_count)+' teams</summary><ul>'+teamRows+'</ul></details>';
-      const avatar=escapeHtml(initialLetter(row.name));
+      const avatar=escapeHtml(String(row.name||"?").trim().slice(0,1).toUpperCase()||"?");
       return '<tr><td class="contributor-rank '+(row.rank<=3?"top":"")+'">#'+number(row.rank)+'</td>'+
         '<td><div class="contributor-player"><span class="contributor-player-mark">'+avatar+'</span><div>'+playerLink(row)+'<small class="contributor-player-note">'+(row.profile_available?"Open contributor profile":"Open Lichess profile")+'</small></div></div></td>'+
         '<td class="numeric">'+number(row.contribution_points)+'</td><td class="numeric">'+number(row.battles_listed)+'</td>'+
