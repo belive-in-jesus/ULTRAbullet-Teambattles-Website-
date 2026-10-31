@@ -140,6 +140,23 @@ class AggregatePeriodTests(unittest.TestCase):
                 {row["id"] for row in json.loads((data_dir / "battle_history.json").read_text(encoding="utf-8"))},
             )
 
+            # Per-battle reports expose the actual recorded standings without
+            # mixing them with cumulative rankings.
+            report = json.loads((data_dir / "battles" / "regular-301.json").read_text(encoding="utf-8"))
+            self.assertEqual(report["battle"]["battle_number"], 301)
+            self.assertEqual(report["summary"]["teams_count"], 1)
+            self.assertEqual(report["teams"][0]["name"], "Test Club")
+            self.assertEqual(report["teams"][0]["rank"], 1)
+            self.assertEqual([row["name"] for row in report["players"]], ["Alice", "Bob"])
+            self.assertEqual([row["rank"] for row in report["players"]], [1, 2])
+            self.assertFalse((data_dir / "battles" / "special-alliance.json").exists())
+
+            # Rank history stores compact cumulative all-time checkpoints at
+            # the last recorded battle of each fixed-number season.
+            rank_index = json.loads((data_dir / "profiles" / "index" / "players-a.json").read_text(encoding="utf-8"))
+            self.assertEqual(rank_index["alice"]["rank_history"], [[250, 1], [300, 1], [301, 1]])
+            self.assertEqual(rank_index["bob"]["rank_history"], [[301, 2]])
+
             players = json.loads((data_dir / "leaderboard_players.json").read_text(encoding="utf-8"))
             self.assertEqual(players[0]["username"], "alice")
             self.assertEqual(players[0]["points"], 520)
