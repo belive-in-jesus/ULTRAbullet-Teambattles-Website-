@@ -10,7 +10,12 @@ ROOT = Path(__file__).resolve().parents[2]
 DOCS = ROOT / "docs"
 PAGES = (
     "index.html",
+    "rankings.html",
+    "analytics.html",
+    "records.html",
+    "contributors.html",
     "hall-of-fame.html",
+    "achievements.html",
     "information.html",
     "profile.html",
 )
@@ -83,25 +88,30 @@ def css_delimiters_are_balanced(source):
 
 
 class WebsiteAssetTests(unittest.TestCase):
-    def test_every_public_page_loads_v2_visual_system_last(self):
+    def test_every_public_page_loads_navigation_layer_after_v2_visual_system(self):
         for page_name in PAGES:
             with self.subTest(page=page_name):
-                page = DOCS / page_name
                 parser = PageAssets()
-                parser.feed(page.read_text(encoding="utf-8"))
+                parser.feed((DOCS / page_name).read_text(encoding="utf-8"))
                 self.assertIn("css/v2-visual-system.css", parser.stylesheets)
-                expected_last = (
-                    "css/profile-analytics.css"
-                    if page_name == "profile.html"
-                    else "css/dashboard-analytics.css"
-                    if page_name == "index.html"
-                    else "css/v2-visual-system.css"
-                )
+                self.assertIn("css/navigation-hubs.css", parser.stylesheets)
                 self.assertEqual(
                     parser.stylesheets[-1],
-                    expected_last,
-                    "The shared V2 stylesheet and any page-specific analytics layer must load in the correct order.",
+                    "css/navigation-hubs.css",
+                    "The shared navigation and hub layout layer must load after each page's visual system.",
                 )
+                if page_name == "index.html":
+                    self.assertIn("css/dashboard-analytics.css", parser.stylesheets)
+                    self.assertLess(
+                        parser.stylesheets.index("css/dashboard-analytics.css"),
+                        parser.stylesheets.index("css/navigation-hubs.css"),
+                    )
+                if page_name == "profile.html":
+                    self.assertIn("css/profile-analytics.css", parser.stylesheets)
+                    self.assertLess(
+                        parser.stylesheets.index("css/profile-analytics.css"),
+                        parser.stylesheets.index("css/navigation-hubs.css"),
+                    )
 
     def test_local_stylesheets_and_scripts_exist(self):
         for page_name in PAGES:
@@ -197,10 +207,10 @@ class WebsiteAssetTests(unittest.TestCase):
         self.assertEqual(overview["latest_battle"]["battle_number"], 643)
 
     def test_planned_special_events_remain_explicitly_disabled(self):
-        for page_name in PAGES:
-            with self.subTest(page=page_name):
-                source = (DOCS / page_name).read_text(encoding="utf-8")
-                self.assertRegex(source, r'class="nav-link upcoming"[^>]*aria-disabled="true"')
+        source = (DOCS / "records.html").read_text(encoding="utf-8")
+        self.assertIn("<h2>Special Events</h2>", source)
+        self.assertIn("remains planned, not active", source)
+        self.assertNotRegex(source, r'<a\\b[^>]*>\\s*Special Events\\s*</a>')
 
 
 if __name__ == "__main__":
