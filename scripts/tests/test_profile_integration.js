@@ -55,7 +55,7 @@ function makeBattle(number, score, rank, date) {
   };
 }
 
-async function runProfile(type, id, entry, history) {
+async function runProfileWithPayloads(type, id, entry, shard, periods) {
   const elements = new Map();
   const getElement = key => {
     if (!elements.has(key)) elements.set(key, new FakeElement(key));
@@ -63,11 +63,6 @@ async function runProfile(type, id, entry, history) {
   };
 
   const directory = { [id.toLowerCase()]: entry };
-  const shard = { [entry.profile_key]: { history } };
-  const periods = {
-    months: [{ key: "2026-10", label: "October 2026", battle_count: history.length }],
-    seasons: [{ key: "season-13", label: "Season 13", battle_count: history.length, complete: false }]
-  };
 
   const fetch = async url => {
     let payload;
@@ -114,6 +109,16 @@ async function runProfile(type, id, entry, history) {
   await new Promise(resolve => setImmediate(resolve));
   await new Promise(resolve => setImmediate(resolve));
   return { elements, document };
+}
+
+
+async function runProfile(type, id, entry, history) {
+  const shard = { [entry.profile_key]: { history } };
+  const periods = {
+    months: [{ key: "2026-10", label: "October 2026", battle_count: history.length }],
+    seasons: [{ key: "season-13", label: "Season 13", battle_count: history.length, complete: false }]
+  };
+  return runProfileWithPayloads(type, id, entry, shard, periods);
 }
 
 test("full player-profile startup renders every new analytics module", async () => {
