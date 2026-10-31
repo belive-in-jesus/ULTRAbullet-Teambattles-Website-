@@ -77,6 +77,11 @@ test("global chart renders an accessible SVG with escaped labels and data values
   assert.match(svg, /Monthly battle count/);
   assert.match(svg, /Oct &lt;2026&gt;/);
   assert.match(svg, /26 battles/);
+  assert.match(svg, />Oct<\/text>/);
+  const other = analytics.buildBarChart([{ key: "2026-10", label: "October 2026", battle_count: 26 }], "battle_count", "Other chart", "battles", 12, "other-chart");
+  assert.match(svg, /global-gradient-global/);
+  assert.match(other, /global-gradient-other-chart/);
+  assert.doesNotMatch(svg, /global-gradient-other-chart/);
 });
 
 test("season chart can display all 13 seasons instead of truncating to 12", () => {
