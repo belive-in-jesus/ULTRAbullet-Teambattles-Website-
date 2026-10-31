@@ -29,9 +29,13 @@
     $("pi-prev").disabled = state.page <= 1;
     $("pi-next").disabled = state.page >= pageCount;
     if (!rows.length) {
-      $("pi-rows").innerHTML = '<tr><td colspan="8" class="pi-message">'
-        + (all.length ? "No eligible competitors match this search." : "The Performance Index has not been published yet. It will appear after the next successful full data refresh.")
-        + "</td></tr>";
+      const hasPublishedIndex = all.some(row => Object.prototype.hasOwnProperty.call(row, "performance_index"));
+      const message = !hasPublishedIndex
+        ? "The Performance Index has not been published yet. It will appear after the next successful full data refresh."
+        : all.length
+          ? "No eligible competitors match this search."
+          : "No leaderboard entries are available yet.";
+      $("pi-rows").innerHTML = '<tr><td colspan="8" class="pi-message">' + message + "</td></tr>";
       return;
     }
     $("pi-rows").innerHTML = visible.map((row) => {
