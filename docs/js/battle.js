@@ -5,6 +5,7 @@ const params=new URLSearchParams(window.location.search);
 const battleId=(params.get("id")||"").trim();
 const state={report:null,view:"teams",query:"",showAll:false};
 const fmt=n=>Number.isFinite(Number(n))?Number(n).toLocaleString(undefined,{maximumFractionDigits:1}):"—";
+const initialLetter=value=>{const text=String(value??"").trim();const match=text.match(/[\p{L}\p{N}]/u);return (match?match[0]:Array.from(text)[0]||"?").toUpperCase();};
 const date=v=>{const d=new Date(Number(v));return Number.isFinite(d.getTime())?d.toLocaleDateString(undefined,{year:"numeric",month:"long",day:"numeric"}):"Date not available";};
 function status(message,error){const node=get("battle-status");node.textContent=message;node.classList.toggle("error",!!error);}
 function showRows(){
@@ -23,7 +24,12 @@ function showRows(){
  shown.forEach((item,index)=>{
   const row=document.createElement("tr");
   const rank=document.createElement("td");rank.className="rank-cell";rank.textContent="#"+fmt(Number(item.rank)>0?item.rank:index+1);row.appendChild(rank);
-  const name=document.createElement("td");name.className="result-name";name.textContent=item.name||item.id||"Unknown";row.appendChild(name);
+  const label=String(item.name||item.id||"Unknown");
+  const name=document.createElement("td");name.className="result-name";
+  const identity=document.createElement("div");identity.className="result-identity";
+  const mark=document.createElement("span");mark.className="result-initial";mark.textContent=initialLetter(label);mark.setAttribute("aria-hidden","true");
+  const copy=document.createElement("span");copy.className="result-name-text";copy.textContent=label;
+  identity.appendChild(mark);identity.appendChild(copy);name.appendChild(identity);row.appendChild(name);
   const score=document.createElement("td");score.className="number-cell";score.textContent=fmt(item.score);row.appendChild(score);
   const profile=document.createElement("td");const link=document.createElement("a");link.className="result-profile";link.textContent="Profile ↗";link.href="./profile.html?type="+(state.view==="teams"?"team":"player")+"&id="+encodeURIComponent(item.id||"");profile.appendChild(link);row.appendChild(profile);
   body.appendChild(row);
