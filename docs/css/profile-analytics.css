@@ -401,3 +401,63 @@
 .pi-profile-empty {padding:14px 2px;color:#91a7bc;font-size:.78rem;line-height:1.65;}
 @media(max-width:760px){.pi-profile-components{grid-template-columns:repeat(2,minmax(0,1fr));}.pi-profile-main{align-items:flex-start;flex-direction:column;}.pi-profile-meta{text-align:left;}}
 @media(max-width:420px){.pi-profile-components{grid-template-columns:1fr 1fr;gap:12px 9px;}}
+
+
+/* Historical Performance Index checkpoints and season comparisons. */
+.pi-history-block {
+  margin-top: 22px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(132,160,190,.16);
+}
+.pi-history-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+.pi-history-heading strong,
+.pi-history-heading span { display: block; }
+.pi-history-heading strong { color: #edf5fb; font-size: .86rem; }
+.pi-history-heading span,
+.pi-history-heading small,
+.pi-history-note { color: #8fa5ba; font-size: .62rem; line-height: 1.6; }
+.pi-history-heading span { margin-top: 4px; }
+.pi-history-heading small { white-space: nowrap; }
+.pi-history-chart { width: 100%; overflow: hidden; }
+.pi-history-svg { display: block; width: 100%; height: auto; }
+.pi-history-table-wrap { width: 100%; overflow-x: auto; margin-top: 10px; }
+.pi-history-table { width: 100%; border-collapse: collapse; min-width: 620px; }
+.pi-history-table th,
+.pi-history-table td {
+  padding: 9px 10px;
+  border-bottom: 1px solid rgba(132,160,190,.12);
+  color: #aebfce;
+  font-size: .64rem;
+  text-align: left;
+  white-space: nowrap;
+}
+.pi-history-table th {
+  color: #7f98ad;
+  font-family: "DM Mono", monospace;
+  font-size: .54rem;
+  font-weight: 500;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+.pi-history-table .number-cell { text-align: right; }
+.pi-history-table td:nth-child(3) { color: #eaf7fb; font-weight: 700; }
+.pi-history-note { margin: 10px 0 0; }
+.pi-history-empty {
+  padding: 15px;
+  border: 1px dashed rgba(132,160,190,.2);
+  border-radius: 10px;
+  color: #91a7bc;
+  font-size: .68rem;
+  line-height: 1.6;
+}
+@media (max-width: 680px) {
+  .pi-history-heading { flex-direction: column; }
+  .pi-history-svg { min-width: 620px; }
+  .pi-history-chart { overflow-x: auto; }
+}
