@@ -70,6 +70,11 @@
     $("compare-results").classList.add("hidden");
     $("compare-message").textContent="Competitor type changed. Enter two "+(state.kind==="team"?"team IDs":"Lichess usernames")+".";
   }));
+  document.querySelectorAll("[data-kind]").forEach(item=>{
+    const active=item.dataset.kind===state.kind;
+    item.classList.toggle("active",active);
+    item.setAttribute("aria-pressed",String(active));
+  });
   $("compare-a").value=state.a;
   $("compare-form").addEventListener("submit",event=>{event.preventDefault();compare();});
   if(state.a){$("compare-message").textContent="First competitor prefilled. Enter the second competitor."; $("compare-b").focus();}
