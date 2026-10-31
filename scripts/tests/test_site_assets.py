@@ -98,10 +98,16 @@ class WebsiteAssetTests(unittest.TestCase):
                 parser.feed((DOCS / page_name).read_text(encoding="utf-8"))
                 self.assertIn("css/v2-visual-system.css", parser.stylesheets)
                 self.assertIn("css/navigation-hubs.css", parser.stylesheets)
+                self.assertIn("css/arena-design-system.css", parser.stylesheets)
+                self.assertLess(
+                    parser.stylesheets.index("css/navigation-hubs.css"),
+                    parser.stylesheets.index("css/arena-design-system.css"),
+                    "The Arena visual layer must load after the shared navigation and hub layer.",
+                )
                 self.assertEqual(
                     parser.stylesheets[-1],
-                    "css/navigation-hubs.css",
-                    "The shared navigation and hub layout layer must load after each page's visual system.",
+                    "css/arena-design-system.css",
+                    "The shared Competitive Arena layer must load last on every public page.",
                 )
                 if page_name == "index.html":
                     self.assertIn("css/dashboard-analytics.css", parser.stylesheets)
@@ -116,6 +122,30 @@ class WebsiteAssetTests(unittest.TestCase):
                         parser.stylesheets.index("css/navigation-hubs.css"),
                     )
 
+    def test_all_public_pages_share_the_same_primary_navigation(self):
+        expected_links = (
+            "./index.html",
+            "./rankings.html",
+            "./performance-index.html",
+            "./analytics.html",
+            "./compare.html",
+            "./records.html",
+            "./information.html",
+        )
+        for page_name in PAGES:
+            with self.subTest(page=page_name):
+                source = (DOCS / page_name).read_text(encoding="utf-8")
+                nav_match = re.search(r"<nav\\b[\\s\\S]*?</nav>", source)
+                self.assertIsNotNone(nav_match, "Every public page must have the shared primary navigation.")
+                nav = nav_match.group(0)
+                for href in expected_links:
+                    self.assertIn(f'href="{href}"', nav)
+                self.assertEqual(
+                    len(re.findall(r'class="nav-link active"', nav)),
+                    1,
+                    "Exactly one primary navigation item must be active.",
+                )
+
     def test_local_stylesheets_and_scripts_exist(self):
         for page_name in PAGES:
             with self.subTest(page=page_name):
@@ -127,7 +157,7 @@ class WebsiteAssetTests(unittest.TestCase):
                         self.assertTrue(path.is_file(), f"{page_name} references missing asset {reference}")
 
     def test_v2_stylesheets_have_balanced_delimiters(self):
-        for filename in ("v2-visual-system.css", "profile.css", "profile-analytics.css", "dashboard-analytics.css", "battle.css", "performance-index.css", "compare.css", "achievements.css"):
+        for filename in ("v2-visual-system.css", "arena-design-system.css", "profile.css", "profile-analytics.css", "dashboard-analytics.css", "battle.css", "performance-index.css", "compare.css", "achievements.css"):
             with self.subTest(stylesheet=filename):
                 source = (DOCS / "css" / filename).read_text(encoding="utf-8")
                 self.assertTrue(
