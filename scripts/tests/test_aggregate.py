@@ -15,6 +15,51 @@ SPEC.loader.exec_module(aggregate)
 
 
 class AggregatePeriodTests(unittest.TestCase):
+    def test_performance_index_uses_normalized_placements_and_separate_rank(self):
+        records = [{
+            "id": f"battle-{index}",
+            "name": f"{index}th ULTRAbullet Team Battle",
+            "startsAt": index * 1000,
+            "rank": 1,
+            "nbPlayers": 10,
+            "score": 100 - index,
+        } for index in range(1, 11)]
+
+        stats = aggregate.compute_stats(records)
+        self.assertEqual(stats["performance_index"], 91.0)
+        self.assertTrue(stats["performance_index_eligible"])
+        self.assertEqual(stats["performance_index_battles"], 10)
+        self.assertEqual(stats["performance_index_components"], {
+            "average_performance": 100.0,
+            "consistency": 100.0,
+            "recent_performance": 100.0,
+            "participation": 20.0,
+        })
+
+        rows = [
+            {"username": "Eligible", **stats},
+            {"username": "Provisional", "performance_index": 99.0,
+             "performance_index_eligible": False, "performance_index_battles": 4},
+        ]
+        aggregate.assign_performance_index_ranks(rows)
+        self.assertEqual(rows[0]["performance_index_rank"], 1)
+        self.assertIsNone(rows[1]["performance_index_rank"])
+
+    def test_performance_index_is_provisional_below_ten_ranked_battles(self):
+        records = [{
+            "id": f"battle-{index}",
+            "startsAt": index * 1000,
+            "rank": 2,
+            "nbTeams": 5,
+            "score": 10,
+        } for index in range(9)]
+
+        stats = aggregate.compute_stats(records)
+        self.assertFalse(stats["performance_index_eligible"])
+        self.assertEqual(stats["performance_index_battles"], 9)
+        self.assertIsNotNone(stats["performance_index"])
+        self.assertEqual(stats["performance_index_components"]["average_performance"], 75.0)
+
     def test_worker_errors_abort_before_existing_data_is_modified(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
