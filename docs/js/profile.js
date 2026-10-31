@@ -204,17 +204,16 @@ function buildRankHistorySvg(checkpoints){
     const y=yFor(rank);
     return '<g><line x1="'+left+'" y1="'+y.toFixed(1)+'" x2="'+(width-right)+'" y2="'+y.toFixed(1)+'" stroke="rgba(151,178,203,.16)" stroke-dasharray="3 7"/><text x="'+(left-12)+'" y="'+(y+4).toFixed(1)+'" text-anchor="end" class="analytics-axis-label">#'+number(rank)+'</text></g>';
   }).join("");
-  const points=rows.map(item=>({ ...item,x:xFor(item.battle),y:yFor(item.rank) }));
-  const path=points.map((point,index)=>(index?"L":"M")+point.x.toFixed(1)+" "+point.y.toFixed(1)).join(" ");
+  const points=rows.map(item=>({ ...item,season:Math.floor((item.battle-1)/50)+1,x:xFor(item.battle),y:yFor(item.rank) }));
+  // Do not draw an implied trend across seasons in which the competitor has no recorded result.
+  const path=points.map((point,index)=>{
+    const previous=points[index-1];
+    const command=!previous||point.season!==previous.season+1?"M":"L";
+    return command+point.x.toFixed(1)+" "+point.y.toFixed(1);
+  }).join(" ");
   const line='<path d="'+path+'" fill="none" stroke="#70e2e8" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>';
-  const circles=points.map(point=>{
-    const season=Math.floor((point.battle-1)/50)+1;
-    return '<circle cx="'+point.x.toFixed(1)+'" cy="'+point.y.toFixed(1)+'" r="5" fill="#b19cff" stroke="#101c2d" stroke-width="2"><title>After Battle '+point.battle+' · All-time rank #'+point.rank+' · Season '+season+'</title></circle>';
-  }).join("");
-  const labels=points.map(point=>{
-    const season=Math.floor((point.battle-1)/50)+1;
-    return '<text x="'+point.x.toFixed(1)+'" y="'+(height-19)+'" text-anchor="middle" class="analytics-axis-label">S'+season+'</text>';
-  }).join("");
+  const circles=points.map(point=>'<circle cx="'+point.x.toFixed(1)+'" cy="'+point.y.toFixed(1)+'" r="5" fill="#b19cff" stroke="#101c2d" stroke-width="2"><title>After Battle '+point.battle+' · All-time rank #'+point.rank+' · Season '+point.season+'</title></circle>').join("");
+  const labels=points.map(point=>'<text x="'+point.x.toFixed(1)+'" y="'+(height-19)+'" text-anchor="middle" class="analytics-axis-label">S'+point.season+'</text>').join("");
   return '<svg class="analytics-svg" viewBox="0 0 '+width+' '+height+'" role="img" aria-label="Cumulative all-time rank history. Lower rank numbers are better.">'+grid+line+circles+labels+'</svg>';
 }
 function renderChart(){
