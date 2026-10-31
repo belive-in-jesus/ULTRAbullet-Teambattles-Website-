@@ -97,16 +97,26 @@
       </article>
     </section>
 
-    <section class="profile-section">
+    <section class="profile-section" id="competitive-trajectory">
       <div class="profile-section-heading analytics-heading">
-        <div><span class="eyebrow">PERFORMANCE TREND</span><h2>Score progression</h2><p class="section-description">Track scoring performance across battles. The dashed line marks the selected period's average.</p></div>
-        <label class="analytics-range-control" for="trend-range"><span>Chart range</span><select id="trend-range" class="select-input"><option value="10">Last 10 battles</option><option value="25" selected>Last 25 battles</option><option value="50">Last 50 battles</option><option value="100">Last 100 battles</option><option value="all">Full selected period</option></select></label>
+        <div><span class="eyebrow">COMPETITIVE TRAJECTORY</span><h2>Performance over time</h2><p class="section-description">Switch between event scores and the cumulative all-time ranking. Lower rank numbers are better.</p></div>
+        <div class="chart-controls">
+          <div class="chart-mode-switch" role="group" aria-label="Choose performance chart">
+            <button class="chart-mode-button active" id="chart-mode-score" type="button" aria-pressed="true">Score</button>
+            <button class="chart-mode-button" id="chart-mode-rank" type="button" aria-pressed="false">All-time rank</button>
+          </div>
+          <label class="analytics-range-control" id="trend-range-wrap" for="trend-range"><span>Chart range</span><select id="trend-range" class="select-input"><option value="10">Last 10 battles</option><option value="25" selected>Last 25 battles</option><option value="50">Last 50 battles</option><option value="100">Last 100 battles</option><option value="all">Full selected period</option></select></label>
+        </div>
       </div>
       <article class="profile-panel analytics-chart-panel">
         <div class="profile-chart analytics-line-chart" id="profile-chart" aria-label="Recent battle score chart">
           <div class="profile-loading">Loading battle history…</div>
         </div>
-        <div class="chart-legend analytics-legend"><span><i class="analytics-legend-line"></i> Score per battle</span><span><i class="analytics-legend-average"></i> Period average</span><span id="chart-range">No data</span></div>
+        <div class="chart-legend analytics-legend">
+          <span><i class="analytics-legend-line"></i><span id="chart-legend-primary">Score per battle</span></span>
+          <span id="chart-legend-secondary-wrap"><i class="analytics-legend-average"></i><span id="chart-legend-secondary">Period average</span></span>
+          <span id="chart-range">No data</span>
+        </div>
       </article>
     </section>
 
