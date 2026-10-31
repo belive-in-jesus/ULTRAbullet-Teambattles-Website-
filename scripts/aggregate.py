@@ -54,6 +54,70 @@ def longest_podium_streak(records: list) -> int:
     return longest
 
 
+def performance_index_stats(records: list) -> dict:
+    """Calculate a transparent 0-100 index from normalized battle placements.
+
+    The same formula works for players and teams because each finish is
+    normalized against that battle's participant/team count. Scores are
+    provisional until ten ranked results are available.
+    """
+    ordered = sorted(records, key=lambda row: int(row.get("startsAt") or 0))
+    performances = []
+    for row in ordered:
+        try:
+            rank = int(row.get("rank"))
+            field_size = int(row.get("nbPlayers") if row.get("nbPlayers") is not None else row.get("nbTeams"))
+        except (TypeError, ValueError):
+            continue
+        if field_size < 2 or rank < 1 or rank > field_size:
+            continue
+        performances.append(((field_size - rank) / (field_size - 1)) * 100)
+
+    if not performances:
+        return {
+            "performance_index": None,
+            "performance_index_eligible": False,
+            "performance_index_battles": 0,
+            "performance_index_components": None,
+        }
+
+    average = sum(performances) / len(performances)
+    recent = performances[-10:]
+    recent_average = sum(recent) / len(recent)
+    variance = sum((value - average) ** 2 for value in performances) / len(performances)
+    consistency = max(0.0, 100.0 - (variance ** 0.5) * 2)
+    participation = min(100.0, len(records) / 50 * 100)
+    index = average * 0.40 + consistency * 0.25 + recent_average * 0.20 + participation * 0.15
+    return {
+        "performance_index": round(index, 1),
+        "performance_index_eligible": len(performances) >= 10,
+        "performance_index_battles": len(performances),
+        "performance_index_components": {
+            "average_performance": round(average, 1),
+            "consistency": round(consistency, 1),
+            "recent_performance": round(recent_average, 1),
+            "participation": round(participation, 1),
+        },
+    }
+
+
+def assign_performance_index_ranks(rows: list) -> None:
+    """Add a separate PI rank without changing the all-time points ranking."""
+    eligible = [
+        row for row in rows
+        if row.get("performance_index_eligible") and row.get("performance_index") is not None
+    ]
+    eligible.sort(key=lambda row: (
+        -float(row["performance_index"]),
+        -int(row.get("performance_index_battles") or 0),
+        str(row.get("username") or row.get("team_name") or "").lower(),
+    ))
+    for row in rows:
+        row["performance_index_rank"] = None
+    for index, row in enumerate(eligible, 1):
+        row["performance_index_rank"] = index
+
+
 def compute_stats(records: list) -> dict:
     if not records:
         return {}
@@ -70,6 +134,7 @@ def compute_stats(records: list) -> dict:
         "active_since": records[0].get("startsAt"),
         "last_played": records[-1].get("startsAt"),
         "longest_podium_streak": longest_podium_streak(records),
+        **performance_index_stats(records),
     }
     if ranks:
         podiums = sum(rank <= 3 for rank in ranks)
@@ -1057,6 +1122,10 @@ def main() -> int:
             "history": history,
             "members": summarize_member_records(member_records_by_team.get(team_id, []), "player_id", "player_name"),
         }
+
+    # PI has its own ranking and never alters the established points leaderboard.
+    assign_performance_index_ranks(players)
+    assign_performance_index_ranks(teams)
 
     for shards in profile_shards.values():
         for filename, payload in shards.items():
