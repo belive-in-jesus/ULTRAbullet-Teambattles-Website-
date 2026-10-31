@@ -31,4 +31,4 @@ jobs:
           node --check docs/js/contributors.js
           node --check docs/js/dashboard-analytics.js
       - name: Run analytics regression tests
-        run: node --test scripts/tests/test_analytics.js scripts/tests/test_profile_integration.js scripts/tests/test_dashboard_analytics.js
+        run: node --test scripts/tests/test_analytics.js scripts/tests/test_profile_integration.js scripts/tests/test_dashboard_analytics.js scripts/tests/test_battle_identity.js
