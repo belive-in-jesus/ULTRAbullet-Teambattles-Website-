@@ -3,7 +3,7 @@ const $=id=>document.getElementById(id);
 const params=new URLSearchParams(window.location.search);
 const type=params.get("type")==="team"?"team":"player";
 const requestedId=(params.get("id")||"").trim();
-const state={entry:null,history:[],periods:null,period:"all",specific:"",query:"",page:1,pageSize:25,filtered:[],chartRange:25};
+const state={entry:null,history:[],periods:null,period:"all",specific:"",query:"",page:1,pageSize:25,filtered:[],chartRange:25,chartMode:"score"};
 const number=v=>Number(v||0).toLocaleString(undefined,{maximumFractionDigits:1});
 const escapeHtml=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const formatDate=v=>{if(v===null||v===undefined||v==="")return"Not available";const d=new Date(Number(v));return Number.isNaN(d.getTime())?"Not available":d.toLocaleDateString(undefined,{year:"numeric",month:"short",day:"numeric"});};
@@ -185,7 +185,67 @@ function renderStats(){
   ];
   $("profile-records").innerHTML=fields.map(([label,value,caption])=>'<article class="profile-record"><span>'+escapeHtml(label)+'</span><strong>'+escapeHtml(value??"—")+'</strong><small>'+escapeHtml(caption)+'</small></article>').join("");
 }
+function buildRankHistorySvg(checkpoints){
+  const rows=(Array.isArray(checkpoints)?checkpoints:[])
+    .map(item=>({battle:Number(item?.[0]),rank:Number(item?.[1])}))
+    .filter(item=>Number.isFinite(item.battle)&&item.battle>0&&Number.isFinite(item.rank)&&item.rank>0)
+    .sort((a,b)=>a.battle-b.battle);
+  if(!rows.length)return '<div class="profile-empty">Cumulative rank history will appear after the next successful data refresh.</div>';
+
+  const width=960,height=278,left=66,right=24,top=25,bottom=52;
+  const plotWidth=width-left-right,plotHeight=height-top-bottom;
+  const maxRank=Math.max(1,...rows.map(item=>item.rank));
+  const axisMax=Math.max(3,Math.ceil(maxRank/10)*10);
+  const minBattle=rows[0].battle,maxBattle=rows[rows.length-1].battle;
+  const xFor=battle=>left+(maxBattle===minBattle?plotWidth/2:(battle-minBattle)/(maxBattle-minBattle)*plotWidth);
+  const yFor=rank=>top+(rank-1)/(axisMax-1||1)*plotHeight;
+  const ticks=[...new Set([1,Math.max(2,Math.round(axisMax/2)),axisMax])];
+  const grid=ticks.map(rank=>{
+    const y=yFor(rank);
+    return '<g><line x1="'+left+'" y1="'+y.toFixed(1)+'" x2="'+(width-right)+'" y2="'+y.toFixed(1)+'" stroke="rgba(151,178,203,.16)" stroke-dasharray="3 7"/><text x="'+(left-12)+'" y="'+(y+4).toFixed(1)+'" text-anchor="end" class="analytics-axis-label">#'+number(rank)+'</text></g>';
+  }).join("");
+  const points=rows.map(item=>({ ...item,x:xFor(item.battle),y:yFor(item.rank) }));
+  const path=points.map((point,index)=>(index?"L":"M")+point.x.toFixed(1)+" "+point.y.toFixed(1)).join(" ");
+  const line='<path d="'+path+'" fill="none" stroke="#70e2e8" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>';
+  const circles=points.map(point=>{
+    const season=Math.floor((point.battle-1)/50)+1;
+    return '<circle cx="'+point.x.toFixed(1)+'" cy="'+point.y.toFixed(1)+'" r="5" fill="#b19cff" stroke="#101c2d" stroke-width="2"><title>After Battle '+point.battle+' · All-time rank #'+point.rank+' · Season '+season+'</title></circle>';
+  }).join("");
+  const labels=points.map(point=>{
+    const season=Math.floor((point.battle-1)/50)+1;
+    return '<text x="'+point.x.toFixed(1)+'" y="'+(height-19)+'" text-anchor="middle" class="analytics-axis-label">S'+season+'</text>';
+  }).join("");
+  return '<svg class="analytics-svg" viewBox="0 0 '+width+' '+height+'" role="img" aria-label="Cumulative all-time rank history. Lower rank numbers are better.">'+grid+line+circles+labels+'</svg>';
+}
 function renderChart(){
+  const scoreButton=$("chart-mode-score"),rankButton=$("chart-mode-rank");
+  const rangeWrap=$("trend-range-wrap"),secondaryLegend=$("chart-legend-secondary-wrap");
+  if(scoreButton&&rankButton){
+    if(state.chartMode==="rank"){
+      scoreButton.classList.remove("active");rankButton.classList.add("active");
+      scoreButton.setAttribute("aria-pressed","false");rankButton.setAttribute("aria-pressed","true");
+    }else{
+      rankButton.classList.remove("active");scoreButton.classList.add("active");
+      rankButton.setAttribute("aria-pressed","false");scoreButton.setAttribute("aria-pressed","true");
+    }
+  }
+  if(state.chartMode==="rank"){
+    rangeWrap?.classList.add("hidden");
+    secondaryLegend?.classList.add("hidden");
+    $("chart-legend-primary").textContent="Cumulative all-time rank";
+    const checkpoints=state.entry?.rank_history||[];
+    $("chart-range").textContent=checkpoints.length
+      ?"Season checkpoints · "+checkpoints.length+" recorded"
+      :"No historical checkpoints";
+    $("profile-chart").innerHTML=buildRankHistorySvg(checkpoints);
+    $("profile-chart").setAttribute("aria-label","Cumulative all-time rank history");
+    return;
+  }
+
+  rangeWrap?.classList.remove("hidden");
+  secondaryLegend?.classList.remove("hidden");
+  $("chart-legend-primary").textContent="Score per battle";
+  $("chart-legend-secondary").textContent="Period average";
   const analytics=window.UBTAnalytics;
   if(!analytics){$("profile-chart").innerHTML='<div class="profile-empty">The analytics module could not be loaded.</div>';return;}
   const rows=analytics.chronological(filteredHistoryForStats());
@@ -193,6 +253,7 @@ function renderChart(){
   const visible=limit?rows.slice(-limit):rows;
   $("chart-range").textContent=visible.length?formatDate(visible[0].startsAt)+" – "+formatDate(visible[visible.length-1].startsAt):"No data";
   $("profile-chart").innerHTML=analytics.buildScoreTrendSvg(rows,limit);
+  $("profile-chart").setAttribute("aria-label","Recent battle score chart");
 }
 function renderAnalytics(){
   const analytics=window.UBTAnalytics;
@@ -276,6 +337,8 @@ async function init(){
   state.periods=periods;
   renderAchievements();
   renderMemberStatistics(profile);
+  $("chart-mode-score").addEventListener("click",()=>{state.chartMode="score";renderChart();});
+  $("chart-mode-rank").addEventListener("click",()=>{state.chartMode="rank";renderChart();});
   $("trend-range").addEventListener("change",()=>{state.chartRange=$("trend-range").value;renderChart();});
   $("history-period").addEventListener("change",()=>{
     state.period=$("history-period").value;state.page=1;
