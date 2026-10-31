@@ -167,6 +167,31 @@ function renderMemberStatistics(profile){
   }).join("");
 }
 
+function renderPerformanceIndex(){
+  const target=$("profile-pi-card");
+  const row=state.entry||{};
+  if(row.performance_index===undefined){
+    target.innerHTML='<div class="pi-profile-empty">Performance Index data will appear after the next successful full statistics refresh.</div>';
+    return;
+  }
+  const value=row.performance_index;
+  const eligible=Boolean(row.performance_index_eligible)&&row.performance_index_rank!=null;
+  const components=row.performance_index_components||{};
+  const componentRows=[
+    ["Average performance",components.average_performance,"40%"],
+    ["Consistency",components.consistency,"25%"],
+    ["Recent performance",components.recent_performance,"20%"],
+    ["Participation",components.participation,"15%"]
+  ];
+  const format=value=>value==null?"—":Number(value).toFixed(1);
+  const componentMarkup=componentRows.map(([label,score,weight])=>
+    '<div class="pi-profile-component"><div><span>'+escapeHtml(label)+'</span><strong>'+format(score)+'</strong></div><div class="pi-profile-track"><i style="width:'+Math.max(0,Math.min(100,Number(score)||0))+'%"></i></div><small>'+weight+' weight</small></div>'
+  ).join("");
+  const status=eligible
+    ?'<span class="pi-profile-status">Official PI rank · #'+escapeHtml(row.performance_index_rank)+'</span>'
+    :'<span class="pi-profile-status provisional">Provisional · '+escapeHtml(row.performance_index_battles||0)+' / 10 ranked battles</span>';
+  target.innerHTML='<div class="pi-profile-main"><div><span class="pi-profile-label">PERFORMANCE INDEX</span><strong class="pi-profile-value">'+format(value)+'</strong><span class="pi-profile-scale">out of 100</span></div><div class="pi-profile-meta">'+status+'<p>Based on '+escapeHtml(row.performance_index_battles||0)+' valid ranked battle results. The PI is independent of cumulative points.</p><a href="./performance-index.html">How the index works ↗</a></div></div><div class="pi-profile-components">'+componentMarkup+'</div>';
+}
 function renderStats(){
   const m=metrics(filteredHistoryForStats());
   $("stat-points").textContent=number(m.points);
@@ -311,7 +336,7 @@ function renderPeriodOptions(){
   if(select.options.length){state.specific=select.options[0].value;select.value=state.specific;$("specific-period-wrap").classList.remove("hidden");}
   else{$("specific-period-wrap").classList.add("hidden");state.specific="";}
 }
-function renderAll(){renderStats();renderChart();renderAnalytics();renderHistory();}
+function renderAll(){renderStats();renderPerformanceIndex();renderChart();renderAnalytics();renderHistory();}
 async function init(){
   if(!requestedId){$("profile-name").textContent="Profile not found";$("profile-description").textContent="This profile URL is missing its competitor identifier.";return;}
   $("profile-kind").textContent=type==="team"?"TEAM PROFILE":"PLAYER PROFILE";
