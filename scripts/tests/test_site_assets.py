@@ -19,6 +19,8 @@ PAGES = (
     "information.html",
     "profile.html",
     "battle.html",
+    "performance-index.html",
+    "compare.html",
 )
 
 
@@ -125,7 +127,7 @@ class WebsiteAssetTests(unittest.TestCase):
                         self.assertTrue(path.is_file(), f"{page_name} references missing asset {reference}")
 
     def test_v2_stylesheets_have_balanced_delimiters(self):
-        for filename in ("v2-visual-system.css", "profile.css", "profile-analytics.css", "dashboard-analytics.css", "battle.css"):
+        for filename in ("v2-visual-system.css", "profile.css", "profile-analytics.css", "dashboard-analytics.css", "battle.css", "performance-index.css", "compare.css", "achievements.css"):
             with self.subTest(stylesheet=filename):
                 source = (DOCS / "css" / filename).read_text(encoding="utf-8")
                 self.assertTrue(
@@ -215,6 +217,47 @@ class WebsiteAssetTests(unittest.TestCase):
         ids = re.findall(r'\bid="([^"]+)"', source)
         duplicates = sorted({element_id for element_id in ids if ids.count(element_id) > 1})
         self.assertEqual(duplicates, [], "Dashboard page contains duplicate HTML IDs.")
+
+
+    def test_performance_index_page_has_pagination_and_all_local_assets(self):
+        page = DOCS / "performance-index.html"
+        parser = PageAssets()
+        source = page.read_text(encoding="utf-8")
+        parser.feed(source)
+        self.assertIn("css/performance-index.css", parser.stylesheets)
+        self.assertIn("js/performance-index.js", parser.scripts)
+        for element_id in ("pi-count", "pi-search", "pi-rows", "pi-page-summary", "pi-page", "pi-prev", "pi-next"):
+            self.assertIn(f'id="{element_id}"', source)
+        ids = re.findall(r'\bid="([^"]+)"', source)
+        duplicates = sorted({element_id for element_id in ids if ids.count(element_id) > 1})
+        self.assertEqual(duplicates, [], "Performance Index page contains duplicate HTML IDs.")
+
+    def test_head_to_head_page_loads_core_before_controller(self):
+        page = DOCS / "compare.html"
+        parser = PageAssets()
+        source = page.read_text(encoding="utf-8")
+        parser.feed(source)
+        self.assertIn("css/compare.css", parser.stylesheets)
+        self.assertIn("js/compare-core.js", parser.scripts)
+        self.assertIn("js/compare.js", parser.scripts)
+        self.assertLess(parser.scripts.index("js/compare-core.js"), parser.scripts.index("js/compare.js"))
+        for element_id in ("compare-form", "compare-a", "compare-b", "compare-results", "compare-pi", "shared-battles"):
+            self.assertIn(f'id="{element_id}"', source)
+        ids = re.findall(r'\bid="([^"]+)"', source)
+        duplicates = sorted({element_id for element_id in ids if ids.count(element_id) > 1})
+        self.assertEqual(duplicates, [], "Head-to-head page contains duplicate HTML IDs.")
+
+    def test_global_dashboard_links_both_performance_index_leaderboards(self):
+        source = (DOCS / "index.html").read_text(encoding="utf-8")
+        self.assertIn('id="global-pi-teams"', source)
+        self.assertIn('id="global-pi-players"', source)
+        self.assertIn('href="./performance-index.html"', source)
+
+    def test_profile_exposes_performance_index_and_history_sections(self):
+        source = (DOCS / "profile.html").read_text(encoding="utf-8")
+        self.assertIn('id="profile-performance-index"', source)
+        self.assertIn('id="profile-pi-card"', source)
+        self.assertIn('href="./performance-index.html"', source)
 
 
     def test_published_dashboard_analytics_snapshots_are_consistent(self):
