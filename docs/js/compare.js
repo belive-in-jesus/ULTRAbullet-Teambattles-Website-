@@ -42,8 +42,10 @@
     $("compare-name-a").textContent=a.name;$("compare-name-b").textContent=b.name;
     $("shared-count").textContent=common.length+" shared";
     $("shared-battles").innerHTML=common.length?common.slice(0,100).map(row=>{
-      const sa=Number(row.a.score)||0,sb=Number(row.b.score)||0;
-      const result=sa>sb?'<span class="compare-result-a">'+esc(a.name)+' won</span>':sb>sa?'<span class="compare-result-b">'+esc(b.name)+' won</span>':'<span class="compare-draw">Draw</span>';
+      const sa=row.a.score==null?NaN:Number(row.a.score),sb=row.b.score==null?NaN:Number(row.b.score);
+      const result=!Number.isFinite(sa)||!Number.isFinite(sb)
+        ?'<span class="compare-draw">Score unavailable</span>'
+        :sa>sb?'<span class="compare-result-a">'+esc(a.name)+' won</span>':sb>sa?'<span class="compare-result-b">'+esc(b.name)+' won</span>':'<span class="compare-draw">Draw</span>';
       const battle=String(row.a.name||row.b.name||"ULTRAbullet Team Battle");
       const link=row.a.id?"https://lichess.org/tournament/"+encodeURIComponent(row.a.id):"#";
       const date=row.a.startsAt?new Date(Number(row.a.startsAt)).toLocaleDateString():"—";
