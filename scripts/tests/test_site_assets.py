@@ -210,7 +210,7 @@ class WebsiteAssetTests(unittest.TestCase):
         source = (DOCS / "records.html").read_text(encoding="utf-8")
         self.assertIn("<h2>Special Events</h2>", source)
         self.assertIn("remains planned, not active", source)
-        self.assertNotRegex(source, r'<a[^>]*>\\s*Special Events\\s*</a>')
+        self.assertNotIn('href="./special-events.html"', source)
 
 
 if __name__ == "__main__":
