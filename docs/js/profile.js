@@ -92,7 +92,6 @@ function renderChart(){
   const rows=analytics.chronological(filteredHistoryForStats());
   const limit=state.chartRange==="all"?null:Number(state.chartRange)||25;
   const visible=limit?rows.slice(-limit):rows;
-  $("chart-caption").textContent=visible.length?"Showing "+number(visible.length)+" of "+number(rows.length)+" recorded battles":"No results in this period";
   $("chart-range").textContent=visible.length?formatDate(visible[0].startsAt)+" – "+formatDate(visible[visible.length-1].startsAt):"No data";
   $("profile-chart").innerHTML=analytics.buildScoreTrendSvg(rows,limit);
 }
