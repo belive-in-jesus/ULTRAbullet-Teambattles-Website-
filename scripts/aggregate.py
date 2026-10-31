@@ -86,7 +86,7 @@ def performance_index_stats(records: list) -> dict:
     recent_average = sum(recent) / len(recent)
     variance = sum((value - average) ** 2 for value in performances) / len(performances)
     consistency = max(0.0, 100.0 - (variance ** 0.5) * 2)
-    participation = min(100.0, len(records) / 50 * 100)
+    participation = min(100.0, len(performances) / 50 * 100)
     index = average * 0.40 + consistency * 0.25 + recent_average * 0.20 + participation * 0.15
     return {
         "performance_index": round(index, 1),
