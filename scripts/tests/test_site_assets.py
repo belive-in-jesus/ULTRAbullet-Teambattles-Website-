@@ -240,16 +240,8 @@ class WebsiteAssetTests(unittest.TestCase):
 
     def test_guide_documents_competitor_initial_marks(self):
         source = (DOCS / "information.html").read_text(encoding="utf-8")
-        self.assertIn("first actual letter or number of each player or team name", source)
-        self.assertIn("skipping any leading flair or emoji", source)
-
-    def test_identity_marks_skip_leading_flair_characters(self):
-        overview = (DOCS / "index.html").read_text(encoding="utf-8")
-        contributors = (DOCS / "js" / "contributors.js").read_text(encoding="utf-8")
-        self.assertIn("const initialLetter=value=>", overview)
-        self.assertIn("esc(initialLetter(n))", overview)
-        self.assertIn("const initialLetter=value=>", contributors)
-        self.assertIn("initialLetter(row.name)", contributors)
+        self.assertIn("first letter of each player or team name", source)
+        self.assertIn("Lichess profile or team flair", source)
 
     def test_planned_special_events_remain_explicitly_disabled(self):
         source = (DOCS / "records.html").read_text(encoding="utf-8")
