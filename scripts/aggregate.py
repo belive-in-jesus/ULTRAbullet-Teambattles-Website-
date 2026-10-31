@@ -83,6 +83,139 @@ def compute_stats(records: list) -> dict:
     return stats
 
 
+
+ACHIEVEMENT_DEFINITIONS = {
+    "players": [
+        {"id": "first_steps", "name": "Battle Regular", "description": "Recorded results in 10 official battles.", "criteria": "10 battles", "metric": "tournaments_played", "threshold": 10, "icon": "10+"},
+        {"id": "battle_veteran", "name": "Battle Veteran", "description": "Recorded results in 50 official battles.", "criteria": "50 battles", "metric": "tournaments_played", "threshold": 50, "icon": "50+"},
+        {"id": "century_club", "name": "Century Club", "description": "Recorded results in 100 official battles.", "criteria": "100 battles", "metric": "tournaments_played", "threshold": 100, "icon": "100"},
+        {"id": "podium_finisher", "name": "Podium Finisher", "description": "Finished in the top three at least five times.", "criteria": "5 podiums", "metric": "podiums", "threshold": 5, "icon": "TOP 3"},
+        {"id": "podium_collector", "name": "Podium Collector", "description": "Finished in the top three at least 25 times.", "criteria": "25 podiums", "metric": "podiums", "threshold": 25, "icon": "25×"},
+        {"id": "multi_champion", "name": "Multiple Champion", "description": "Won at least five official battles.", "criteria": "5 wins", "metric": "first_places", "threshold": 5, "icon": "★"},
+        {"id": "podium_streak", "name": "Podium Streak", "description": "Reached the podium in five consecutive numbered battles.", "criteria": "5 consecutive podiums", "metric": "longest_podium_streak", "threshold": 5, "icon": "STREAK"},
+    ],
+    "teams": [
+        {"id": "first_steps", "name": "Active Team", "description": "Recorded results in 10 official battles.", "criteria": "10 battles", "metric": "tournaments_played", "threshold": 10, "icon": "10+"},
+        {"id": "battle_veteran", "name": "Veteran Team", "description": "Recorded results in 50 official battles.", "criteria": "50 battles", "metric": "tournaments_played", "threshold": 50, "icon": "50+"},
+        {"id": "century_club", "name": "Century Club", "description": "Recorded results in 100 official battles.", "criteria": "100 battles", "metric": "tournaments_played", "threshold": 100, "icon": "100"},
+        {"id": "podium_finisher", "name": "Podium Team", "description": "Finished in the top three at least five times.", "criteria": "5 podiums", "metric": "podiums", "threshold": 5, "icon": "TOP 3"},
+        {"id": "podium_collector", "name": "Podium Dynasty", "description": "Finished in the top three at least 25 times.", "criteria": "25 podiums", "metric": "podiums", "threshold": 25, "icon": "25×"},
+        {"id": "multi_champion", "name": "Championship Team", "description": "Won at least five official battles.", "criteria": "5 wins", "metric": "first_places", "threshold": 5, "icon": "★"},
+        {"id": "podium_streak", "name": "Unbroken Form", "description": "Reached the podium in five consecutive numbered battles.", "criteria": "5 consecutive podiums", "metric": "longest_podium_streak", "threshold": 5, "icon": "STREAK"},
+    ],
+}
+
+
+def achievements_for(stats: dict, kind: str) -> list:
+    """Return earned career achievement IDs using transparent all-time thresholds."""
+    definitions = ACHIEVEMENT_DEFINITIONS[kind]
+    earned = []
+    for definition in definitions:
+        try:
+            value = float(stats.get(definition["metric"]) or 0)
+        except (TypeError, ValueError):
+            value = 0
+        if value >= definition["threshold"]:
+            earned.append(definition["id"])
+    return earned
+
+
+def summarize_member_records(records: list, id_field: str, name_field: str) -> list:
+    """Summarize per-battle top-contributor snapshots without claiming a full roster."""
+    grouped = {}
+    for row in records:
+        identifier = str(row.get(id_field) or "").strip()
+        battle_id = str(row.get("id") or "").strip()
+        if not identifier or not battle_id:
+            continue
+        bucket = grouped.setdefault(identifier, {"name": row.get(name_field) or identifier, "records": {}})
+        bucket["records"][battle_id] = row
+
+    summaries = []
+    for identifier, bucket in grouped.items():
+        items = list(bucket["records"].values())
+        scores = [float(row.get("score", 0) or 0) for row in items]
+        latest = max(items, key=lambda row: int(row.get("startsAt") or 0))
+        total = sum(scores)
+        summaries.append({
+            "id": identifier,
+            "name": bucket["name"],
+            "battles_listed": len(items),
+            "contribution_points": round(total, 1),
+            "avg_contribution": round(total / len(items), 1) if items else 0,
+            "best_contribution": max(scores) if scores else 0,
+            "last_seen": latest.get("startsAt"),
+            "last_battle": latest.get("name"),
+        })
+    return sorted(
+        summaries,
+        key=lambda row: (-float(row["contribution_points"]), -int(row["battles_listed"]), str(row["name"]).lower()),
+    )
+
+
+def build_achievements_catalog(teams: list, players: list, generated_at: str) -> dict:
+    """Create a public index of badge criteria, counts and leading holders."""
+    categories = {}
+    leaders = {}
+    for kind, rows, id_field, name_field in (
+        ("players", players, "username", "username"),
+        ("teams", teams, "team_id", "team_name"),
+    ):
+        category_rows = []
+        for definition in ACHIEVEMENT_DEFINITIONS[kind]:
+            holders = [
+                row for row in rows
+                if definition["id"] in (row.get("achievements") or [])
+            ]
+            holders.sort(
+                key=lambda row: (
+                    -float(row.get(definition["metric"]) or 0),
+                    -int(row.get("tournaments_played") or 0),
+                    str(row.get(name_field) or "").lower(),
+                )
+            )
+            category_rows.append({
+                **definition,
+                "count": len(holders),
+                "holders": [{
+                    "id": row.get(id_field),
+                    "name": row.get(name_field),
+                    "rank": row.get("rank"),
+                    "points": row.get("points"),
+                    "value": row.get(definition["metric"]),
+                } for row in holders[:8]],
+            })
+        categories[kind] = category_rows
+
+        ranked = sorted(
+            rows,
+            key=lambda row: (
+                -len(row.get("achievements") or []),
+                -float(row.get("points") or 0),
+                str(row.get(name_field) or "").lower(),
+            ),
+        )
+        leaders[kind] = [{
+            "id": row.get(id_field),
+            "name": row.get(name_field),
+            "rank": row.get("rank"),
+            "points": row.get("points"),
+            "achievement_count": len(row.get("achievements") or []),
+        } for row in ranked[:10] if row.get("achievements")]
+
+    return {
+        "generated_at": generated_at,
+        "summary": {
+            "players_with_achievements": sum(bool(row.get("achievements")) for row in players),
+            "teams_with_achievements": sum(bool(row.get("achievements")) for row in teams),
+            "player_badges_awarded": sum(len(row.get("achievements") or []) for row in players),
+            "team_badges_awarded": sum(len(row.get("achievements") or []) for row in teams),
+        },
+        "categories": categories,
+        "leaders": leaders,
+    }
+
+
 def write_json(path: str, payload) -> None:
     directory = os.path.dirname(path)
     if directory:
@@ -445,6 +578,7 @@ def main() -> int:
 
     player_totals, player_records = {}, {}
     team_totals, team_names, team_records = {}, {}, {}
+    team_member_records = {}
     tournaments_processed = 0
     all_errors = []
     battle_history = {}
@@ -466,6 +600,8 @@ def main() -> int:
             team_names.setdefault(team_id, name)
         for team_id, records in data.get("team_records", {}).items():
             team_records.setdefault(team_id, []).extend(records)
+        for team_id, records in data.get("team_member_records", {}).items():
+            team_member_records.setdefault(team_id, []).extend(records)
         all_errors.extend(data.get("errors", []))
 
     # Keep only regular numbered team battles. This defensive filter is applied
@@ -485,12 +621,40 @@ def main() -> int:
     team_records = {key: [row for row in records if str(row.get("id") or "") in allowed_ids]
                     for key, records in team_records.items()}
     team_records = {key: records for key, records in team_records.items() if records}
+    team_member_records = {
+        key: [row for row in records if str(row.get("id") or "") in allowed_ids]
+        for key, records in team_member_records.items()
+    }
+    team_member_records = {key: records for key, records in team_member_records.items() if records}
     player_totals = {key: sum(float(row.get("score", 0) or 0) for row in records)
                      for key, records in player_records.items()}
     team_totals = {key: sum(float(row.get("score", 0) or 0) for row in records)
                    for key, records in team_records.items()}
     player_rank = sorted(player_totals.items(), key=lambda item: (-item[1], item[0].lower()))
     team_rank = sorted(team_totals.items(), key=lambda item: (-item[1], item[0].lower()))
+
+    # Resolve Lichess account IDs to the canonical player profile key and build
+    # both directions of the team-contributor relationship.
+    player_key_by_id = {str(key).strip().lower(): key for key in player_records}
+    member_records_by_team = defaultdict(list)
+    team_records_by_player = defaultdict(list)
+    for team_id, records in team_member_records.items():
+        for record in records:
+            raw_player_id = str(record.get("player_id") or record.get("player_name") or "").strip()
+            if not raw_player_id:
+                continue
+            player_key = player_key_by_id.get(raw_player_id.lower(), raw_player_id)
+            member_row = {
+                **record,
+                "player_id": player_key,
+                "player_name": record.get("player_name") or player_key,
+            }
+            member_records_by_team[team_id].append(member_row)
+            team_records_by_player[player_key].append({
+                **member_row,
+                "team_id": team_id,
+                "team_name": team_names.get(team_id, record.get("team_name") or team_id),
+            })
 
     # Rebuild profile shards so removed competitors cannot leave stale profile files behind.
     profiles_dir = os.path.join(OUTPUT_DIR, "profiles")
@@ -513,14 +677,20 @@ def main() -> int:
             "profile_file": f"profiles/{shard_name}",
             "profile_key": username,
         }
+        player_stats = compute_stats(player_records.get(username, []))
+        achievements = achievements_for(player_stats, "players")
         players.append({
             "rank": index + 1,
             "username": username,
             "points": points,
-            **compute_stats(player_records.get(username, [])),
+            **player_stats,
+            "achievements": achievements,
             **player_profile_refs[username],
         })
-        profile_shards["players"].setdefault(shard_name, {})[username] = {"history": history}
+        profile_shards["players"].setdefault(shard_name, {})[username] = {
+            "history": history,
+            "teams": summarize_member_records(team_records_by_player.get(username, []), "team_id", "team_name"),
+        }
 
     for index, (team_id, points) in enumerate(team_rank):
         history = sorted(
@@ -533,15 +703,21 @@ def main() -> int:
             "profile_file": f"profiles/{shard_name}",
             "profile_key": team_id,
         }
+        team_stats = compute_stats(team_records.get(team_id, []))
+        achievements = achievements_for(team_stats, "teams")
         teams.append({
             "rank": index + 1,
             "team_id": team_id,
             "team_name": team_names.get(team_id, team_id),
             "points": points,
-            **compute_stats(team_records.get(team_id, [])),
+            **team_stats,
+            "achievements": achievements,
             **team_profile_refs[team_id],
         })
-        profile_shards["teams"].setdefault(shard_name, {})[team_id] = {"history": history}
+        profile_shards["teams"].setdefault(shard_name, {})[team_id] = {
+            "history": history,
+            "members": summarize_member_records(member_records_by_team.get(team_id, []), "player_id", "player_name"),
+        }
 
     for shards in profile_shards.values():
         for filename, payload in shards.items():
@@ -671,6 +847,12 @@ def main() -> int:
     write_json(os.path.join(OUTPUT_DIR, "analytics", "overview.json"), dashboard_overview)
     write_json(os.path.join(OUTPUT_DIR, "analytics", "timeseries.json"), dashboard_timeseries)
 
+    achievements_catalog = build_achievements_catalog(teams, players, generated_at)
+    write_json(os.path.join(OUTPUT_DIR, "achievements.json"), achievements_catalog)
+
+    member_record_count = sum(len(records) for records in team_member_records.values())
+    teams_with_member_data = sum(bool(records) for records in team_member_records.values())
+
     meta = {
         "generated_at": generated_at,
         "tournaments_processed": len(numbered_battles),
@@ -688,6 +870,9 @@ def main() -> int:
         "month_count": len(month_index),
         "max_battle_number": max_battle_number,
         "excluded_events_count": len(battle_history) - len(regular_battles),
+        "team_member_records_count": member_record_count,
+        "teams_with_member_data_count": teams_with_member_data,
+        "achievement_catalog_schema_version": 1,
     }
     for filename, payload in (
         ("leaderboard_players.json", players),
