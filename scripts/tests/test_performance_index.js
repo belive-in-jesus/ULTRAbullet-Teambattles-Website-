@@ -131,6 +131,7 @@ test("Performance Index search and competitor switch reset the page", async () =
   assert.match(get("pi-rows").innerHTML, /Player234/);
   assert.doesNotMatch(get("pi-rows").innerHTML, /Provisional/);
 
+  get("pi-search").listeners.input({ target: { value: "" } });
   teamButton.listeners.click();
   assert.equal(get("pi-count").textContent, "1 eligible");
   assert.match(get("pi-rows").innerHTML, /Team A/);
