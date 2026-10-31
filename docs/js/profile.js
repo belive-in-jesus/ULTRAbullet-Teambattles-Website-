@@ -66,6 +66,51 @@ function metrics(rows){
     longest_podium_streak:longestPodiumStreak(rows)
   };
 }
+
+const ACHIEVEMENT_LABELS={
+  first_steps:{name:"Battle Regular",description:"Recorded results in 10 official battles.",icon:"10+"},
+  battle_veteran:{name:type==="team"?"Veteran Team":"Battle Veteran",description:"Recorded results in 50 official battles.",icon:"50+"},
+  century_club:{name:"Century Club",description:"Recorded results in 100 official battles.",icon:"100"},
+  podium_finisher:{name:type==="team"?"Podium Team":"Podium Finisher",description:"Reached the top three at least five times.",icon:"TOP 3"},
+  podium_collector:{name:type==="team"?"Podium Dynasty":"Podium Collector",description:"Reached the top three at least 25 times.",icon:"25×"},
+  multi_champion:{name:type==="team"?"Championship Team":"Multiple Champion",description:"Won at least five official battles.",icon:"★"},
+  podium_streak:{name:type==="team"?"Unbroken Form":"Podium Streak",description:"Reached the podium in five consecutive numbered battles.",icon:"STREAK"}
+};
+function renderAchievements(){
+  const earned=Array.isArray(state.entry?.achievements)?state.entry.achievements:[];
+  if(!earned.length){
+    $("profile-achievements").innerHTML='<div class="profile-empty">Achievement data will appear after the next successful full data refresh. Milestones are calculated from the all-time record.</div>';
+    return;
+  }
+  $("profile-achievements").innerHTML=earned.map(id=>{
+    const item=ACHIEVEMENT_LABELS[id];
+    if(!item)return "";
+    return '<article class="achievement-badge-card"><span class="achievement-badge-icon">'+escapeHtml(item.icon)+'</span><span class="achievement-badge-copy"><strong>'+escapeHtml(item.name)+'</strong><small>'+escapeHtml(item.description)+'</small></span></article>';
+  }).join("");
+}
+function renderMemberStatistics(profile){
+  const isTeam=type==="team";
+  $("member-stat-title").textContent=isTeam?"Top team contributors":"Recorded team affiliations";
+  $("member-stat-description").textContent=isTeam
+    ?"Players listed in this team's historical Lichess team-battle standings, with their recorded contributions."
+    :"Teams in whose historical Lichess team-battle standings this player was listed, with the recorded contribution.";
+  const rows=isTeam?(Array.isArray(profile.members)?profile.members:[]):(Array.isArray(profile.teams)?profile.teams:[]);
+  const subject=isTeam?"Player":"Team";
+  $("member-stat-head").innerHTML='<tr><th>'+subject+'</th><th class="number-cell">Battles listed</th><th class="number-cell">Contribution pts</th><th class="number-cell">Avg / battle</th><th>Last seen</th></tr>';
+  if(!rows.length){
+    $("member-stat-summary").textContent="No contributor snapshots are published for this profile yet.";
+    $("member-stat-rows").innerHTML='<tr><td colspan="5" class="profile-empty">These statistics will be populated by the next successful full data refresh. Lichess exposes the players listed in each team standing; this is not a complete team roster.</td></tr>';
+    return;
+  }
+  const total=rows.reduce((sum,row)=>sum+(Number(row.battles_listed)||0),0);
+  $("member-stat-summary").textContent=rows.length+" "+(isTeam?"listed contributors":"recorded teams")+" · "+number(total)+" listed battle appearances";
+  $("member-stat-rows").innerHTML=rows.map(row=>{
+    const id=String(row.id||"");
+    const href="./profile.html?type="+(isTeam?"player":"team")+"&id="+encodeURIComponent(id);
+    return '<tr><td><a class="member-profile-link" href="'+escapeHtml(href)+'">'+escapeHtml(row.name||id)+'</a></td><td class="number-cell">'+number(row.battles_listed)+'</td><td class="number-cell">'+number(row.contribution_points)+'</td><td class="number-cell">'+number(row.avg_contribution)+'</td><td>'+escapeHtml(formatDate(row.last_seen))+'</td></tr>';
+  }).join("");
+}
+
 function renderStats(){
   const m=metrics(filteredHistoryForStats());
   $("stat-points").textContent=number(m.points);
@@ -175,6 +220,8 @@ async function init(){
   if(!profile||!Array.isArray(profile.history))throw new Error("The competitor's detailed history is not present in the published profile shard.");
   state.history=[...profile.history].sort((a,b)=>(Number(b.startsAt)||0)-(Number(a.startsAt)||0));
   state.periods=periods;
+  renderAchievements();
+  renderMemberStatistics(profile);
   $("trend-range").addEventListener("change",()=>{state.chartRange=$("trend-range").value;renderChart();});
   $("history-period").addEventListener("change",()=>{
     state.period=$("history-period").value;state.page=1;
