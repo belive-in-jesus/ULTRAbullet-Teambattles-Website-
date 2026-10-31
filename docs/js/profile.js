@@ -68,27 +68,70 @@ function metrics(rows){
 }
 
 const ACHIEVEMENT_LABELS={
-  first_steps:{name:"Battle Regular",description:"Recorded results in 10 official battles.",icon:"10+"},
-  battle_veteran:{name:type==="team"?"Veteran Team":"Battle Veteran",description:"Recorded results in 50 official battles.",icon:"50+"},
-  century_club:{name:"Century Club",description:"Recorded results in 100 official battles.",icon:"100"},
-  podium_finisher:{name:type==="team"?"Podium Team":"Podium Finisher",description:"Reached the top three at least five times.",icon:"TOP 3"},
-  podium_collector:{name:type==="team"?"Podium Dynasty":"Podium Collector",description:"Reached the top three at least 25 times.",icon:"25×"},
-  multi_champion:{name:type==="team"?"Championship Team":"Multiple Champion",description:"Won at least five official battles.",icon:"★"},
-  podium_streak:{name:type==="team"?"Unbroken Form":"Podium Streak",description:"Reached the podium in five consecutive numbered battles.",icon:"STREAK"}
+  battles_100:{name:type==="team"?"Century Challenger":"Century Challenger",description:"Recorded results in 100 official battles.",icon:"100"},
+  battles_200:{name:type==="team"?"Double Century":"Double Century",description:"Recorded results in 200 official battles.",icon:"200"},
+  battles_400:{name:type==="team"?"Veteran Club":"Battle Marathon",description:"Recorded results in 400 official battles.",icon:"400"},
+  battles_600:{name:type==="team"?"600-Battle Institution":"Ultra Veteran",description:"Recorded results in 600 official battles.",icon:"600"},
+  podiums_25:{name:type==="team"?"Podium Specialist":"Podium Specialist",description:"Finished in the top three at least 25 times.",icon:"25×"},
+  podiums_50:{name:type==="team"?"Podium Contender":"Podium Elite",description:"Finished in the top three at least 50 times.",icon:"50×"},
+  podiums_100:{name:type==="team"?"Podium Dynasty":"Podium Legend",description:"Finished in the top three at least 100 times.",icon:"100"},
+  podiums_200:{name:type==="team"?"Podium Empire":"Podium Immortal",description:"Finished in the top three at least 200 times.",icon:"200"},
+  wins_10:{name:type==="team"?"10-Time Team Champion":"10-Time Champion",description:"Won at least 10 official battles.",icon:"10 W"},
+  wins_25:{name:type==="team"?"Dominant Team":"Grand Champion",description:"Won at least 25 official battles.",icon:"25 W"},
+  wins_50:{name:type==="team"?"Team Dynasty":"Supreme Champion",description:"Won at least 50 official battles.",icon:"50 W"},
+  wins_75:{name:type==="team"?"Ultra Champion":"Ultra Champion",description:"Won at least 75 official battles.",icon:"75 W"},
+  streak_8:{name:type==="team"?"Podium Momentum":"Podium Momentum",description:"Reached the podium in eight consecutive numbered battles.",icon:"8×"},
+  streak_10:{name:type==="team"?"Unbroken Team Form":"Unbroken Momentum",description:"Reached the podium in 10 consecutive numbered battles.",icon:"10×"},
+  streak_12:{name:type==="team"?"Unstoppable Run":"Unstoppable Run",description:"Reached the podium in 12 consecutive numbered battles.",icon:"12×"},
+  streak_15:{name:type==="team"?"Perfect Podium Run":"Perfect Podium Run",description:"Reached the podium in 15 consecutive numbered battles.",icon:"15×"},
+  battles_300:{name:type==="team"?"Established Club":"Established Club",description:"Recorded results in 300 official battles.",icon:"300"},
+  battles_500:{name:type==="team"?"Elite Institution":"Elite Institution",description:"Recorded results in 500 official battles.",icon:"500"},
+  podiums_400:{name:type==="team"?"Four-Hundred Podiums":"Four-Hundred Podiums",description:"Finished in the top three at least 400 times.",icon:"400"},
+  wins_100:{name:type==="team"?"Century of Victories":"Century of Victories",description:"Won at least 100 official battles.",icon:"100 W"},
+  streak_20:{name:type==="team"?"Elite Consistency":"Elite Consistency",description:"Reached the podium in 20 consecutive numbered battles.",icon:"20×"},
+  streak_30:{name:type==="team"?"Thirty-Battle Reign":"Thirty-Battle Reign",description:"Reached the podium in 30 consecutive numbered battles.",icon:"30×"},
+  streak_40:{name:type==="team"?"Forty-Battle Reign":"Forty-Battle Reign",description:"Reached the podium in 40 consecutive numbered battles.",icon:"40×"}
 };
 function renderAchievements(){
   const row=state.entry||{};
-  const earned=[
-    ["first_steps",Number(row.tournaments_played||0)>=10],
-    ["battle_veteran",Number(row.tournaments_played||0)>=50],
-    ["century_club",Number(row.tournaments_played||0)>=100],
-    ["podium_finisher",Number(row.podiums||0)>=5],
-    ["podium_collector",Number(row.podiums||0)>=25],
-    ["multi_champion",Number(row.first_places||0)>=5],
-    ["podium_streak",Number(row.longest_podium_streak||0)>=5]
-  ].filter(([,qualified])=>qualified).map(([id])=>id);
+  const definitions=type==="team"?[
+    ["battles_300","tournaments_played",300],
+    ["battles_400","tournaments_played",400],
+    ["battles_500","tournaments_played",500],
+    ["battles_600","tournaments_played",600],
+    ["podiums_50","podiums",50],
+    ["podiums_100","podiums",100],
+    ["podiums_200","podiums",200],
+    ["podiums_400","podiums",400],
+    ["wins_10","first_places",10],
+    ["wins_25","first_places",25],
+    ["wins_50","first_places",50],
+    ["wins_100","first_places",100],
+    ["streak_10","longest_podium_streak",10],
+    ["streak_20","longest_podium_streak",20],
+    ["streak_30","longest_podium_streak",30],
+    ["streak_40","longest_podium_streak",40]
+  ]:[
+    ["battles_100","tournaments_played",100],
+    ["battles_200","tournaments_played",200],
+    ["battles_400","tournaments_played",400],
+    ["battles_600","tournaments_played",600],
+    ["podiums_25","podiums",25],
+    ["podiums_50","podiums",50],
+    ["podiums_100","podiums",100],
+    ["podiums_200","podiums",200],
+    ["wins_10","first_places",10],
+    ["wins_25","first_places",25],
+    ["wins_50","first_places",50],
+    ["wins_75","first_places",75],
+    ["streak_8","longest_podium_streak",8],
+    ["streak_10","longest_podium_streak",10],
+    ["streak_12","longest_podium_streak",12],
+    ["streak_15","longest_podium_streak",15]
+  ];
+  const earned=definitions.filter(([,metric,threshold])=>Number(row[metric]||0)>=threshold).map(([id])=>id);
   if(!earned.length){
-    $("profile-achievements").innerHTML='<div class="profile-empty">No career badges earned yet. Achievement thresholds are calculated from this profile’s all-time record.</div>';
+    $("profile-achievements").innerHTML='<div class="profile-empty">No career badges earned yet. Achievement thresholds are based on the all-time record.</div>';
     return;
   }
   $("profile-achievements").innerHTML=earned.map(id=>{
