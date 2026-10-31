@@ -8,7 +8,7 @@ A standalone website for the recurring UltraBullet team battles organised by **N
 
 - Combined team and individual points across matching finished UltraBullet tournaments
 - Searchable team/player standings with all-time, monthly and 50-battle seasonal rankings, sort controls, pagination and CSV export
-- Homepage dashboard with current-season progress, latest indexed battle and all-time leaders
+- Homepage dashboard with current-season progress, latest indexed battle, global monthly activity charts, active player/team trends, seasonal comparisons, all-time top-five rankings and career-record highlights
 - Head-to-head team/player comparisons with six performance metrics
 - Hall of Fame with season champions, podiums and automatically updated career records
 - Dedicated shareable team and player profiles with score-trend charts, finish-distribution donuts, monthly point charts, 52-week activity heatmaps, season-by-season comparisons, period filters and paginated battle history
@@ -21,13 +21,13 @@ A standalone website for the recurring UltraBullet team battles organised by **N
 
 ## Repository layout
 
-- `docs/` — GitHub Pages dashboard (`index.html`), Hall of Fame (`hall-of-fame.html`), methodology page (`information.html`), shareable analytics profiles (`profile.html`) and generated JSON data (`hall_of_fame.json`, `battle_history.json`, compact team/player leaderboard indexes, metadata and profile-history shards)
+- `docs/` — GitHub Pages dashboard (`index.html`), Hall of Fame (`hall-of-fame.html`), methodology page (`information.html`), shareable analytics profiles (`profile.html`) and generated JSON data (including compact dashboard analytics under `data/analytics/`)
 - `scripts/discover.py` — finds finished regular ULTRAbullet Team Battles with their official ordinal battle number
 - `scripts/fetch_worker.py` — fetches each tournament's individual and team results
-- `scripts/aggregate.py` — combines scores and calculates statistics and generates the Hall of Fame dataset
+- `scripts/aggregate.py` — combines scores, calculates career and period statistics, and generates profile shards, the Hall of Fame and compact dashboard analytics datasets
 - `.github/workflows/leaderboard.yml` — daily and manual update workflow
 - `.github/workflows/validate.yml` — pull-request checks and aggregation tests
-- `scripts/tests/` — Python aggregation tests and Node.js regression tests for profile analytics, chart data and browser script syntax
+- `scripts/tests/` — Python aggregation and dashboard-data tests plus Node.js regression tests for profile and dashboard analytics, chart rendering, DOM hooks and browser script syntax
 
 ## Publish the website
 
@@ -63,3 +63,4 @@ An optional Lichess API token may be added as a repository Actions secret named 
 - Generated result files are written into `docs/data/` and committed by the workflow.
 - Competitor histories are stored in `docs/data/profiles/` in shards of 200 competitors and fetched only when a profile is opened. The next successful leaderboard workflow run regenerates the compact indexes and these shards.
 - Period summaries are stored separately under `docs/data/periods/`; the frontend loads only the selected month or season.
+- Global dashboard summaries are precomputed as `docs/data/analytics/overview.json` and `docs/data/analytics/timeseries.json`. Monthly active competitor counts are distinct teams or players with at least one recorded result during that UTC month; participant counts use the Lichess `nbPlayers` value and are not unique monthly users.
