@@ -174,7 +174,8 @@ function buildPerformanceIndexHistoryMarkup(checkpoints){
       cumulative:Number(item?.[1]),
       cumulativeBattles:Number(item?.[2])||0,
       seasonal:item?.[3]==null?null:Number(item[3]),
-      seasonalBattles:Number(item?.[4])||0
+      seasonalBattles:Number(item?.[4])||0,
+      rank:item?.[5]==null?null:Number(item[5])
     }))
     .filter(item=>Number.isFinite(item.battle)&&item.battle>0&&Number.isFinite(item.cumulative))
     .sort((a,b)=>a.battle-b.battle);
@@ -195,16 +196,16 @@ function buildPerformanceIndexHistoryMarkup(checkpoints){
     return (!previous||point.season!==previous.season+1?"M":"L")+point.x.toFixed(1)+" "+point.y.toFixed(1);
   }).join(" ");
   const line='<path d="'+path+'" fill="none" stroke="#70e2e8" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>';
-  const circles=points.map(point=>'<circle cx="'+point.x.toFixed(1)+'" cy="'+point.y.toFixed(1)+'" r="5" fill="#b19cff" stroke="#101c2d" stroke-width="2"><title>After Battle '+point.battle+' · Cumulative PI '+point.cumulative.toFixed(1)+' · Season PI '+(point.seasonal==null?"not eligible":point.seasonal.toFixed(1))+'</title></circle>').join("");
+  const circles=points.map(point=>'<circle cx="'+point.x.toFixed(1)+'" cy="'+point.y.toFixed(1)+'" r="5" fill="#b19cff" stroke="#101c2d" stroke-width="2"><title>After Battle '+point.battle+' · Cumulative PI '+point.cumulative.toFixed(1)+' · Season PI '+(point.seasonal==null?"not eligible":point.seasonal.toFixed(1))+' · Career PI rank '+(point.rank==null?"provisional":"#"+point.rank)+'</title></circle>').join("");
   const labels=points.map(point=>'<text x="'+point.x.toFixed(1)+'" y="'+(height-14)+'" text-anchor="middle" class="analytics-axis-label">S'+point.season+'</text>').join("");
   const svg='<svg class="pi-history-svg" viewBox="0 0 '+width+' '+height+'" role="img" aria-label="Historical cumulative Performance Index from zero to one hundred">'+grid+line+circles+labels+'</svg>';
   const table=rows.slice().reverse().map(row=>{
     const season=Math.floor((row.battle-1)/50)+1;
     const seasonValue=row.seasonal==null?"—":row.seasonal.toFixed(1);
     const eligibility=row.seasonalBattles>=10?"Official":"Provisional";
-    return '<tr><td>Season '+season+'</td><td class="number-cell">#'+row.battle+'</td><td class="number-cell">'+row.cumulative.toFixed(1)+'</td><td class="number-cell">'+seasonValue+'</td><td class="number-cell">'+row.seasonalBattles+'</td><td>'+eligibility+'</td></tr>';
+    return '<tr><td>Season '+season+'</td><td class="number-cell">#'+row.battle+'</td><td class="number-cell">'+row.cumulative.toFixed(1)+'</td><td class="number-cell">'+(row.rank==null?"—":"#"+row.rank)+'</td><td class="number-cell">'+seasonValue+'</td><td class="number-cell">'+row.seasonalBattles+'</td><td>'+eligibility+'</td></tr>';
   }).join("");
-  return '<div class="pi-history-block"><div class="pi-history-heading"><div><strong>Historical PI development</strong><span>Cumulative index at the end of each active season</span></div><small>'+rows.length+' checkpoints</small></div><div class="pi-history-chart">'+svg+'</div><div class="pi-history-table-wrap"><table class="pi-history-table"><thead><tr><th>Season</th><th class="number-cell">Checkpoint</th><th class="number-cell">Career PI</th><th class="number-cell">Season PI</th><th class="number-cell">Season battles</th><th>Status</th></tr></thead><tbody>'+table+'</tbody></table></div><p class="pi-history-note">Career PI uses all ranked results up to the checkpoint. Season PI uses only that season’s results and is official from 10 ranked battles. Seasons without a recorded result are omitted.</p></div>';
+  return '<div class="pi-history-block"><div class="pi-history-heading"><div><strong>Historical PI development</strong><span>Cumulative index at the end of each active season</span></div><small>'+rows.length+' checkpoints</small></div><div class="pi-history-chart">'+svg+'</div><div class="pi-history-table-wrap"><table class="pi-history-table"><thead><tr><th>Season</th><th class="number-cell">Checkpoint</th><th class="number-cell">Career PI</th><th class="number-cell">Career PI rank</th><th class="number-cell">Season PI</th><th class="number-cell">Season battles</th><th>Status</th></tr></thead><tbody>'+table+'</tbody></table></div><p class="pi-history-note">Career PI uses all ranked results up to the checkpoint. Season PI uses only that season’s results and is official from 10 ranked battles. Seasons without a recorded result are omitted.</p></div>';
 }
 
 function renderPerformanceIndex(){
