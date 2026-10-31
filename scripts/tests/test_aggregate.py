@@ -282,6 +282,17 @@ class AggregatePeriodTests(unittest.TestCase):
             self.assertEqual(alice_rank_index["alice"]["rank_history"], [[250, 1], [300, 1], [301, 1]])
             self.assertEqual(bob_rank_index["bob"]["rank_history"], [[301, 2]])
             self.assertEqual(team_rank_index["club-id"]["rank_history"], [[250, 1], [300, 1], [301, 1]])
+            self.assertEqual(
+                [item[0] for item in alice_rank_index["alice"]["performance_index_history"]],
+                [250, 300, 301],
+            )
+            self.assertIsNone(alice_rank_index["alice"]["performance_index_history"][0][5])
+            self.assertEqual(alice_rank_index["alice"]["performance_index_history"][-1][5], 1)
+            self.assertEqual(
+                [item[0] for item in team_rank_index["club-id"]["performance_index_history"]],
+                [250, 300, 301],
+            )
+            self.assertEqual(team_rank_index["club-id"]["performance_index_history"][-1][5], 1)
 
             players = json.loads((data_dir / "leaderboard_players.json").read_text(encoding="utf-8"))
             self.assertEqual(players[0]["username"], "alice")
@@ -346,6 +357,12 @@ class AggregatePeriodTests(unittest.TestCase):
             self.assertEqual(overview["current_month"]["battle_count"], 21)
             self.assertEqual(overview["current_month"]["active_players"], 2)
             self.assertEqual(overview["current_month"]["active_teams"], 1)
+            self.assertEqual(overview["performance_index"]["eligible_counts"]["players"], 1)
+            self.assertEqual(overview["performance_index"]["eligible_counts"]["teams"], 1)
+            self.assertEqual(overview["performance_index"]["players"][0]["id"], "alice")
+            self.assertEqual(overview["performance_index"]["players"][0]["rank"], 1)
+            self.assertEqual(overview["performance_index"]["teams"][0]["id"], "club-id")
+            self.assertEqual(overview["performance_index"]["teams"][0]["rank"], 1)
             self.assertEqual([item["key"] for item in timeline["months"]], ["2026-01", "2026-02"])
             self.assertEqual(timeline["months"][0]["new_players"], 1)
             self.assertEqual(timeline["months"][1]["new_players"], 1)
