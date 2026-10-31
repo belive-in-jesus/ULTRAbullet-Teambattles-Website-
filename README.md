@@ -62,6 +62,6 @@ An optional Lichess API token may be added as a repository Actions secret named 
 - Monthly rankings use UTC calendar months and include only eligible regular numbered battles.
 - Points are summed across the discovered tournaments, so the leaderboard is cumulative, not a single-day ranking.
 - Generated result files are written into `docs/data/` and committed by the workflow.
-- Competitor histories are stored in `docs/data/profiles/` in shards of 200 competitors and fetched only when a profile is opened. The next successful leaderboard workflow run regenerates the compact indexes and these shards. Compact profile indexes also store cumulative PI checkpoints and season-only PI values at the last recorded battle of each active season.
+- Competitor histories are stored in `docs/data/profiles/` in shards of 200 competitors and fetched only when a profile is opened. The next successful leaderboard workflow run regenerates the compact indexes and these shards. Compact profile indexes also store cumulative PI checkpoints, historical PI ranks and season-only PI values at each fixed season checkpoint.
 - Period summaries are stored separately under `docs/data/periods/`; the frontend loads only the selected month or season.
 - Global dashboard summaries are precomputed as `docs/data/analytics/overview.json` and `docs/data/analytics/timeseries.json`. Monthly active competitor counts are distinct teams or players with at least one recorded result during that UTC month; participant counts use the Lichess `nbPlayers` value and are not unique monthly users.
