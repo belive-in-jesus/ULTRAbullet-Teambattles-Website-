@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#070b12">
+  <meta name="description" content="Detailed team and player results for an UltraBullet Team Battle.">
+  <title>Battle report — UltraBullet Team Battles</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="css/design-system.css" rel="stylesheet">
+  <link href="css/design-refresh.css" rel="stylesheet">
+  <link href="css/v2-visual-system.css" rel="stylesheet">
+  <link href="css/battle.css" rel="stylesheet">
+  <link href="css/navigation-hubs.css" rel="stylesheet">
+</head>
+<body class="page-battle">
+  <main class="shell battle-shell">
+    <nav class="masthead" aria-label="Main navigation">
+      <a class="brand" href="./index.html" aria-label="UltraBullet Team Battles home">
+        <span class="brand-emblem"><img class="brand-logo" src="https://i.imgur.com/Zo7BRdZ.gif" alt="UltraBullet Team Battles logo" width="84" height="84" loading="eager" decoding="async" onerror="this.hidden=true"></span>
+        <span class="brand-copy"><strong>ULTRAbullet</strong><small>TEAM BATTLES</small></span>
+      </a>
+      <div class="mast-actions primary-nav">
+        <a class="nav-link" href="./index.html">Overview</a>
+        <a class="nav-link" href="./rankings.html">Rankings</a>
+        <a class="nav-link" href="./analytics.html">Analytics</a>
+        <a class="nav-link active" href="./records.html" aria-current="page">Records &amp; History</a>
+        <a class="nav-link" href="./information.html">Guide</a>
+      </div>
+    </nav>
+
+    <header class="battle-hero">
+      <a class="battle-back-link" href="./index.html#battle-history">← Back to battle archive</a>
+      <span class="eyebrow">TOURNAMENT ARCHIVE / BATTLE REPORT</span>
+      <h1 id="battle-title">Battle report</h1>
+      <p id="battle-subtitle">Detailed results from a numbered UltraBullet Team Battle.</p>
+      <a class="battle-original-link" id="battle-original-link" href="https://lichess.org/" target="_blank" rel="noopener noreferrer">Open original Lichess battle ↗</a>
+    </header>
+
+    <div class="battle-status" id="battle-status" role="status" aria-live="polite">Loading battle results…</div>
+
+    <section class="battle-summary" id="battle-summary" aria-label="Battle summary" hidden>
+      <article class="battle-summary-card"><span>DATE</span><strong id="battle-date">—</strong></article>
+      <article class="battle-summary-card"><span>PARTICIPANTS</span><strong id="battle-participants">—</strong></article>
+      <article class="battle-summary-card"><span>RECORDED RESULTS</span><strong id="battle-results-count">—</strong></article>
+    </section>
+
+    <section class="battle-results-panel" id="battle-results-panel" hidden aria-labelledby="results-heading">
+      <div class="battle-results-heading">
+        <div>
+          <span class="battle-kicker">OFFICIAL RECORDED STANDINGS</span>
+          <h2 id="results-heading">Tournament results</h2>
+          <p id="results-description">Choose teams or individual players to view the published standings.</p>
+        </div>
+        <div class="battle-view-switch" role="group" aria-label="Choose results">
+          <button type="button" class="battle-view-button active" id="view-teams" aria-pressed="true">Teams</button>
+          <button type="button" class="battle-view-button" id="view-players" aria-pressed="false">Players</button>
+        </div>
+      </div>
+
+      <div class="battle-table-controls">
+        <label class="battle-search-label" for="result-search">Search results</label>
+        <input id="result-search" type="search" autocomplete="off" placeholder="Find a team or player…" aria-label="Search results">
+        <span class="battle-result-count" id="result-count">—</span>
+      </div>
+
+      <div class="battle-table-wrap">
+        <table class="battle-table">
+          <thead><tr><th scope="col">Rank</th><th scope="col" id="result-name-heading">Team</th><th scope="col" class="number-cell">Score</th><th scope="col">Profile</th></tr></thead>
+          <tbody id="result-rows"><tr><td colspan="4" class="battle-empty">Loading results…</td></tr></tbody>
+        </table>
+      </div>
+      <div class="battle-panel-footer">
+        <span id="result-footnote">Results are shown as recorded for this tournament.</span>
+        <button type="button" class="battle-more-button" id="results-more" hidden>Show all results ↓</button>
+      </div>
+    </section>
+
+    <footer class="battle-footer">
+      <span>UltraBullet Team Battles · Community statistics archive</span>
+      <span>Results are derived from recorded Lichess tournament standings.</span>
+    </footer>
+  </main>
+  <script src="js/battle.js" defer></script>
+</body>
+</html>
