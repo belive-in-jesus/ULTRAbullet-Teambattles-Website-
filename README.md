@@ -11,7 +11,7 @@ A standalone website for the recurring UltraBullet team battles organised by **N
 - Homepage dashboard with current-season progress, latest indexed battle, global monthly activity charts, active player/team trends, seasonal comparisons, all-time top-five rankings and career-record highlights
 - Head-to-head team/player comparisons with six performance metrics
 - Hall of Fame with season champions, podiums and automatically updated career records
-- Dedicated shareable team and player profiles with score-trend charts, finish-distribution donuts, monthly point charts, 52-week activity heatmaps, season-by-season comparisons, period filters and paginated battle history
+- Dedicated shareable team and player profiles with score-trend charts, finish-distribution donuts, monthly point charts, 52-week activity heatmaps, season-by-season comparisons, period filters, paginated battle history, career achievement badges and historical team-contributor statistics
 - Compact first-character profile lookup indexes to resolve direct profile URLs without downloading the full leaderboard
 - Searchable battle archive linking back to the original Lichess tournaments
 - Information page explaining eligibility, ranking periods, points and data refreshes
@@ -21,7 +21,7 @@ A standalone website for the recurring UltraBullet team battles organised by **N
 
 ## Repository layout
 
-- `docs/` — GitHub Pages dashboard (`index.html`), Hall of Fame (`hall-of-fame.html`), methodology page (`information.html`), shareable analytics profiles (`profile.html`) and generated JSON data (including compact dashboard analytics under `data/analytics/`)
+- `docs/` — GitHub Pages dashboard (`index.html`), Hall of Fame (`hall-of-fame.html`), achievements directory (`achievements.html`), methodology page (`information.html`), shareable analytics profiles (`profile.html`) and generated JSON data (including compact dashboard analytics under `data/analytics/`)
 - `scripts/discover.py` — finds finished regular ULTRAbullet Team Battles with their official ordinal battle number
 - `scripts/fetch_worker.py` — fetches each tournament's individual and team results
 - `scripts/aggregate.py` — combines scores, calculates career and period statistics, and generates profile shards, the Hall of Fame and compact dashboard analytics datasets
