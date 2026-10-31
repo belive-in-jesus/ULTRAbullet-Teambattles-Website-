@@ -1,0 +1,254 @@
+/* Global V2 dashboard analytics */
+.global-analytics {
+  margin: 48px 0 44px;
+}
+.global-analytics-heading {
+  align-items: flex-end;
+}
+.global-analytics-heading .pill {
+  flex: 0 0 auto;
+}
+.global-analytics-kpis {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin: 20px 0 14px;
+}
+.global-analytics-stat {
+  position: relative;
+  min-width: 0;
+  overflow: hidden;
+  padding: 17px 19px;
+  border: 1px solid var(--v2-border);
+  border-radius: 15px;
+  background: linear-gradient(145deg, rgba(17, 31, 49, .88), rgba(12, 20, 33, .76));
+}
+.global-analytics-stat:before {
+  position: absolute;
+  top: 0;
+  left: 18px;
+  width: 45px;
+  height: 2px;
+  background: linear-gradient(90deg, var(--v2-cyan), transparent);
+  content: "";
+}
+.global-analytics-stat:nth-child(2):before { background: linear-gradient(90deg, var(--v2-gold), transparent); }
+.global-analytics-stat:nth-child(3):before { background: linear-gradient(90deg, var(--v2-violet), transparent); }
+.global-analytics-stat:nth-child(4):before { background: linear-gradient(90deg, var(--v2-blue), transparent); }
+.global-analytics-stat span {
+  display: block;
+  color: var(--v2-muted);
+  font-size: .72rem;
+}
+.global-analytics-stat strong {
+  display: block;
+  margin-top: 9px;
+  color: var(--v2-text);
+  font-family: var(--v2-mono);
+  font-size: clamp(1.35rem, 2.5vw, 1.9rem);
+  letter-spacing: -.055em;
+  line-height: 1.2;
+}
+.global-analytics-stat small {
+  display: block;
+  min-height: 1.5em;
+  margin-top: 7px;
+  color: var(--v2-dim);
+  font-size: .67rem;
+  line-height: 1.45;
+}
+.global-analytics-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 13px;
+  margin-top: 13px;
+}
+.global-analytics-panel {
+  min-width: 0;
+  overflow: hidden;
+  padding: 20px 20px 15px;
+  border: 1px solid var(--v2-border);
+  border-radius: 17px;
+  background: linear-gradient(145deg, rgba(15, 27, 44, .88), rgba(11, 19, 31, .83));
+  box-shadow: 0 15px 40px rgba(0,0,0,.12);
+}
+.global-analytics-panel--wide {
+  grid-column: 1 / -1;
+}
+.global-analytics-panel-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 12px;
+}
+.global-analytics-panel-head h3 {
+  margin: 5px 0 0;
+  color: var(--v2-text);
+  font-size: 1rem;
+  font-weight: 750;
+  letter-spacing: -.025em;
+}
+.global-analytics-panel-head p {
+  margin: 5px 0 0;
+  color: var(--v2-muted);
+  font-size: .71rem;
+  line-height: 1.5;
+}
+.global-analytics-kicker {
+  color: var(--v2-cyan);
+  font-family: var(--v2-mono);
+  font-size: .62rem;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+.global-analytics-panel-note {
+  flex: 0 0 auto;
+  color: var(--v2-dim);
+  font-family: var(--v2-mono);
+  font-size: .62rem;
+  letter-spacing: .04em;
+}
+.global-analytics-chart {
+  min-height: 190px;
+  display: flex;
+  align-items: center;
+}
+.global-analytics-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+.global-chart-axis {
+  fill: var(--v2-dim);
+  font-family: var(--v2-mono);
+  font-size: 10px;
+}
+.global-analytics-empty {
+  width: 100%;
+  padding: 38px 12px;
+  color: var(--v2-muted);
+  font-size: .78rem;
+  text-align: center;
+}
+.global-analytics-bottom {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 13px;
+  margin-top: 13px;
+}
+.global-leader-list,
+.global-record-list {
+  display: grid;
+  gap: 0;
+}
+.global-leader-row,
+.global-record-row {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  gap: 12px;
+  padding: 11px 1px;
+  border-bottom: 1px solid rgba(145, 171, 199, .11);
+  color: inherit;
+  text-decoration: none;
+  transition: background .14s ease, padding .14s ease;
+}
+.global-leader-row:last-child,
+.global-record-row:last-child {
+  border-bottom: 0;
+}
+.global-leader-row:hover,
+.global-record-row:hover {
+  padding-right: 7px;
+  padding-left: 7px;
+  border-radius: 8px;
+  background: rgba(112, 226, 232, .055);
+}
+.global-leader-rank {
+  flex: 0 0 26px;
+  color: var(--v2-dim);
+  font-family: var(--v2-mono);
+  font-size: .76rem;
+}
+.global-leader-row:nth-child(-n+3) .global-leader-rank {
+  color: var(--v2-gold);
+}
+.global-leader-copy,
+.global-record-copy {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+  gap: 3px;
+}
+.global-leader-copy strong,
+.global-record-copy strong {
+  overflow: hidden;
+  color: var(--v2-text);
+  font-size: .77rem;
+  font-weight: 750;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.global-leader-copy small,
+.global-record-copy small {
+  overflow: hidden;
+  color: var(--v2-muted);
+  font-size: .65rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.global-leader-points {
+  flex: 0 0 auto;
+  color: var(--v2-cyan);
+  font-family: var(--v2-mono);
+  font-size: .76rem;
+  text-align: right;
+}
+.global-leader-points small {
+  display: block;
+  color: var(--v2-dim);
+  font-size: .56rem;
+  font-weight: 400;
+}
+.global-record-kind {
+  flex: 0 0 48px;
+  color: var(--v2-cyan);
+  font-family: var(--v2-mono);
+  font-size: .55rem;
+  letter-spacing: .08em;
+}
+.global-record-row:nth-child(2n) .global-record-kind {
+  color: var(--v2-violet);
+}
+.global-record-value {
+  flex: 0 0 auto;
+  color: var(--v2-gold);
+  font-family: var(--v2-mono);
+  font-size: .7rem;
+  text-align: right;
+}
+.global-analytics-method {
+  margin: 13px 2px 0;
+  color: var(--v2-dim);
+  font-size: .67rem;
+  line-height: 1.55;
+}
+@media (max-width: 980px) {
+  .global-analytics-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 760px) {
+  .global-analytics-grid,
+  .global-analytics-bottom { grid-template-columns: 1fr; }
+  .global-analytics-panel--wide { grid-column: auto; }
+  .global-analytics-panel { padding: 17px 15px 12px; }
+  .global-analytics-heading { align-items: flex-start; flex-direction: column; }
+}
+@media (max-width: 420px) {
+  .global-analytics-kpis { gap: 8px; }
+  .global-analytics-stat { padding: 14px; }
+  .global-analytics-stat strong { font-size: 1.35rem; }
+  .global-analytics-panel-head { gap: 8px; }
+  .global-analytics-panel-note { font-size: .55rem; }
+}
