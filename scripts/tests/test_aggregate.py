@@ -145,7 +145,7 @@ class AggregatePeriodTests(unittest.TestCase):
             self.assertEqual(players[0]["points"], 520)
             self.assertEqual(players[0]["tournaments_played"], 52)
             self.assertEqual(players[0]["avg_points"], 10)
-            self.assertIn("first_steps", players[0]["achievements"])
+            self.assertIn("podiums_25", players[0]["achievements"])
 
             player_profile = json.loads((data_dir / players[0]["profile_file"]).read_text(encoding="utf-8"))[players[0]["profile_key"]]
             self.assertEqual(player_profile["teams"][0]["id"], "club-id")
