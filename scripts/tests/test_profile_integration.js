@@ -154,8 +154,8 @@ test("full player-profile startup renders every new analytics module", async () 
       participation: 48
     },
     performance_index_history: [
-      [599, 76.2, 12, 76.2, 12],
-      [643, 82.4, 24, 89.1, 12]
+      [599, 76.2, 12, 76.2, 12, 1],
+      [643, 82.4, 24, 89.1, 12, 1]
     ]
   };
   const { elements } = await runProfile("player", "TestPlayer", entry, history, {
@@ -165,6 +165,8 @@ test("full player-profile startup renders every new analytics module", async () 
   assert.match(elements.get("profile-pi-card").innerHTML, /Historical PI development/);
   assert.match(elements.get("profile-pi-card").innerHTML, /Season PI/);
   assert.match(elements.get("profile-pi-card").innerHTML, /Career PI/);
+  assert.match(elements.get("profile-pi-card").innerHTML, /Career PI rank/);
+  assert.match(elements.get("profile-pi-card").innerHTML, /#1/);
   assert.match(elements.get("profile-pi-card").innerHTML, /82.4/);
   assert.match(elements.get("profile-chart").innerHTML, /<svg/);
   elements.get("chart-mode-rank").listeners.click();
