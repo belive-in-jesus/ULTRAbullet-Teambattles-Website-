@@ -274,16 +274,29 @@ class AggregatePeriodTests(unittest.TestCase):
         self.assertEqual(aggregate.longest_podium_streak([]), 0)
 
     def test_achievement_thresholds_are_explicit_and_all_time_based(self):
-        stats = {
+        player_stats = {
             "tournaments_played": 100,
             "podiums": 25,
-            "first_places": 5,
-            "longest_podium_streak": 5,
+            "first_places": 10,
+            "longest_podium_streak": 8,
         }
-        earned = aggregate.achievements_for(stats, "players")
         self.assertEqual(
-            set(earned),
-            {"first_steps", "battle_veteran", "century_club", "podium_finisher", "podium_collector", "multi_champion", "podium_streak"},
+            set(aggregate.achievements_for(player_stats, "players")),
+            {"battles_100", "podiums_25", "wins_10", "streak_8"},
+        )
+        team_stats = {
+            "tournaments_played": 600,
+            "podiums": 400,
+            "first_places": 100,
+            "longest_podium_streak": 40,
+        }
+        self.assertEqual(
+            len(aggregate.achievements_for(team_stats, "teams")),
+            16,
+        )
+        self.assertEqual(
+            aggregate.achievements_for({"tournaments_played": 99, "podiums": 24, "first_places": 9, "longest_podium_streak": 7}, "players"),
+            [],
         )
 
     def test_member_summaries_deduplicate_repeated_battle_snapshots(self):
