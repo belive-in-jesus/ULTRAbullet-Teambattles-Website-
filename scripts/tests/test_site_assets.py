@@ -18,6 +18,7 @@ PAGES = (
     "achievements.html",
     "information.html",
     "profile.html",
+    "battle.html",
 )
 
 
