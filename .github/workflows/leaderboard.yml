@@ -127,6 +127,7 @@ jobs:
           path: |
             docs/data/leaderboard_players.json
             docs/data/leaderboard_teams.json
+            docs/data/contributors.json
             docs/data/meta.json
             docs/data/battle_history.json
             docs/data/periods_index.json

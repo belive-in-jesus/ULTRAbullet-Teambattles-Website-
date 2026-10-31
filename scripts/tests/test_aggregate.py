@@ -311,6 +311,50 @@ class AggregatePeriodTests(unittest.TestCase):
         self.assertEqual(summary[0]["contribution_points"], 30)
         self.assertEqual(summary[0]["avg_contribution"], 15)
 
+    def test_global_contributor_leaderboard_combines_teams_and_deduplicates_battles(self):
+        team_member_records = {
+            "club-a": [
+                {"id": "battle-1", "player_id": "alice", "player_name": "Alice", "score": 10, "startsAt": 100, "name": "1st ULTRAbullet Team Battle"},
+                {"id": "battle-1", "player_id": "alice", "player_name": "Alice", "score": 10, "startsAt": 100, "name": "1st ULTRAbullet Team Battle"},
+                {"id": "battle-2", "player_id": "alice", "player_name": "Alice", "score": 20, "startsAt": 200, "name": "2nd ULTRAbullet Team Battle"},
+                {"id": "battle-1", "player_id": "bob", "player_name": "Bob", "score": 5, "startsAt": 100, "name": "1st ULTRAbullet Team Battle"},
+                {"id": "special", "player_id": "alice", "player_name": "Alice", "score": 999, "startsAt": 300},
+            ],
+            "club-b": [
+                {"id": "battle-3", "player_id": "alice", "player_name": "Alice", "score": 30, "startsAt": 300, "name": "3rd ULTRAbullet Team Battle"},
+                # Defensive cross-team duplicate: count one appearance and retain the highest score.
+                {"id": "battle-1", "player_id": "alice", "player_name": "Alice", "score": 99, "startsAt": 100, "name": "1st ULTRAbullet Team Battle"},
+            ],
+        }
+        result = aggregate.build_contributor_leaderboard(
+            team_member_records,
+            {"Alice": [{"id": "battle-1"}]},
+            {"club-a": "Club A", "club-b": "Club B"},
+            allowed_battle_ids={"battle-1", "battle-2", "battle-3"},
+        )
+
+        self.assertEqual(result["summary"]["contributors_count"], 2)
+        self.assertEqual(result["summary"]["teams_covered_count"], 2)
+        self.assertEqual(result["summary"]["battles_covered_count"], 3)
+        self.assertEqual(result["summary"]["battle_appearances_count"], 4)
+        self.assertEqual(result["summary"]["total_contribution_points"], 154)
+
+        alice = result["contributors"][0]
+        self.assertEqual(alice["name"], "Alice")
+        self.assertEqual(alice["player_id"], "Alice")
+        self.assertTrue(alice["profile_available"])
+        self.assertEqual(alice["rank"], 1)
+        self.assertEqual(alice["battles_listed"], 3)
+        self.assertEqual(alice["teams_count"], 2)
+        self.assertEqual(alice["contribution_points"], 149)
+        self.assertEqual(alice["best_contribution"], 99)
+        self.assertEqual([row["id"] for row in alice["teams"]], ["club-b", "club-a"])
+
+        bob = result["contributors"][1]
+        self.assertEqual(bob["name"], "Bob")
+        self.assertFalse(bob["profile_available"])
+        self.assertEqual(bob["contribution_points"], 5)
+
     def test_compute_stats_uses_only_the_supplied_period_records(self):
         stats = aggregate.compute_stats([
             {"startsAt": 2000, "score": 10, "rank": 2},

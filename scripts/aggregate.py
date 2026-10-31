@@ -171,6 +171,147 @@ def summarize_member_records(records: list, id_field: str, name_field: str) -> l
     )
 
 
+def build_contributor_leaderboard(
+    team_member_records: dict,
+    player_records: dict,
+    team_names: dict,
+    allowed_battle_ids: set | None = None,
+) -> dict:
+    """Aggregate listed team-standing contributions into a global player ranking.
+
+    A player's appearance is counted once per battle even if duplicate snapshots
+    are present. Lichess normally allows one team per player in a single battle;
+    the maximum score is retained defensively if an unexpected cross-team
+    duplicate exists.
+    """
+    player_key_by_id = {str(key).strip().lower(): key for key in player_records}
+    grouped = {}
+    covered_teams = set()
+    covered_battles = set()
+
+    for team_id, records in team_member_records.items():
+        team_key = str(team_id or "").strip()
+        if not team_key:
+            continue
+        team_name = team_names.get(team_key, team_key)
+        for row in records:
+            battle_id = str(row.get("id") or "").strip()
+            if not battle_id:
+                continue
+            if allowed_battle_ids is not None and battle_id not in allowed_battle_ids:
+                continue
+
+            raw_player_id = str(row.get("player_id") or row.get("player_name") or "").strip()
+            if not raw_player_id:
+                continue
+            canonical_id = player_key_by_id.get(raw_player_id.lower())
+            display_name = canonical_id or row.get("player_name") or raw_player_id
+            contributor_key = str(canonical_id or raw_player_id).strip().lower()
+            if not contributor_key:
+                continue
+
+            try:
+                score = float(row.get("score", 0) or 0)
+            except (TypeError, ValueError):
+                score = 0.0
+            battle_record = {
+                "score": score,
+                "startsAt": row.get("startsAt"),
+                "name": row.get("name") or row.get("last_battle"),
+            }
+
+            contributor = grouped.setdefault(contributor_key, {
+                "player_id": canonical_id,
+                "lichess_id": raw_player_id,
+                "name": str(display_name),
+                "battle_records": {},
+                "teams": {},
+            })
+            if canonical_id:
+                contributor["player_id"] = canonical_id
+                contributor["name"] = str(canonical_id)
+
+            existing_battle = contributor["battle_records"].get(battle_id)
+            if existing_battle is None or score > existing_battle["score"]:
+                contributor["battle_records"][battle_id] = battle_record
+
+            team_bucket = contributor["teams"].setdefault(team_key, {
+                "name": team_name,
+                "battle_records": {},
+            })
+            existing_team_battle = team_bucket["battle_records"].get(battle_id)
+            if existing_team_battle is None or score > existing_team_battle["score"]:
+                team_bucket["battle_records"][battle_id] = battle_record
+
+            covered_teams.add(team_key)
+            covered_battles.add(battle_id)
+
+    ranked = []
+    for contributor in grouped.values():
+        battle_rows = list(contributor["battle_records"].values())
+        if not battle_rows:
+            continue
+        points = sum(row["score"] for row in battle_rows)
+        latest = max(battle_rows, key=lambda row: int(row.get("startsAt") or 0))
+        team_summaries = []
+        for team_id, team_bucket in contributor["teams"].items():
+            team_rows = list(team_bucket["battle_records"].values())
+            team_points = sum(row["score"] for row in team_rows)
+            team_latest = max(team_rows, key=lambda row: int(row.get("startsAt") or 0))
+            team_summaries.append({
+                "id": team_id,
+                "name": team_bucket["name"],
+                "battles_listed": len(team_rows),
+                "contribution_points": round(team_points, 1),
+                "avg_contribution": round(team_points / len(team_rows), 1),
+                "last_seen": team_latest.get("startsAt"),
+            })
+        team_summaries.sort(
+            key=lambda row: (
+                -float(row["contribution_points"]),
+                -int(row["battles_listed"]),
+                str(row["name"]).lower(),
+            )
+        )
+        ranked.append({
+            "player_id": contributor.get("player_id"),
+            "lichess_id": contributor.get("lichess_id"),
+            "profile_available": bool(contributor.get("player_id")),
+            "name": contributor.get("name") or contributor.get("lichess_id"),
+            "contribution_points": round(points, 1),
+            "battles_listed": len(battle_rows),
+            "teams_count": len(team_summaries),
+            "avg_contribution": round(points / len(battle_rows), 1),
+            "best_contribution": round(max(row["score"] for row in battle_rows), 1),
+            "last_seen": latest.get("startsAt"),
+            "last_battle": latest.get("name"),
+            "teams": team_summaries,
+        })
+
+    ranked.sort(
+        key=lambda row: (
+            -float(row["contribution_points"]),
+            -int(row["battles_listed"]),
+            -int(row["teams_count"]),
+            str(row["name"]).lower(),
+        )
+    )
+    for index, row in enumerate(ranked, 1):
+        row["rank"] = index
+
+    return {
+        "summary": {
+            "contributors_count": len(ranked),
+            "teams_covered_count": len(covered_teams),
+            "battles_covered_count": len(covered_battles),
+            "battle_appearances_count": sum(row["battles_listed"] for row in ranked),
+            "total_contribution_points": round(sum(row["contribution_points"] for row in ranked), 1),
+            "profile_match_count": sum(bool(row["profile_available"]) for row in ranked),
+        },
+        "contributors": ranked,
+    }
+
+
 def build_achievements_catalog(teams: list, players: list, generated_at: str) -> dict:
     """Create a public index of badge criteria, counts and leading holders."""
     categories = {}
@@ -844,6 +985,22 @@ def main() -> int:
         })
 
     generated_at = datetime.now(timezone.utc).isoformat()
+    contributor_leaderboard = build_contributor_leaderboard(
+        team_member_records,
+        player_records,
+        team_names,
+        allowed_battle_ids=allowed_ids,
+    )
+    write_json(os.path.join(OUTPUT_DIR, "contributors.json"), {
+        "generated_at": generated_at,
+        "summary": contributor_leaderboard["summary"],
+        "contributors": contributor_leaderboard["contributors"],
+        "methodology": (
+            "Career contribution points summed from player scores listed in official numbered "
+            "Lichess team-battle standings. Each player is counted once per battle. These are "
+            "listed contributors, not a complete team-membership roster."
+        ),
+    })
     period_index = {
         "generated_at": generated_at,
         "season_size": SEASON_SIZE,
@@ -889,6 +1046,9 @@ def main() -> int:
         "max_battle_number": max_battle_number,
         "excluded_events_count": len(battle_history) - len(regular_battles),
         "team_member_records_count": member_record_count,
+        "contributors_count": contributor_leaderboard["summary"]["contributors_count"],
+        "contributor_battle_appearances_count": contributor_leaderboard["summary"]["battle_appearances_count"],
+        "contributor_leaderboard_schema_version": 1,
         "teams_with_member_data_count": teams_with_member_data,
         "achievement_catalog_schema_version": 1,
     }
