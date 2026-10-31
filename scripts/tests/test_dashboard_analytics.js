@@ -67,7 +67,7 @@ const sampleSeries = {
 
 test("global chart renders an accessible SVG with escaped labels and data values", () => {
   const svg = analytics.buildBarChart(
-    [{ label: "Oct <2026>", battle_count: 26 }],
+    [{ key: "2026-10", label: "October <2026>", battle_count: 26 }],
     "battle_count",
     "Monthly battle count",
     "battles"
@@ -75,7 +75,7 @@ test("global chart renders an accessible SVG with escaped labels and data values
   assert.match(svg, /<svg/);
   assert.match(svg, /role="img"/);
   assert.match(svg, /Monthly battle count/);
-  assert.match(svg, /Oct &lt;2026&gt;/);
+  assert.match(svg, /October &lt;2026&gt;/);
   assert.match(svg, /26 battles/);
   assert.match(svg, />Oct<\/text>/);
   const other = analytics.buildBarChart([{ key: "2026-10", label: "October 2026", battle_count: 26 }], "battle_count", "Other chart", "battles", 12, "other-chart");
