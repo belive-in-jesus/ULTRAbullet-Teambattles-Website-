@@ -142,12 +142,30 @@ test("full player-profile startup renders every new analytics module", async () 
     last_played: Date.parse("2026-10-30T12:00:00Z"),
     profile_file: "profiles/players-000.json",
     profile_key: "TestPlayer",
-    rank_history: [[550, 3], [600, 2], [643, 1]]
+    rank_history: [[550, 3], [600, 2], [643, 1]],
+    performance_index: 82.4,
+    performance_index_eligible: true,
+    performance_index_rank: 4,
+    performance_index_battles: 24,
+    performance_index_components: {
+      average_performance: 84,
+      consistency: 78,
+      recent_performance: 88,
+      participation: 48
+    },
+    performance_index_history: [
+      [599, 76.2, 12, 76.2, 12],
+      [643, 82.4, 24, 89.1, 12]
+    ]
   };
   const { elements } = await runProfile("player", "TestPlayer", entry, history, {
     teams: [{ id: "sample-team", name: "🏆 The House", battles_listed: 3, contribution_points: 120, avg_contribution: 40, last_seen: Date.parse("2026-10-30T12:00:00Z") }]
   });
 
+  assert.match(elements.get("profile-pi-card").innerHTML, /Historical PI development/);
+  assert.match(elements.get("profile-pi-card").innerHTML, /Season PI/);
+  assert.match(elements.get("profile-pi-card").innerHTML, /Career PI/);
+  assert.match(elements.get("profile-pi-card").innerHTML, /82.4/);
   assert.match(elements.get("profile-chart").innerHTML, /<svg/);
   elements.get("chart-mode-rank").listeners.click();
   assert.match(elements.get("profile-chart").innerHTML, /Cumulative all-time rank history/);
