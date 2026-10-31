@@ -5,22 +5,40 @@
   const num=value=>Number(value||0).toLocaleString();
   const DEFINITIONS={
     players:[
-      {id:"first_steps",name:"Battle Regular",description:"Recorded results in 10 official battles.",criteria:"10 battles",metric:"tournaments_played",threshold:10,icon:"10+"},
-      {id:"battle_veteran",name:"Battle Veteran",description:"Recorded results in 50 official battles.",criteria:"50 battles",metric:"tournaments_played",threshold:50,icon:"50+"},
-      {id:"century_club",name:"Century Club",description:"Recorded results in 100 official battles.",criteria:"100 battles",metric:"tournaments_played",threshold:100,icon:"100"},
-      {id:"podium_finisher",name:"Podium Finisher",description:"Finished in the top three at least five times.",criteria:"5 podiums",metric:"podiums",threshold:5,icon:"TOP 3"},
-      {id:"podium_collector",name:"Podium Collector",description:"Finished in the top three at least 25 times.",criteria:"25 podiums",metric:"podiums",threshold:25,icon:"25×"},
-      {id:"multi_champion",name:"Multiple Champion",description:"Won at least five official battles.",criteria:"5 wins",metric:"first_places",threshold:5,icon:"★"},
-      {id:"podium_streak",name:"Podium Streak",description:"Reached the podium in five consecutive numbered battles.",criteria:"5 consecutive podiums",metric:"longest_podium_streak",threshold:5,icon:"STREAK"}
+      {id:"battles_100",name:"Century Challenger",description:"Recorded results in 100 official battles.",criteria:"100 battles",metric:"tournaments_played",threshold:100,icon:"100"},
+      {id:"battles_200",name:"Double Century",description:"Recorded results in 200 official battles.",criteria:"200 battles",metric:"tournaments_played",threshold:200,icon:"200"},
+      {id:"battles_400",name:"Battle Marathon",description:"Recorded results in 400 official battles.",criteria:"400 battles",metric:"tournaments_played",threshold:400,icon:"400"},
+      {id:"battles_600",name:"Ultra Veteran",description:"Recorded results in 600 official battles.",criteria:"600 battles",metric:"tournaments_played",threshold:600,icon:"600"},
+      {id:"podiums_25",name:"Podium Specialist",description:"Finished in the top three at least 25 times.",criteria:"25 podiums",metric:"podiums",threshold:25,icon:"25×"},
+      {id:"podiums_50",name:"Podium Elite",description:"Finished in the top three at least 50 times.",criteria:"50 podiums",metric:"podiums",threshold:50,icon:"50×"},
+      {id:"podiums_100",name:"Podium Legend",description:"Finished in the top three at least 100 times.",criteria:"100 podiums",metric:"podiums",threshold:100,icon:"100"},
+      {id:"podiums_200",name:"Podium Immortal",description:"Finished in the top three at least 200 times.",criteria:"200 podiums",metric:"podiums",threshold:200,icon:"200"},
+      {id:"wins_10",name:"10-Time Champion",description:"Won at least 10 official battles.",criteria:"10 wins",metric:"first_places",threshold:10,icon:"10 W"},
+      {id:"wins_25",name:"Grand Champion",description:"Won at least 25 official battles.",criteria:"25 wins",metric:"first_places",threshold:25,icon:"25 W"},
+      {id:"wins_50",name:"Supreme Champion",description:"Won at least 50 official battles.",criteria:"50 wins",metric:"first_places",threshold:50,icon:"50 W"},
+      {id:"wins_75",name:"Ultra Champion",description:"Won at least 75 official battles.",criteria:"75 wins",metric:"first_places",threshold:75,icon:"75 W"},
+      {id:"streak_8",name:"Podium Momentum",description:"Reached the podium in eight consecutive numbered battles.",criteria:"8 consecutive podiums",metric:"longest_podium_streak",threshold:8,icon:"8×"},
+      {id:"streak_10",name:"Unbroken Momentum",description:"Reached the podium in 10 consecutive numbered battles.",criteria:"10 consecutive podiums",metric:"longest_podium_streak",threshold:10,icon:"10×"},
+      {id:"streak_12",name:"Unstoppable Run",description:"Reached the podium in 12 consecutive numbered battles.",criteria:"12 consecutive podiums",metric:"longest_podium_streak",threshold:12,icon:"12×"},
+      {id:"streak_15",name:"Perfect Podium Run",description:"Reached the podium in 15 consecutive numbered battles.",criteria:"15 consecutive podiums",metric:"longest_podium_streak",threshold:15,icon:"15×"}
     ],
     teams:[
-      {id:"first_steps",name:"Active Team",description:"Recorded results in 10 official battles.",criteria:"10 battles",metric:"tournaments_played",threshold:10,icon:"10+"},
-      {id:"battle_veteran",name:"Veteran Team",description:"Recorded results in 50 official battles.",criteria:"50 battles",metric:"tournaments_played",threshold:50,icon:"50+"},
-      {id:"century_club",name:"Century Club",description:"Recorded results in 100 official battles.",criteria:"100 battles",metric:"tournaments_played",threshold:100,icon:"100"},
-      {id:"podium_finisher",name:"Podium Team",description:"Finished in the top three at least five times.",criteria:"5 podiums",metric:"podiums",threshold:5,icon:"TOP 3"},
-      {id:"podium_collector",name:"Podium Dynasty",description:"Finished in the top three at least 25 times.",criteria:"25 podiums",metric:"podiums",threshold:25,icon:"25×"},
-      {id:"multi_champion",name:"Championship Team",description:"Won at least five official battles.",criteria:"5 wins",metric:"first_places",threshold:5,icon:"★"},
-      {id:"podium_streak",name:"Unbroken Form",description:"Reached the podium in five consecutive numbered battles.",criteria:"5 consecutive podiums",metric:"longest_podium_streak",threshold:5,icon:"STREAK"}
+      {id:"battles_300",name:"Established Club",description:"Recorded results in 300 official battles.",criteria:"300 battles",metric:"tournaments_played",threshold:300,icon:"300"},
+      {id:"battles_400",name:"Veteran Club",description:"Recorded results in 400 official battles.",criteria:"400 battles",metric:"tournaments_played",threshold:400,icon:"400"},
+      {id:"battles_500",name:"Elite Institution",description:"Recorded results in 500 official battles.",criteria:"500 battles",metric:"tournaments_played",threshold:500,icon:"500"},
+      {id:"battles_600",name:"600-Battle Institution",description:"Recorded results in 600 official battles.",criteria:"600 battles",metric:"tournaments_played",threshold:600,icon:"600"},
+      {id:"podiums_50",name:"Podium Contender",description:"Finished in the top three at least 50 times.",criteria:"50 podiums",metric:"podiums",threshold:50,icon:"50×"},
+      {id:"podiums_100",name:"Podium Dynasty",description:"Finished in the top three at least 100 times.",criteria:"100 podiums",metric:"podiums",threshold:100,icon:"100"},
+      {id:"podiums_200",name:"Podium Empire",description:"Finished in the top three at least 200 times.",criteria:"200 podiums",metric:"podiums",threshold:200,icon:"200"},
+      {id:"podiums_400",name:"Four-Hundred Podiums",description:"Finished in the top three at least 400 times.",criteria:"400 podiums",metric:"podiums",threshold:400,icon:"400"},
+      {id:"wins_10",name:"10-Time Team Champion",description:"Won at least 10 official battles.",criteria:"10 wins",metric:"first_places",threshold:10,icon:"10 W"},
+      {id:"wins_25",name:"Dominant Team",description:"Won at least 25 official battles.",criteria:"25 wins",metric:"first_places",threshold:25,icon:"25 W"},
+      {id:"wins_50",name:"Team Dynasty",description:"Won at least 50 official battles.",criteria:"50 wins",metric:"first_places",threshold:50,icon:"50 W"},
+      {id:"wins_100",name:"Century of Victories",description:"Won at least 100 official battles.",criteria:"100 wins",metric:"first_places",threshold:100,icon:"100 W"},
+      {id:"streak_10",name:"Unbroken Team Form",description:"Reached the podium in 10 consecutive numbered battles.",criteria:"10 consecutive podiums",metric:"longest_podium_streak",threshold:10,icon:"10×"},
+      {id:"streak_20",name:"Elite Consistency",description:"Reached the podium in 20 consecutive numbered battles.",criteria:"20 consecutive podiums",metric:"longest_podium_streak",threshold:20,icon:"20×"},
+      {id:"streak_30",name:"Thirty-Battle Reign",description:"Reached the podium in 30 consecutive numbered battles.",criteria:"30 consecutive podiums",metric:"longest_podium_streak",threshold:30,icon:"30×"},
+      {id:"streak_40",name:"Forty-Battle Reign",description:"Reached the podium in 40 consecutive numbered battles.",criteria:"40 consecutive podiums",metric:"longest_podium_streak",threshold:40,icon:"40×"}
     ]
   };
   async function getJson(path){
