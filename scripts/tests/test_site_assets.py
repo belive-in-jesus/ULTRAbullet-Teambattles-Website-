@@ -381,7 +381,7 @@ class WebsiteAssetTests(unittest.TestCase):
             labels.append(label.group(1))
         self.assertEqual(len(labels), len(set(labels)), "Table scroll-region labels must be unique.")
 
-        ids = re.findall(r'\\bid="([^"]+)"', rankings)
+        ids = re.findall(r'\bid="([^"]+)"', rankings)
         self.assertEqual(len(ids), len(set(ids)), "Rankings preview contains duplicate HTML IDs.")
         self.assertIn('event.key === "ArrowRight"', controller)
         self.assertIn('event.key === "Home"', controller)
