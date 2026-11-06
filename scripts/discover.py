@@ -4,6 +4,7 @@ import json
 import os
 import re
 import sys
+import time
 from urllib.parse import quote
 
 import requests
@@ -58,8 +59,47 @@ def main() -> int:
         f"Scanning regular numbered battles created by {USER}; filters={NAME_FILTERS}; max={NB}",
         file=sys.stderr,
     )
-    response = session.get(url, headers=headers, params={"nb": NB}, stream=True, timeout=(15, 180))
-    response.raise_for_status()
+    response = None
+    backoff = 3.0
+    for attempt in range(1, 8):
+        try:
+            response = session.get(url, headers=headers, params={"nb": NB}, stream=True, timeout=(15, 180))
+        except requests.RequestException:
+            if attempt == 7:
+                raise
+            wait = min(backoff, 60.0)
+            print(f"Network issue during discovery; retrying in {wait:.0f}s ({attempt}/7)", file=sys.stderr)
+            time.sleep(wait)
+            backoff = min(backoff * 2, 60.0)
+            continue
+
+        if response.status_code == 429:
+            retry_after = response.headers.get("Retry-After")
+            try:
+                server_wait = float(retry_after) if retry_after else 60.0
+            except (TypeError, ValueError):
+                server_wait = 60.0
+            wait = max(60.0, server_wait)
+            response.close()
+            if attempt == 7:
+                raise RuntimeError("Lichess discovery remained rate limited after 7 attempts.")
+            print(f"Lichess discovery rate limited; waiting {wait:.0f}s ({attempt}/7)", file=sys.stderr)
+            time.sleep(wait)
+            continue
+
+        if response.status_code >= 500 and attempt < 7:
+            response.close()
+            wait = min(backoff, 60.0)
+            print(f"Lichess discovery HTTP {response.status_code}; retrying in {wait:.0f}s ({attempt}/7)", file=sys.stderr)
+            time.sleep(wait)
+            backoff = min(backoff * 2, 60.0)
+            continue
+
+        response.raise_for_status()
+        break
+
+    if response is None:
+        raise RuntimeError("Lichess discovery did not return a response.")
 
     matches = {}
     scanned = 0
