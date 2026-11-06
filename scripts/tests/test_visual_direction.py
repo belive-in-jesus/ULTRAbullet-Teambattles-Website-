@@ -48,7 +48,7 @@ def css_delimiters_are_balanced(source):
         following = source[index + 1] if index + 1 < len(source) else ""
 
         if quote:
-            if char == "\\\\":
+            if char == "\\":
                 index += 2
                 continue
             if char == quote:
