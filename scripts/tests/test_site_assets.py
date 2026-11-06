@@ -372,6 +372,7 @@ class WebsiteAssetTests(unittest.TestCase):
         self.assertIn('aria-live="polite"', overview)
         self.assertIn('href="https://lichess.org/tournament/2vPEnd1i"', overview)
         self.assertIn('Archived battles', overview)
+        self.assertIn('latest official number #644', overview)
         self.assertNotIn('Numbered battles</span>', overview)
 
         contributor_panel = rankings.split('data-mode-panel="contributors"', 1)[1].split('</section>', 1)[0]
