@@ -1003,6 +1003,26 @@ def write_battle_reports(
                 "rank": rank,
             })
 
+    members_by_battle = defaultdict(list)
+    for team_id, records in (team_member_records or {}).items():
+        for record in records:
+            battle_id = str(record.get("id") or "").strip()
+            player_id = str(record.get("player_id") or record.get("player_name") or "").strip()
+            if not battle_id or not player_id:
+                continue
+            try:
+                member_score = float(record.get("score", 0) or 0)
+            except (TypeError, ValueError):
+                member_score = 0.0
+            members_by_battle[battle_id].append({
+                "team_id": str(team_id),
+                "team_name": str(record.get("team_name") or team_names.get(team_id, team_id)),
+                "player_id": player_id,
+                "player_name": str(record.get("player_name") or player_id),
+                "score": round(member_score, 1),
+                "team_rank": record.get("team_rank"),
+            })
+
     for battle in numbered_battles:
         battle_id = str(battle.get("id") or "").strip()
         if not battle_id:
