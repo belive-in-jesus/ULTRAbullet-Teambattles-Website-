@@ -261,7 +261,7 @@ main { padding: 28px 0 56px; }
 .activity-legend span { width: 7px; height: 7px; border-radius: 2px; background: linear-gradient(135deg, #4ba5a9, var(--violet)); }
 .activity-chart { min-height: 173px; display: flex; align-items: center; margin-top: 3px; }
 .activity-chart:focus-visible { outline-offset: 1px; }
-.activity-chart svg { display: block; width: 100%; height: auto; overflow: visible; }
+.activity-chart svg { display: block; width: 100%; height: auto; overflow: visible; }\n.chart-axis { fill: #87928c; font-family: var(--mono); font-size: 10px; }
 .chart-loading { width: 100%; padding: 48px 12px; color: var(--muted); font-size: 9px; text-align: center; }
 .activity-foot { display: flex; justify-content: space-between; gap: 10px; padding-top: 9px; border-top: 1px solid var(--line); color: var(--muted); font-family: var(--mono); font-size: 7px; }
 .leaders-section { margin-top: 39px; }
