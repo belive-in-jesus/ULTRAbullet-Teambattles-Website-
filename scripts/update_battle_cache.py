@@ -20,7 +20,7 @@ from typing import Any
 import requests
 
 API_ROOT = "https://lichess.org/api"
-CACHE_DIR = Path(os.environ.get("BATTLE_CACHE_DIR", "docs/data/battle_cache"))
+CACHE_DIR = Path(os.environ.get("BATTLE_CACHE_DIR", "cache/battles"))
 SOURCE_REPORT_DIR = Path(os.environ.get("BATTLE_REPORT_DIR", "docs/data/battles"))
 TOURNAMENTS_FILE = Path(os.environ.get("TOURNAMENTS_FILE", "tournaments.json"))
 TOKEN = os.environ.get("LICHESS_TOKEN", "").strip()
