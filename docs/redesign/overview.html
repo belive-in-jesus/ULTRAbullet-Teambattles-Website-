@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f0f2f4">
+  <meta name="description" content="Structural wireframe for the redesigned UltraBullet Team Battles overview page.">
+  <title>Overview Wireframe — UltraBullet Team Battles</title>
+  <link rel="stylesheet" href="./wireframes.css">
+</head>
+<body>
+  <div class="preview-banner">Redesign wireframe · 01 / Overview <span>Layout concept only — the live homepage and all current features remain unchanged.</span></div>
+  <div class="shell">
+    <header class="topbar">
+      <a class="brand" href="./overview.html" aria-label="UltraBullet Team Battles redesign overview">
+        <span class="brand-mark" aria-hidden="true">UTB</span>
+        <span class="brand-copy"><strong>ULTRABULLET</strong><small>TEAM BATTLES</small></span>
+      </a>
+      <nav class="main-nav" aria-label="Redesign preview navigation">
+        <a href="./overview.html" aria-current="page">Overview</a>
+        <a href="./rankings.html">Rankings</a>
+        <a href="../analytics.html">Analysis ↗</a>
+        <a href="../records.html">History ↗</a>
+        <a href="../information.html">Guide ↗</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="page-intro">
+        <div>
+          <span class="eyebrow">Competitive overview</span>
+          <h1>Every battle. One competitive picture.</h1>
+          <p>A focused snapshot of the UltraBullet Team Battles: the size of the archive, the current season, recent activity and the leading competitors. Detailed exploration starts in Rankings and the specialist areas.</p>
+        </div>
+        <div class="intro-actions">
+          <a class="action primary" href="./rankings.html">Explore rankings <span aria-hidden="true">→</span></a>
+          <a class="action" href="../records.html">Browse history</a>
+        </div>
+      </section>
+
+      <div class="data-note">
+        <span><strong>Data snapshot:</strong> 2 November 2026 · sample figures from the existing published dataset</span>
+        <span>Wireframe only · not live data</span>
+      </div>
+
+      <section class="kpi-grid" aria-label="Competition at a glance">
+        <article class="kpi-card">
+          <span class="kpi-label">Numbered battles</span>
+          <strong class="kpi-value">640</strong>
+          <span class="kpi-foot">Included in the cumulative archive</span>
+        </article>
+        <article class="kpi-card">
+          <span class="kpi-label">Teams represented</span>
+          <strong class="kpi-value">821</strong>
+          <span class="kpi-foot">Across the recorded competition</span>
+        </article>
+        <article class="kpi-card">
+          <span class="kpi-label">Players represented</span>
+          <strong class="kpi-value">13,372</strong>
+          <span class="kpi-foot">Unique players in the published data</span>
+        </article>
+      </section>
+
+      <section class="overview-grid" aria-label="Current competition status">
+        <article class="panel season-panel">
+          <div class="panel-head">
+            <div>
+              <span class="eyebrow">Current season</span>
+              <h2>Season 13</h2>
+              <p>Battles 601–650 · cumulative season progress</p>
+            </div>
+            <span class="panel-tag">In progress</span>
+          </div>
+          <div class="season-main">
+            <strong class="season-count">44 <small>/ 50 battles</small></strong>
+            <span class="panel-tag">88% complete</span>
+          </div>
+          <div class="progress-track" role="img" aria-label="Season 13 is 88 percent complete"><span></span></div>
+          <div class="progress-caption"><span>44 indexed battles</span><span>6 remaining in the season</span></div>
+          <div class="season-stats">
+            <div><strong>253</strong><span>Active teams</span></div>
+            <div><strong>1,520</strong><span>Active players</span></div>
+          </div>
+          <a class="panel-link" href="./rankings.html#teams">View season rankings <span aria-hidden="true">→</span></a>
+        </article>
+
+        <article class="panel latest-panel">
+          <div class="panel-head">
+            <div>
+              <span class="eyebrow">Latest indexed battle</span>
+              <h2>Most recent result</h2>
+            </div>
+            <span class="panel-tag">#644</span>
+          </div>
+          <strong class="battle-number">644th</strong>
+          <div class="battle-name">ULTRAbullet Team Battle</div>
+          <p>One compact entry point to the tournament report, placements and original Lichess event.</p>
+          <div class="battle-meta"><span>88 participants</span><span>Battle report</span></div>
+          <a class="panel-link" href="../battle.html?id=2vPEnd1i">Open battle report <span aria-hidden="true">→</span></a>
+        </article>
+
+        <article class="panel month-panel">
+          <div class="panel-head">
+            <div>
+              <span class="eyebrow">Monthly activity</span>
+              <h2>November 2026</h2>
+            </div>
+          </div>
+          <p>A small activity summary, not a second analytics dashboard.</p>
+          <div class="month-stats-grid">
+            <div class="month-stat"><span>Battles</span><strong>1</strong></div>
+            <div class="month-stat"><span>Active teams</span><strong>195</strong></div>
+            <div class="month-stat"><span>Active players</span><strong>88</strong></div>
+          </div>
+          <a class="panel-link" href="../analytics.html">Explore activity <span aria-hidden="true">→</span></a>
+        </article>
+      </section>
+
+      <section aria-labelledby="leaders-heading">
+        <div class="section-head">
+          <div>
+            <span class="eyebrow">Standings snapshot</span>
+            <h2 id="leaders-heading">The current leaders</h2>
+            <p>Only a small preview belongs on the homepage. Full filters and rankings live in one place.</p>
+          </div>
+          <a class="action" href="./rankings.html">All rankings <span aria-hidden="true">→</span></a>
+        </div>
+
+        <div class="leader-grid">
+          <article class="panel leader-card">
+            <div class="leader-card-head">
+              <div><h3>Top teams</h3><p>All-time team points</p></div>
+              <span class="panel-tag">Teams</span>
+            </div>
+            <ol class="leader-list">
+              <li><span class="rank-number">01</span><span class="leader-name">itachi-n-friends <small class="leader-sub">640 battles · 527 podiums</small></span><strong class="leader-score">338,368</strong></li>
+              <li><span class="rank-number">02</span><span class="leader-name">darkonteams <small class="leader-sub">539 battles · 384 podiums</small></span><strong class="leader-score">291,989</strong></li>
+              <li><span class="rank-number">03</span><span class="leader-name">the-house-discord-server <small class="leader-sub">640 battles · 198 podiums</small></span><strong class="leader-score">151,372</strong></li>
+            </ol>
+            <div class="leader-card-foot"><a href="./rankings.html#teams">Open team leaderboard →</a></div>
+          </article>
+
+          <article class="panel leader-card">
+            <div class="leader-card-head">
+              <div><h3>Top players</h3><p>All-time individual points</p></div>
+              <span class="panel-tag">Players</span>
+            </div>
+            <ol class="leader-list">
+              <li><span class="rank-number">01</span><span class="leader-name">Nathanael01 <small class="leader-sub">640 battles · 324 podiums</small></span><strong class="leader-score">94,925</strong></li>
+              <li><span class="rank-number">02</span><span class="leader-name">Cupidust123 <small class="leader-sub">349 battles · 57 podiums</small></span><strong class="leader-score">35,045</strong></li>
+              <li><span class="rank-number">03</span><span class="leader-name">DarkOnCrack <small class="leader-sub">506 battles · 68 podiums</small></span><strong class="leader-score">27,348</strong></li>
+            </ol>
+            <div class="leader-card-foot"><a href="./rankings.html#players">Open player leaderboard →</a></div>
+          </article>
+        </div>
+      </section>
+
+      <section aria-labelledby="next-heading">
+        <div class="section-head">
+          <div>
+            <span class="eyebrow">Continue exploring</span>
+            <h2 id="next-heading">Go deeper when you need to</h2>
+          </div>
+        </div>
+        <div class="quick-links">
+          <a class="quick-link" href="./rankings.html#performance-index"><span><strong>Performance Index</strong><span>Normalized performance, consistency and recent form.</span></span><b aria-hidden="true">→</b></a>
+          <a class="quick-link" href="./rankings.html#contributors"><span><strong>Contributors</strong><span>Career contributions across the teams.</span></span><b aria-hidden="true">→</b></a>
+          <a class="quick-link" href="../analytics.html"><span><strong>Competition analysis</strong><span>Trends, comparisons and deeper statistics.</span></span><b aria-hidden="true">→</b></a>
+        </div>
+      </section>
+
+      <footer class="footer">
+        <span>UltraBullet Team Battles · Overview layout concept</span>
+        <span>Production homepage has not been changed.</span>
+      </footer>
+    </main>
+  </div>
+</body>
+</html>
