@@ -63,6 +63,7 @@
     teams: document.getElementById("pi-teams-table"),
     players: document.getElementById("pi-players-table")
   };
+  const piRegions = Array.from(document.querySelectorAll("[data-pi-region]"));
   const piTitle = document.getElementById("pi-table-title");
   const piCount = document.getElementById("pi-table-count");
 
@@ -75,6 +76,9 @@
     });
     Object.entries(piTables).forEach(([kind, table]) => {
       if (table) table.hidden = kind !== selected;
+    });
+    piRegions.forEach((region) => {
+      region.hidden = region.dataset.piRegion !== selected;
     });
     if (piTitle) piTitle.textContent = selected === "teams" ? "Team Performance Index" : "Player Performance Index";
     if (piCount) piCount.textContent = selected === "teams" ? "637 eligible teams" : "1,485 eligible players";
