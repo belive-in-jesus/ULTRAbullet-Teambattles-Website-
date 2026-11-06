@@ -33,6 +33,7 @@ jobs:
           node --check docs/js/performance-index.js
           node --check docs/js/compare-core.js
           node --check docs/js/compare.js
+          node --check docs/js/redesign-wireframes.js
       - name: Check inline browser JavaScript syntax
         run: python scripts/tests/check_inline_javascript.py
       - name: Run analytics regression tests
