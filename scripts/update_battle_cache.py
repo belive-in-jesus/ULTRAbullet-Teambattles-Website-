@@ -20,7 +20,8 @@ from typing import Any
 import requests
 
 API_ROOT = "https://lichess.org/api"
-CACHE_DIR = Path(os.environ.get("BATTLE_CACHE_DIR", "docs/data/battles"))
+CACHE_DIR = Path(os.environ.get("BATTLE_CACHE_DIR", "docs/data/battle_cache"))
+SOURCE_REPORT_DIR = Path(os.environ.get("BATTLE_REPORT_DIR", "docs/data/battles"))
 TOURNAMENTS_FILE = Path(os.environ.get("TOURNAMENTS_FILE", "tournaments.json"))
 TOKEN = os.environ.get("LICHESS_TOKEN", "").strip()
 REQUEST_DELAY = max(0.0, float(os.environ.get("REQUEST_DELAY", "1.0")))
@@ -216,15 +217,36 @@ def update_cache(tournaments: list[dict]) -> dict:
     CACHE_DIR.mkdir(parents=True, exist_ok=True)
     counters = {"new": 0, "backfilled": 0, "refreshed": 0, "unchanged": 0, "team_endpoints_missing": 0}
 
-    eligible = []
+    eligible_by_id = {}
     for tournament in tournaments:
         name = tournament.get("fullName") or tournament.get("name") or ""
         if not parse_battle_number(name):
             continue
         tournament_id = str(tournament.get("id") or "").strip()
         if tournament_id:
-            eligible.append((tournament_id, tournament))
+            eligible_by_id[tournament_id] = tournament
 
+    # Ensure that legacy reports outside the current discovery window are
+    # also migrated once. This prevents an old cached battle from blocking
+    # the aggregate merely because it is no longer in the discovery response.
+    for report_path in SOURCE_REPORT_DIR.glob("*.json"):
+        if report_path.stem in eligible_by_id:
+            continue
+        try:
+            report = json.loads(report_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as error:
+            raise RuntimeError(f"Cannot read legacy battle report {report_path}: {error}") from error
+        battle = report.get("battle") or {}
+        name = str(battle.get("name") or "")
+        if parse_battle_number(name):
+            eligible_by_id[report_path.stem] = {
+                "id": report_path.stem,
+                "fullName": name,
+                "startsAt": battle.get("startsAt"),
+                "nbPlayers": battle.get("nbPlayers"),
+            }
+
+    eligible = list(eligible_by_id.items())
     eligible.sort(key=lambda item: (int(item[1].get("startsAt") or 0), item[0]))
     if not eligible:
         raise RuntimeError("Discovery returned no eligible numbered battles; refusing to rebuild from an empty cache.")
@@ -232,11 +254,12 @@ def update_cache(tournaments: list[dict]) -> dict:
     for index, (battle_id, tournament) in enumerate(eligible, start=1):
         cache_path = CACHE_DIR / f"{battle_id}.json"
         existing = None
-        if cache_path.exists():
+        source_path = cache_path if cache_path.exists() else SOURCE_REPORT_DIR / f"{battle_id}.json"
+        if source_path.exists():
             try:
-                existing = json.loads(cache_path.read_text(encoding="utf-8"))
+                existing = json.loads(source_path.read_text(encoding="utf-8"))
             except (OSError, json.JSONDecodeError) as error:
-                raise RuntimeError(f"Cannot read existing battle cache {cache_path}: {error}") from error
+                raise RuntimeError(f"Cannot read existing battle data {source_path}: {error}") from error
 
         is_current = (
             existing is not None
