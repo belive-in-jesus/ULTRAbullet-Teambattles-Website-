@@ -368,6 +368,8 @@ class WebsiteAssetTests(unittest.TestCase):
         self.assertIn("Open current website", rankings)
         self.assertIn("2 November 2026 · 03:49 UTC", overview)
         self.assertIn("2 November 2026 · 03:49 UTC", rankings)
+        self.assertIn("snapshot-status", overview)
+        self.assertIn('aria-live="polite"', overview)
         self.assertIn('href="https://lichess.org/tournament/2vPEnd1i"', overview)
         self.assertIn('Indexed battles', overview)
         self.assertNotIn('Numbered battles</span>', overview)
