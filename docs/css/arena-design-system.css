@@ -535,3 +535,12 @@ button:disabled { cursor: not-allowed; }
 @media (max-width: 700px) {
   .home-pathways-grid { grid-template-columns: 1fr; }
 }
+
+
+/* Operational data freshness states */
+.primary-nav .status-pill.is-stale,
+.primary-nav .status-pill.has-issues {
+  border-color: rgba(223, 187, 123, .48);
+  background: rgba(223, 187, 123, .10);
+  color: #f2d7a8;
+}
