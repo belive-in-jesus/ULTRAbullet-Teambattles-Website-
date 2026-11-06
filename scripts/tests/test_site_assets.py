@@ -391,6 +391,10 @@ class WebsiteAssetTests(unittest.TestCase):
             self.assertIsNotNone(label, "Every scroll region must have an accessible name.")
             labels.append(label.group(1))
         self.assertEqual(len(labels), len(set(labels)), "Table scroll-region labels must be unique.")
+        self.assertEqual(len(re.findall(r'<th scope="col"', rankings)), 35,
+                         "Every ranking table column must have a scoped header.")
+        self.assertNotRegex(rankings, r'<th(?=\\s|>)(?![^>]*\\bscope=)')
+        self.assertIn("text-overflow: ellipsis", stylesheet)
 
         ids = re.findall(r'\bid="([^"]+)"', rankings)
         self.assertEqual(len(ids), len(set(ids)), "Rankings preview contains duplicate HTML IDs.")
