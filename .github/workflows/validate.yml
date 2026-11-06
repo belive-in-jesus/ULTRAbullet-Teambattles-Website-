@@ -19,7 +19,7 @@ jobs:
           python-version: "3.12"
       - name: Compile Python scripts
         run: |
-          python -m py_compile scripts/discover.py scripts/fetch_worker.py scripts/aggregate.py scripts/tests/test_aggregate.py scripts/tests/check_inline_javascript.py
+          python -m py_compile scripts/discover.py scripts/fetch_worker.py scripts/update_battle_cache.py scripts/cache_to_partials.py scripts/aggregate.py scripts/tests/test_aggregate.py scripts/tests/test_incremental_cache.py scripts/tests/check_inline_javascript.py
       - name: Run aggregation tests
         run: python -m unittest discover -s scripts/tests -v
       - name: Check browser JavaScript syntax
