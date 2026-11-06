@@ -61,13 +61,13 @@ jobs:
           LICHESS_TOKEN: ${{ secrets.LICHESS_TOKEN }}
           REQUEST_DELAY: ${{ inputs.request_delay || '1.0' }}
           FORCE_REFRESH_ALL: ${{ inputs.force_refresh_all || 'false' }}
-          BATTLE_CACHE_DIR: docs/data/battle_cache
+          BATTLE_CACHE_DIR: cache/battles
           BATTLE_REPORT_DIR: docs/data/battles
         run: python scripts/update_battle_cache.py
 
       - name: Build aggregate input from cached battles
         env:
-          BATTLE_CACHE_DIR: docs/data/battle_cache
+          BATTLE_CACHE_DIR: cache/battles
           PARTIALS_DIR: artifacts
         run: python scripts/cache_to_partials.py
 
@@ -104,7 +104,7 @@ jobs:
             docs/data/periods/
             docs/data/profiles/
             docs/data/battles/
-            docs/data/battle_cache/
+            cache/battles/
           if-no-files-found: warn
           retention-days: 7
 
@@ -117,18 +117,21 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
           generated_dir="$RUNNER_TEMP/leaderboard-generated-data"
-          rm -rf "$generated_dir"
-          mkdir -p "$generated_dir"
+          cache_dir="$RUNNER_TEMP/leaderboard-battle-cache"
+          rm -rf "$generated_dir" "$cache_dir"
+          mkdir -p "$generated_dir" "$cache_dir"
           cp -a docs/data/. "$generated_dir/"
+          cp -a cache/battles/. "$cache_dir/"
 
           # Retry push conflicts without discarding site or workflow commits.
           for attempt in 1 2 3; do
-            echo "Publishing leaderboard data (attempt $attempt/3)"
+            echo "Publishing leaderboard data and battle cache (attempt $attempt/3)"
             git fetch origin main
             git reset --hard origin/main
-            mkdir -p docs/data
+            mkdir -p docs/data cache/battles
             cp -a "$generated_dir/." docs/data/
-            git add docs/data
+            cp -a "$cache_dir/." cache/battles/
+            git add docs/data cache/battles
 
             if git diff --cached --quiet; then
               echo "Leaderboard data is already up to date."
