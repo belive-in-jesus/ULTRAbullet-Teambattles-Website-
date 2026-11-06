@@ -125,7 +125,7 @@ class WebsiteAssetTests(unittest.TestCase):
     def test_all_public_pages_share_the_same_primary_navigation(self):
         expected_links = (
             "./index.html",
-            "./rankings.html",
+            "./index.html#leaderboard",
             "./performance-index.html",
             "./analytics.html",
             "./compare.html",
@@ -293,25 +293,53 @@ class WebsiteAssetTests(unittest.TestCase):
 
 
     def test_published_dashboard_analytics_snapshots_are_consistent(self):
-        analytics_dir = DOCS / "data" / "analytics"
+        data_dir = DOCS / "data"
+        analytics_dir = data_dir / "analytics"
         overview = json.loads((analytics_dir / "overview.json").read_text(encoding="utf-8"))
         timeseries = json.loads((analytics_dir / "timeseries.json").read_text(encoding="utf-8"))
+        meta = json.loads((data_dir / "meta.json").read_text(encoding="utf-8"))
+        periods = json.loads((data_dir / "periods_index.json").read_text(encoding="utf-8"))
+
         self.assertEqual(overview["schema_version"], 1)
         self.assertEqual(timeseries["schema_version"], 1)
         self.assertEqual(overview["generated_at"], timeseries["generated_at"])
-        self.assertEqual(overview["totals"]["numbered_battles"], 639)
-        self.assertEqual(overview["totals"]["teams"], 818)
-        self.assertEqual(overview["totals"]["players"], 13366)
-        self.assertEqual(len(timeseries["months"]), 24)
-        self.assertEqual(len(timeseries["seasons"]), 13)
-        self.assertEqual(timeseries["months"][0]["key"], "2024-11")
-        self.assertEqual(timeseries["months"][-1]["key"], "2026-10")
-        self.assertEqual(timeseries["months"][-1]["active_players"], 1116)
-        self.assertEqual(timeseries["months"][-1]["active_teams"], 229)
-        self.assertEqual(overview["current_month"]["key"], "2026-10")
-        self.assertEqual(overview["current_season"]["season_number"], 13)
-        self.assertTrue(overview["current_season"]["in_progress"])
-        self.assertEqual(overview["latest_battle"]["battle_number"], 643)
+        self.assertEqual(overview["generated_at"], meta["generated_at"])
+
+        # Published analytics must agree with the metadata produced in the same run.
+        self.assertEqual(overview["totals"]["numbered_battles"], meta["tournaments_processed"])
+        self.assertEqual(overview["totals"]["teams"], meta["teams_count"])
+        self.assertEqual(overview["totals"]["players"], meta["players_count"])
+        self.assertEqual(len(timeseries["months"]), meta["month_count"])
+        self.assertEqual(len(timeseries["seasons"]), meta["season_count"])
+        self.assertEqual(len(timeseries["months"]), len(periods["months"]))
+        self.assertEqual(len(timeseries["seasons"]), len(periods["seasons"]))
+
+        month_keys = [row["key"] for row in timeseries["months"]]
+        self.assertEqual(month_keys, sorted(set(month_keys)))
+        self.assertEqual(timeseries["months"][-1]["key"], overview["current_month"]["key"])
+        self.assertEqual(timeseries["months"][-1]["active_players"], overview["current_month"]["active_players"])
+        self.assertEqual(timeseries["months"][-1]["active_teams"], overview["current_month"]["active_teams"])
+
+        self.assertEqual(timeseries["seasons"][-1]["season_number"], overview["current_season"]["season_number"])
+        self.assertEqual(timeseries["seasons"][-1]["battle_count"], overview["current_season"]["battle_count"])
+        self.assertEqual(overview["latest_battle"]["battle_number"], meta["max_battle_number"])
+
+    def test_player_leaderboard_is_loaded_on_demand(self):
+        source = (DOCS / "index.html").read_text(encoding="utf-8")
+        init_start = source.index("async function init()")
+        init_end = source.index('$("compare-search-a")', init_start)
+        init_source = source[init_start:init_end]
+
+        self.assertIn("async function ensurePlayersLoaded()", source)
+        self.assertIn('load("./data/leaderboard_players.json")', source)
+        self.assertNotIn('load("./data/leaderboard_players.json")', init_source)
+        self.assertIn('$("players-btn").addEventListener("click",()=>setView("players"))', source)
+
+    def test_homepage_flags_stale_published_data(self):
+        source = (DOCS / "index.html").read_text(encoding="utf-8")
+        self.assertIn("const DATA_STALE_AFTER_MS=36*60*60*1000;", source)
+        self.assertIn("DATA STALE", source)
+        self.assertIn('class="pill status-pill" id="status-pill" role="status" aria-live="polite"', source)
 
     def test_guide_documents_competitor_initial_marks(self):
         source = (DOCS / "information.html").read_text(encoding="utf-8")
