@@ -5,7 +5,7 @@ The scheduled leaderboard workflow runs at **06:15 and 18:15 Europe/Berlin**. Gi
 ## Refresh model
 
 1. Discover finished, numbered UltraBullet Team Battles created by the configured Lichess account.
-2. Reuse the persistent snapshots in `docs/data/battle_cache/`.
+2. Reuse the persistent snapshots in `cache/battles/`.
 3. Fetch player/team results only for newly discovered battles. The first migration also reads the existing public reports in `docs/data/battles/` and backfills their team-member snapshots once.
 4. Convert all saved battle snapshots into the existing aggregate input format.
 5. Rebuild the existing cumulative rankings, profiles, period data, records, contributor data and analytics from the local cache.
@@ -23,7 +23,7 @@ The local aggregation still recalculates derived outputs from the complete cache
 
 ## One-time migration
 
-The first successful run takes longer because the existing battle reports do not contain team-member snapshots. The updater imports those historical records into `docs/data/battle_cache/`. The public per-battle report files remain compact and are not enlarged with the internal contributor cache.
+The first successful run takes longer because the existing battle reports do not contain team-member snapshots. The updater imports those historical records into `cache/battles/`. The public per-battle report files remain compact and are not enlarged with the separate processing cache.
 
 ## Manual controls
 
