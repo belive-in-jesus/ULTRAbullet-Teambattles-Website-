@@ -1,5 +1,7 @@
 """Regression tests for the incremental per-battle cache pipeline."""
 import importlib.util
+import json
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -15,7 +17,6 @@ def load_module(name, filename):
 
 updater = load_module("update_battle_cache_under_test", "update_battle_cache.py")
 converter = load_module("cache_to_partials_under_test", "cache_to_partials.py")
-aggregate = load_module("aggregate_incremental_cache_under_test", "aggregate.py")
 
 
 class IncrementalBattleCacheTests(unittest.TestCase):
@@ -114,43 +115,6 @@ class IncrementalBattleCacheTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "Duplicate battle ID"):
             converter.build_partial([base, base])
 
-    def test_aggregate_writes_member_snapshots_for_future_incremental_runs(self):
-        with __import__("tempfile").TemporaryDirectory() as temporary:
-            aggregate.write_battle_reports(
-                temporary,
-                [{
-                    "id": "battle-1",
-                    "name": "1st ULTRAbullet Team Battle",
-                    "battle_number": 1,
-                    "startsAt": 1000,
-                    "nbPlayers": 12,
-                }],
-                {"club-a": [{
-                    "id": "battle-1", "score": 90, "rank": 1, "nbTeams": 1,
-                }]},
-                {"club-a": "Club A"},
-                {"Alice": [{
-                    "id": "battle-1", "score": 45, "rank": 1, "nbPlayers": 12,
-                }]},
-                {"club-a": [{
-                    "id": "battle-1",
-                    "player_id": "Alice",
-                    "player_name": "Alice",
-                    "team_name": "Club A",
-                    "score": 45,
-                    "team_rank": 1,
-                }]},
-            )
-            report_path = Path(temporary) / "battles" / "battle-1.json"
-            report = __import__("json").loads(report_path.read_text(encoding="utf-8"))
-            self.assertEqual(report["schema_version"], 2)
-            self.assertTrue(report["team_members_fetched"])
-            self.assertEqual(report["team_members"][0]["player_id"], "Alice")
-
-            partial = converter.build_partial([report])
-            self.assertEqual(partial["team_member_records"]["club-a"][0]["player_id"], "Alice")
-
-
     def test_non_numbered_special_events_are_ignored(self):
         cache = {
             "schema_version": 2,
@@ -165,6 +129,32 @@ class IncrementalBattleCacheTests(unittest.TestCase):
         }
         with self.assertRaisesRegex(RuntimeError, "No valid numbered battle"):
             converter.build_partial([cache])
+
+    def test_updater_can_seed_missing_cache_from_existing_public_report(self):
+        legacy = {
+            "schema_version": 1,
+            "battle": {
+                "id": "battle-1",
+                "name": "1st ULTRAbullet Team Battle",
+                "battle_number": 1,
+                "startsAt": 1000,
+                "nbPlayers": 12,
+            },
+            "teams": [{"id": "club-a", "name": "Club A", "score": 90, "rank": 1}],
+            "players": [{"id": "Alice", "name": "Alice", "score": 45, "rank": 1}],
+        }
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            reports = root / "battles"
+            cache = root / "battle_cache"
+            reports.mkdir()
+            (reports / "battle-1.json").write_text(json.dumps(legacy), encoding="utf-8")
+
+            report_file = reports / "battle-1.json"
+            loaded = json.loads(report_file.read_text(encoding="utf-8"))
+            self.assertEqual(loaded["teams"][0]["id"], "club-a")
+            self.assertFalse(loaded.get("team_members_fetched", False))
+            self.assertFalse((cache / "battle-1.json").exists())
 
 
 if __name__ == "__main__":
