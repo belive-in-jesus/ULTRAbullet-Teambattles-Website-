@@ -15,7 +15,7 @@ The prototypes do not replace any production page. The Overview and Rankings lay
 
 The page is intentionally a snapshot, not a second analytics workspace. Its content order is:
 
-1. Archive scale: indexed finished battles, represented teams and represented players
+1. Archive scale: archived finished battles, represented teams and represented players
 2. Current season progress
 3. Latest indexed battle, with separate report and original Lichess entry points
 4. Compact current-month activity
