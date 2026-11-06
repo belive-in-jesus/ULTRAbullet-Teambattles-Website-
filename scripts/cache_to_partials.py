@@ -9,7 +9,7 @@ import sys
 from collections import defaultdict
 from pathlib import Path
 
-CACHE_DIR = Path(os.environ.get("BATTLE_CACHE_DIR", "docs/data/battles"))
+CACHE_DIR = Path(os.environ.get("BATTLE_CACHE_DIR", "docs/data/battle_cache"))
 OUTPUT_DIR = Path(os.environ.get("PARTIALS_DIR", "artifacts"))
 BATTLE_NAME_PATTERN = re.compile(
     r"^\s*(?P<number>\d+)(?:st|nd|rd|th)\s+ultrabullet\s+(?:team\s+battle|teambattle\s+team\s+battle)\s*$",
