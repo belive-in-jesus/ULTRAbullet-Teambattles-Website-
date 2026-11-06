@@ -129,6 +129,26 @@ def build_performance_index_history(records_by_key: dict, numbered_battles: list
     """
     battle_numbers = {}
     last_in_season = {}
+    members_by_battle = defaultdict(list)
+    for team_id, records in (team_member_records or {}).items():
+        for record in records:
+            battle_id = str(record.get("id") or "").strip()
+            player_id = str(record.get("player_id") or record.get("player_name") or "").strip()
+            if not battle_id or not player_id:
+                continue
+            try:
+                member_score = float(record.get("score", 0) or 0)
+            except (TypeError, ValueError):
+                member_score = 0.0
+            members_by_battle[battle_id].append({
+                "team_id": str(team_id),
+                "team_name": str(record.get("team_name") or team_names.get(team_id, team_id)),
+                "player_id": player_id,
+                "player_name": str(record.get("player_name") or player_id),
+                "score": round(member_score, 1),
+                "team_rank": record.get("team_rank"),
+            })
+
     for battle in numbered_battles:
         battle_id = str(battle.get("id") or "").strip()
         number = int(battle.get("battle_number") or parse_battle_number(battle.get("name")) or 0)
@@ -933,6 +953,7 @@ def write_battle_reports(
     team_records: dict,
     team_names: dict,
     player_records: dict,
+    team_member_records: dict | None = None,
 ) -> int:
     """Publish one lazy-loaded, compact report per numbered battle."""
     reports_dir = os.path.join(output_dir, "battles")
@@ -1006,8 +1027,16 @@ def write_battle_reports(
             if not row["rank"] or row["rank"] < 1:
                 row["rank"] = index
 
+        team_members = members_by_battle.get(battle_id, [])
+        team_members.sort(key=lambda row: (
+            row.get("team_rank") if row.get("team_rank") else 10**9,
+            -row["score"],
+            row["player_name"].lower(),
+        ))
+
         payload = {
-            "schema_version": 1,
+            "schema_version": 2,
+            "team_members_fetched": True,
             "battle": {
                 "id": battle_id,
                 "name": battle.get("name") or battle.get("fullName") or "UltraBullet Team Battle",
@@ -1021,9 +1050,11 @@ def write_battle_reports(
                 "players_count": len(players),
                 "team_results_available": bool(teams),
                 "player_results_available": bool(players),
+                "team_member_records_count": len(team_members),
             },
             "teams": teams,
             "players": players,
+            "team_members": team_members,
         }
         write_json(os.path.join(reports_dir, f"{battle_id}.json"), payload)
 
@@ -1261,7 +1292,9 @@ def main() -> int:
     # Monthly tables use regular numbered battles only. Seasons are fixed to
     # official battle-number ranges, not the count/order of available records.
     max_battle_number = max((int(row["battle_number"]) for row in numbered_battles), default=0)
-    battle_reports_count = write_battle_reports(OUTPUT_DIR, numbered_battles, team_records, team_names, player_records)
+    battle_reports_count = write_battle_reports(
+        OUTPUT_DIR, numbered_battles, team_records, team_names, player_records, member_records_by_team
+    )
     dated_battles = [row for row in numbered_battles if row.get("startsAt") is not None]
 
     period_dir = os.path.join(OUTPUT_DIR, "periods")
