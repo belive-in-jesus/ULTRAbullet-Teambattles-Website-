@@ -369,6 +369,17 @@ class WebsiteAssetTests(unittest.TestCase):
         self.assertIn("2 November 2026 · 03:49 UTC", overview)
         self.assertIn("2 November 2026 · 03:49 UTC", rankings)
         self.assertIn('href="https://lichess.org/tournament/2vPEnd1i"', overview)
+        self.assertIn('Indexed battles', overview)
+        self.assertNotIn('Numbered battles</span>', overview)
+
+        contributor_panel = rankings.split('data-mode-panel="contributors"', 1)[1].split('</section>', 1)[0]
+        self.assertIn("Total contribution points", contributor_panel)
+        self.assertIn("Top contributors", contributor_panel)
+        self.assertIn("Best single-battle score", contributor_panel)
+        self.assertIn("Last seen", contributor_panel)
+        self.assertNotIn("Last active", contributor_panel)
+        self.assertNotIn("Each row opens the corresponding", rankings)
+        self.assertIn("How the Performance Index is calculated", rankings)
 
         regions = re.findall(r'<div class="table-scroll"([^>]*)>', rankings)
         self.assertEqual(len(regions), 5, "All five ranking tables must have their own scroll region.")
