@@ -15,7 +15,7 @@ The prototypes do not replace any production page. The Overview and Rankings lay
 
 The page is intentionally a snapshot, not a second analytics workspace. Its content order is:
 
-1. Archive scale: numbered battles, represented teams and represented players
+1. Archive scale: indexed finished battles, represented teams and represented players
 2. Current season progress
 3. Latest indexed battle, with separate report and original Lichess entry points
 4. Compact current-month activity
@@ -30,7 +30,7 @@ The four perspectives share a workspace but retain their own meaning:
 
 - **Teams:** cumulative team points; all-time, monthly and fixed 50-battle season periods; minimum participation; ranking-specific sorting and export
 - **Players:** cumulative individual points; the same period concepts, with individual profile entry points
-- **Contributors:** contribution points across team appearances; cumulative archive view with contribution-specific search and sorting
+- **Contributors:** cumulative listed contribution points across team appearances; archive summary, top-three career podium, player/team search, contribution-specific sorting and expandable team details
 - **Performance Index:** normalized performance view for teams or players, with the existing 10-battle eligibility threshold and component measures
 
 Cumulative team points, individual points, contribution points and Performance Index scores must never be presented as interchangeable measures. The prototype descriptions call out these differences. Contributor controls are deliberately not given team/player period filters because this view is cumulative in the current model.
@@ -60,8 +60,8 @@ The table layout intentionally remains tabular on small screens. Reflowing a mul
 
 - Displayed sample figures use the published analytics snapshot generated on **2 November 2026 at 03:49 UTC**.
 - Overview totals, latest battle, current-month and current-season values are taken from the published analytics overview.
-- Sample leader rows illustrate the target table hierarchy; the prototype does not claim to show all 50 rows on a page.
-- Contributor rows and detailed Performance Index component values are not fabricated.
+- Sample leader rows illustrate the target table hierarchy; the prototype does not claim to show all 50 rows on a page. Profile links, row counts and pagination are preview placeholders.
+- Contributor podium identities, total contribution-point value and detailed Performance Index component values are not fabricated in the wireframe; they remain explicit placeholders until the archive is connected.
 - These files remain under `docs/redesign/`; production HTML, CSS, data-loading scripts, ranking formulas and aggregation pipelines are unchanged.
 
 ## Review checklist before functional migration
