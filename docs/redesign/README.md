@@ -22,7 +22,7 @@ The page is intentionally a snapshot, not a second analytics workspace. Its cont
 5. Short all-time team and player leader previews
 6. Direct routes to Rankings, Contributors, Performance Index and Analysis
 
-This keeps full tables, historical charts and detailed comparisons out of the homepage. The Overview's leader cards are previews only; their all-time scope is named explicitly.
+This keeps full tables, historical charts and detailed comparisons out of the homepage. The Overview's leader cards are previews only; their all-time scope is named explicitly. The data timestamp and freshness state remain visible; production logic marks data stale after 36 hours and must calculate that state from the published generation timestamp.
 
 ### Rankings
 
@@ -59,7 +59,7 @@ The table layout intentionally remains tabular on small screens. Reflowing a mul
 ## Data fixture and implementation boundary
 
 - Displayed sample figures use the published analytics snapshot generated on **2 November 2026 at 03:49 UTC**.
-- Overview totals, latest battle, current-month and current-season values are taken from the published analytics overview.
+- Overview totals, latest battle, current-month and current-season values are taken from the published analytics overview. The stale label is fixture state only; the functional status must use the existing 36-hour freshness rule.
 - Sample leader rows illustrate the target table hierarchy; the prototype does not claim to show all 50 rows on a page. Profile links, row counts and pagination are preview placeholders.
 - Contributor podium identities, total contribution-point value and detailed Performance Index component values are not fabricated in the wireframe; they remain explicit placeholders until the archive is connected.
 - These files remain under `docs/redesign/`; production HTML, CSS, data-loading scripts, ranking formulas and aggregation pipelines are unchanged.
