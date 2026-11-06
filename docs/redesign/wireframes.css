@@ -71,6 +71,11 @@ main { padding: 34px 0 60px; }
   border-radius: 9px; background: rgba(255,255,255,.64); color: var(--muted); font-size: 11px;
 }
 .data-note strong { color: var(--ink-soft); }
+.snapshot-status {
+  display: inline-flex; align-items: center; flex-shrink: 0; padding: 5px 9px;
+  border: 1px solid #c7b895; border-radius: 999px; background: #f6f1e8;
+  color: #685638; font-size: 10px; font-weight: 800; letter-spacing: .02em;
+}
 .kpi-grid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 12px; margin-bottom: 16px; }
 .kpi-card {
   min-width: 0; padding: 17px 19px; border: 1px solid var(--line); border-radius: var(--radius);
