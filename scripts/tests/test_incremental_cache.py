@@ -148,13 +148,20 @@ class IncrementalBattleCacheTests(unittest.TestCase):
             reports = root / "battles"
             cache = root / "battle_cache"
             reports.mkdir()
+            cache.mkdir()
             (reports / "battle-1.json").write_text(json.dumps(legacy), encoding="utf-8")
 
-            report_file = reports / "battle-1.json"
-            loaded = json.loads(report_file.read_text(encoding="utf-8"))
+            loaded = updater.load_existing_snapshot("battle-1", cache, reports)
             self.assertEqual(loaded["teams"][0]["id"], "club-a")
+            self.assertEqual(loaded["players"][0]["id"], "Alice")
             self.assertFalse(loaded.get("team_members_fetched", False))
-            self.assertFalse((cache / "battle-1.json").exists())
+
+            # A completed private cache must take precedence over its public seed.
+            private = {**legacy, "schema_version": 2, "team_members_fetched": True}
+            (cache / "battle-1.json").write_text(json.dumps(private), encoding="utf-8")
+            loaded_private = updater.load_existing_snapshot("battle-1", cache, reports)
+            self.assertEqual(loaded_private["schema_version"], 2)
+            self.assertTrue(loaded_private["team_members_fetched"])
 
 
 if __name__ == "__main__":
