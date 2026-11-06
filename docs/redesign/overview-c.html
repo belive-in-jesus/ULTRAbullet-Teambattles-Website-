@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0a1422">
+  <meta name="description" content="A live-linked overview of the UltraBullet Team Battles archive, current season, latest battle and all-time leaders.">
+  <title>Overview Preview — UltraBullet Team Battles</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,500;0,600;1,500;1,600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./overview-c.css">
+  <script src="./overview-c.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <div class="preview-bar">
+    <span class="preview-flag"><span class="preview-pulse" aria-hidden="true"></span> REDESIGN PREVIEW</span>
+    <span>Direction C · editorial clarity × competitive arena</span>
+    <a href="../index.html">Return to current website <span aria-hidden="true">↗</span></a>
+  </div>
+
+  <div class="site-shell">
+    <header class="site-header">
+      <a class="brand" href="./overview-c.html" aria-label="UltraBullet Team Battles overview preview">
+        <span class="brand-symbol" aria-hidden="true"><span>U</span><i></i><b></b></span>
+        <span class="brand-wordmark"><strong>ULTRABULLET</strong><small>TEAM BATTLES / DATA ARCHIVE</small></span>
+      </a>
+      <nav class="main-nav" aria-label="Main navigation">
+        <a href="./overview-c.html" aria-current="page">Overview</a>
+        <a href="../rankings.html">Rankings <span aria-hidden="true">↗</span></a>
+        <a href="../analytics.html">Analysis <span aria-hidden="true">↗</span></a>
+        <a href="../records.html">History <span aria-hidden="true">↗</span></a>
+        <a href="../information.html">Guide <span aria-hidden="true">↗</span></a>
+      </nav>
+    </header>
+
+    <main id="main">
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="hero-copy">
+          <p class="eyebrow"><span class="eyebrow-line"></span> THE COMPETITIVE ARCHIVE <span class="eyebrow-year">/ 2026</span></p>
+          <h1 id="hero-title">Every battle.<br><em>One bigger picture.</em></h1>
+          <p class="hero-lede">The UltraBullet Team Battles, brought into focus. Track the archive, follow the current season and see the teams and players shaping the all-time standings.</p>
+          <div class="hero-actions">
+            <a class="button button-primary" href="../rankings.html">Explore rankings <span aria-hidden="true">→</span></a>
+            <a class="button button-quiet" href="../records.html">Browse battle history <span aria-hidden="true">↗</span></a>
+          </div>
+          <div class="hero-meta">
+            <span class="hero-meta-mark" aria-hidden="true"></span>
+            <span id="data-updated-label">Connecting to the published archive…</span>
+          </div>
+        </div>
+
+        <aside class="hero-panel" aria-label="Archive identity">
+          <div class="hero-panel-top">
+            <span>UTB / ARCHIVE INDEX</span>
+            <span class="hero-panel-live"><i></i> DATA CONNECTED</span>
+          </div>
+          <div class="arena-graphic" aria-hidden="true">
+            <div class="arena-ring arena-ring-one"></div>
+            <div class="arena-ring arena-ring-two"></div>
+            <div class="arena-ring arena-ring-three"></div>
+            <div class="arena-cross arena-cross-x"></div>
+            <div class="arena-cross arena-cross-y"></div>
+            <div class="arena-core"><span>UB</span><small>64</small></div>
+            <span class="arena-node arena-node-a"></span>
+            <span class="arena-node arena-node-b"></span>
+            <span class="arena-node arena-node-c"></span>
+          </div>
+          <div class="hero-panel-bottom">
+            <span>NUMBERED BATTLES</span>
+            <strong id="hero-latest-number">—</strong>
+            <small>Latest indexed event</small>
+          </div>
+        </aside>
+      </section>
+
+      <section class="archive-overview" aria-label="Archive at a glance">
+        <div class="archive-heading">
+          <div>
+            <p class="section-kicker">01 / ARCHIVE SCALE</p>
+            <h2>The numbers behind the competition.</h2>
+          </div>
+          <div class="freshness-state" id="freshness-state" role="status" aria-live="polite">
+            <span class="freshness-dot" aria-hidden="true"></span>
+            <span id="freshness-label">Checking data status</span>
+          </div>
+        </div>
+        <div class="archive-grid">
+          <article class="archive-stat">
+            <span class="stat-index">01</span>
+            <span class="stat-label">Archived battles</span>
+            <strong class="stat-value" id="archive-battles">—</strong>
+            <small>Finished, eligible numbered records</small>
+            <span class="stat-accent stat-accent-cyan" aria-hidden="true"></span>
+          </article>
+          <article class="archive-stat">
+            <span class="stat-index">02</span>
+            <span class="stat-label">Teams represented</span>
+            <strong class="stat-value" id="archive-teams">—</strong>
+            <small>Across the recorded competition</small>
+            <span class="stat-accent stat-accent-violet" aria-hidden="true"></span>
+          </article>
+          <article class="archive-stat">
+            <span class="stat-index">03</span>
+            <span class="stat-label">Players represented</span>
+            <strong class="stat-value" id="archive-players">—</strong>
+            <small>Unique players in the published archive</small>
+            <span class="stat-accent stat-accent-gold" aria-hidden="true"></span>
+          </article>
+        </div>
+        <div class="data-caption">
+          <span>Latest official event: <strong id="archive-latest-number">—</strong></span>
+          <span>Published snapshot: <strong id="data-updated-time">Waiting for data</strong></span>
+        </div>
+      </section>
+
+      <section class="section-block" aria-labelledby="current-heading">
+        <div class="section-heading">
+          <div>
+            <p class="section-kicker">02 / CURRENT ACTIVITY</p>
+            <h2 id="current-heading">The competition, now.</h2>
+          </div>
+          <p class="section-note">Season progress, latest result and monthly participation.</p>
+        </div>
+
+        <div class="current-grid">
+          <article class="season-card">
+            <div class="card-topline">
+              <span class="card-eyebrow"><span class="card-dot card-dot-pine"></span> CURRENT SEASON</span>
+              <span class="season-status" id="season-status">—</span>
+            </div>
+            <div class="season-title-row">
+              <div>
+                <h3 id="season-name">Loading season…</h3>
+                <p id="season-range">Official battle range</p>
+              </div>
+              <div class="season-percent"><strong id="season-percent">—</strong><span>%</span></div>
+            </div>
+            <div class="progress-track" role="progressbar" aria-label="Current season progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="season-progress">
+              <span id="season-progress-fill"></span>
+            </div>
+            <div class="progress-foot">
+              <span id="season-recorded">— recorded battles</span>
+              <span id="season-remaining">— remaining</span>
+            </div>
+            <div class="season-stats">
+              <div><span>Active teams</span><strong id="season-teams">—</strong></div>
+              <div><span>Active players</span><strong id="season-players">—</strong></div>
+            </div>
+            <a class="inline-link" href="../rankings.html">View seasonal standings <span aria-hidden="true">→</span></a>
+          </article>
+
+          <article class="latest-card">
+            <div class="card-topline">
+              <span class="card-eyebrow"><span class="card-dot card-dot-rust"></span> LATEST INDEXED BATTLE</span>
+              <span class="battle-number-tag" id="latest-battle-tag">#—</span>
+            </div>
+            <p class="latest-ordinal" id="latest-battle-ordinal">—</p>
+            <h3 id="latest-battle-name">Waiting for latest result</h3>
+            <div class="latest-participants"><strong id="latest-battle-participants">—</strong><span>participants</span></div>
+            <div class="latest-links">
+              <a id="latest-report-link" href="../records.html">Battle report <span aria-hidden="true">↗</span></a>
+              <a id="latest-lichess-link" href="https://lichess.org" target="_blank" rel="noopener noreferrer">Lichess event <span aria-hidden="true">↗</span></a>
+            </div>
+            <div class="latest-corner" aria-hidden="true">UB</div>
+          </article>
+
+          <article class="month-card">
+            <div class="card-topline">
+              <span class="card-eyebrow"><span class="card-dot card-dot-gold"></span> MONTHLY ACTIVITY</span>
+              <span class="month-mark" aria-hidden="true">UTC</span>
+            </div>
+            <h3 id="month-name">Latest recorded month</h3>
+            <p class="month-description">Distinct competitors with at least one result during this UTC calendar month.</p>
+            <div class="month-metrics">
+              <div><span>Battles recorded</span><strong id="month-battles">—</strong></div>
+              <div><span>Active teams</span><strong id="month-teams">—</strong></div>
+              <div><span>Active players</span><strong id="month-players">—</strong></div>
+            </div>
+            <a class="inline-link" href="../analytics.html">Explore monthly analytics <span aria-hidden="true">→</span></a>
+          </article>
+        </div>
+      </section>
+
+      <section class="section-block activity-section" aria-labelledby="activity-heading">
+        <div class="section-heading">
+          <div>
+            <p class="section-kicker">03 / ARCHIVE RHYTHM</p>
+            <h2 id="activity-heading">A competition in motion.</h2>
+          </div>
+          <a class="text-link" href="../analytics.html">Full activity analysis <span aria-hidden="true">↗</span></a>
+        </div>
+        <article class="activity-panel">
+          <div class="activity-panel-head">
+            <div>
+              <span class="card-eyebrow">BATTLES PER MONTH</span>
+              <h3>Recent archive activity</h3>
+              <p>Eligible numbered battles grouped by UTC calendar month.</p>
+            </div>
+            <div class="activity-legend"><span></span> Battles recorded</div>
+          </div>
+          <div id="activity-chart" class="activity-chart" role="region" aria-label="Monthly battle activity chart" tabindex="0">
+            <p class="chart-loading">Loading published monthly activity…</p>
+          </div>
+          <div class="activity-foot">
+            <span>Showing the latest 12 published months</span>
+            <span id="activity-total">— battles across this period</span>
+          </div>
+        </article>
+      </section>
+
+      <section class="section-block leaders-section" aria-labelledby="leaders-heading">
+        <div class="section-heading">
+          <div>
+            <p class="section-kicker">04 / ALL-TIME STANDINGS</p>
+            <h2 id="leaders-heading">The leaders at a glance.</h2>
+          </div>
+          <a class="text-link" href="../rankings.html">All rankings <span aria-hidden="true">↗</span></a>
+        </div>
+        <div class="leaders-grid">
+          <article class="leaders-card">
+            <div class="leaders-card-head">
+              <div><span class="card-eyebrow">TEAM POINTS</span><h3>Leading teams</h3></div>
+              <span class="leaders-icon team-icon" aria-hidden="true">T</span>
+            </div>
+            <div class="leaders-list" id="top-teams"><p class="list-loading">Loading team standings…</p></div>
+            <a class="leaders-footer" href="../rankings.html">Open team leaderboard <span aria-hidden="true">→</span></a>
+          </article>
+          <article class="leaders-card">
+            <div class="leaders-card-head">
+              <div><span class="card-eyebrow">INDIVIDUAL POINTS</span><h3>Leading players</h3></div>
+              <span class="leaders-icon player-icon" aria-hidden="true">P</span>
+            </div>
+            <div class="leaders-list" id="top-players"><p class="list-loading">Loading player standings…</p></div>
+            <a class="leaders-footer" href="../rankings.html">Open player leaderboard <span aria-hidden="true">→</span></a>
+          </article>
+        </div>
+      </section>
+
+      <section class="method-note" aria-label="Data methodology">
+        <div class="method-mark" aria-hidden="true">i</div>
+        <div>
+          <strong>One archive, clearly defined.</strong>
+          <p>Only finished regular numbered ULTRAbullet Team Battles are included. Seasons use fixed blocks of 50 official battle numbers; monthly activity follows UTC calendar months. Active teams and players are distinct competitors with a recorded result in the selected month.</p>
+          <a href="../information.html">Read the ranking and data guide <span aria-hidden="true">↗</span></a>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <a class="footer-brand" href="./overview-c.html">ULTRABULLET <span>TEAM BATTLES</span></a>
+      <span>Editorial clarity. Competitive energy.</span>
+      <a href="../index.html">Current website <span aria-hidden="true">↗</span></a>
+    </footer>
+  </div>
+
+  <noscript>
+    <p class="noscript-note">JavaScript is required to load the published competition statistics for this preview.</p>
+  </noscript>
+</body>
+</html>
