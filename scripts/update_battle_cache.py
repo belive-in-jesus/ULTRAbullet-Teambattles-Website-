@@ -180,6 +180,26 @@ def battle_metadata(tournament: dict, existing: dict | None = None) -> dict:
     }
 
 
+def load_existing_snapshot(
+    battle_id: str,
+    cache_dir: Path = CACHE_DIR,
+    report_dir: Path = SOURCE_REPORT_DIR,
+) -> dict | None:
+    """Prefer the private cache, falling back to the existing public report during migration."""
+    candidates = (
+        cache_dir / f"{battle_id}.json",
+        report_dir / f"{battle_id}.json",
+    )
+    for path in candidates:
+        if not path.exists():
+            continue
+        try:
+            return json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as error:
+            raise RuntimeError(f"Cannot read existing battle data {path}: {error}") from error
+    return None
+
+
 def write_json_atomic(path: Path, payload: dict) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with tempfile.NamedTemporaryFile("w", encoding="utf-8", dir=path.parent, delete=False) as handle:
@@ -253,13 +273,7 @@ def update_cache(tournaments: list[dict]) -> dict:
 
     for index, (battle_id, tournament) in enumerate(eligible, start=1):
         cache_path = CACHE_DIR / f"{battle_id}.json"
-        existing = None
-        source_path = cache_path if cache_path.exists() else SOURCE_REPORT_DIR / f"{battle_id}.json"
-        if source_path.exists():
-            try:
-                existing = json.loads(source_path.read_text(encoding="utf-8"))
-            except (OSError, json.JSONDecodeError) as error:
-                raise RuntimeError(f"Cannot read existing battle data {source_path}: {error}") from error
+        existing = load_existing_snapshot(battle_id)
 
         is_current = (
             existing is not None
