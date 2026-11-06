@@ -393,7 +393,7 @@ class WebsiteAssetTests(unittest.TestCase):
         self.assertEqual(len(labels), len(set(labels)), "Table scroll-region labels must be unique.")
         self.assertEqual(len(re.findall(r'<th scope="col"', rankings)), 35,
                          "Every ranking table column must have a scoped header.")
-        self.assertNotRegex(rankings, r'<th(?=\\s|>)(?![^>]*\\bscope=)')
+        self.assertNotRegex(rankings, r'<th(?=\s|>)(?![^>]*\bscope=)')
         self.assertIn("text-overflow: ellipsis", stylesheet)
 
         ids = re.findall(r'\bid="([^"]+)"', rankings)
