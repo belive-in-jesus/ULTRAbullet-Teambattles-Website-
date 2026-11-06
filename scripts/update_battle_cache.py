@@ -235,7 +235,7 @@ def fetch_teams(tournament_id: str) -> tuple[list[dict], list[dict], bool]:
 
 def update_cache(tournaments: list[dict]) -> dict:
     CACHE_DIR.mkdir(parents=True, exist_ok=True)
-    counters = {"new": 0, "backfilled": 0, "refreshed": 0, "unchanged": 0, "team_endpoints_missing": 0}
+    counters = {"new": 0, "backfilled": 0, "refreshed": 0, "unchanged": 0}
 
     eligible_by_id = {}
     for tournament in tournaments:
@@ -303,7 +303,10 @@ def update_cache(tournaments: list[dict]) -> dict:
             counters["backfilled"] += 1
 
         if not team_endpoint_available:
-            counters["team_endpoints_missing"] += 1
+            raise RuntimeError(
+                f"Team results endpoint returned 404 for battle {battle_id}. "
+                "Refusing to publish incomplete team and contributor rankings."
+            )
 
         payload = {
             "schema_version": CACHE_SCHEMA_VERSION,
