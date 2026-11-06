@@ -84,7 +84,8 @@ class VisualDirectionTests(unittest.TestCase):
         parser = VisualDirectionParser()
         parser.feed(html)
 
-        self.assertEqual(parser.styles, ["./visual-direction.css"])
+        local_styles = [style for style in parser.styles if not style.startswith("http")]
+        self.assertEqual(local_styles, ["./visual-direction.css"])
         self.assertEqual(parser.scripts, ["./visual-direction.js"])
         self.assertIn('href="../index.html"', html)
         self.assertIn("Visual direction study", html)
@@ -111,6 +112,8 @@ class VisualDirectionTests(unittest.TestCase):
         self.assertEqual(len(parser.tabs), 4)
         self.assertEqual(len(parser.panels), 4)
         self.assertEqual(len(parser.scroll_regions), 5)
+        pi_regions = [region for region in parser.scroll_regions if region.get("data-pi-region")]
+        self.assertEqual({region["data-pi-region"] for region in pi_regions}, {"teams", "players"})
         self.assertEqual(len(parser.table_headers), 35)
         self.assertTrue(all(header.get("scope") == "col" for header in parser.table_headers))
         self.assertTrue(all(region.get("tabindex") == "0" for region in parser.scroll_regions))
