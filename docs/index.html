@@ -72,7 +72,7 @@
         <a class="nav-link" href="./compare.html">Compare</a>
         <a class="nav-link" href="./records.html">Records</a>
         <a class="nav-link" href="./information.html">Guide</a>
-        <span class="pill status-pill" id="status-pill">LOADING DATA</span>
+        <span class="pill status-pill" id="status-pill" role="status" aria-live="polite">LOADING DATA</span>
       </div>
     </nav>
 
@@ -82,7 +82,7 @@
         <h1>Every battle.<br><em>One leaderboard.</em></h1>
         <p class="lede">Follow teams and players across the ULTRAbullet Team Battles. Explore long-term standings, compare seasonal performance and revisit the tournament archive.</p>
         <div class="hero-actions">
-          <a class="primary-action" href="./rankings.html">Explore rankings <span aria-hidden="true">↗</span></a>
+          <a class="primary-action" href="./index.html#leaderboard">Explore rankings <span aria-hidden="true">↗</span></a>
           <a class="secondary-action" href="./records.html">Browse records &amp; history</a>
         </div>
       </div>
@@ -115,7 +115,7 @@
         <p>Move from the live standings to deeper performance analysis, direct comparisons and the competition's history.</p>
       </div>
       <div class="home-pathways-grid">
-        <a class="home-pathway-card" href="./rankings.html">
+        <a class="home-pathway-card" href="./index.html#leaderboard">
           <span class="pathway-kicker">01 / RESULTS</span>
           <strong>Rankings</strong>
           <span>Team and player standings, time periods and global contributions.</span>
@@ -368,7 +368,7 @@
   <script src="js/dashboard-analytics.js"></script>
   <script>
 (()=>{"use strict";
-const state={view:"teams",teams:[],players:[],meta:{},history:[],query:"",historyQuery:"",historyPeriodFilter:"all",showAllHistory:false,page:1,pageSize:50,compareA:"",compareB:"",compareQueryA:"",compareQueryB:"",periodsIndex:null,periodData:null,periodType:"all",periodKey:"",periodCache:{},periodRequest:0,periodLoading:false,periodError:"",profileCache:{},profileRequest:0};
+const state={view:"teams",teams:[],players:[],playersLoaded:false,playersLoading:false,playersLoadPromise:null,playersLoadError:"",meta:{},history:[],dashboardOverview:null,query:"",historyQuery:"",historyPeriodFilter:"all",showAllHistory:false,page:1,pageSize:50,compareA:"",compareB:"",compareQueryA:"",compareQueryB:"",periodsIndex:null,periodData:null,periodType:"all",periodKey:"",periodCache:{},periodRequest:0,periodLoading:false,periodError:"",profileCache:{},profileRequest:0};
 const $=id=>document.getElementById(id);
 const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const num=v=>Number(v||0).toLocaleString();
@@ -397,6 +397,8 @@ function renderCompare(){
   if(!period)return;
   period.textContent=state.periodData?state.periodData.label.toUpperCase():state.periodType==="all"?"ALL-TIME":state.periodType==="month"?"MONTHLY":"SEASONAL";
   if(state.periodLoading){$("compare-results").innerHTML='<div class="compare-empty">Loading the selected ranking period…</div>';return;}
+  if(state.view==="players"&&state.periodType==="all"&&state.playersLoading){$("compare-results").innerHTML='<div class="compare-empty">Loading the player leaderboard…</div>';return;}
+  if(state.view==="players"&&state.periodType==="all"&&state.playersLoadError){$("compare-results").innerHTML='<div class="compare-empty">'+esc(state.playersLoadError)+'</div>';return;}
   const available=rows();
   const previousA=state.compareA,previousB=state.compareB;
   if(!available.some(r=>competitorKey(r)===state.compareA))state.compareA=available[0]?competitorKey(available[0]):"";
@@ -469,6 +471,8 @@ function render(){
   const body=$("leaderboard-body");
   const pagination=$("leaderboard-pagination");
   pagination.classList.add("hidden");
+  if(state.view==="players"&&state.periodType==="all"&&state.playersLoading){$("result-count").textContent="Loading";body.innerHTML='<tr><td colspan="5"><div class="empty"><strong>Loading player standings…</strong>The full player dataset is being fetched because you opened the player rankings.</div></td></tr>';return;}
+  if(state.view==="players"&&state.periodType==="all"&&state.playersLoadError){$("result-count").textContent="Unavailable";body.innerHTML='<tr><td colspan="5"><div class="empty"><strong>Player standings unavailable</strong>'+esc(state.playersLoadError)+'</div></td></tr>';return;}
   if(state.periodLoading){$("result-count").textContent="Loading";body.innerHTML='<tr><td colspan="5"><div class="empty"><strong>Loading period ranking…</strong>Fetching the selected month or season.</div></td></tr>';return;}
   if(state.periodError){$("result-count").textContent="Unavailable";body.innerHTML='<tr><td colspan="5"><div class="empty"><strong>Period ranking unavailable</strong>'+esc(state.periodError)+'</div></td></tr>';return;}
   const q=state.query.trim().toLocaleLowerCase();
@@ -551,6 +555,42 @@ function details(r){
     }
   });
 }
+async function ensurePlayersLoaded(){
+  if(state.playersLoaded)return true;
+  // Monthly and seasonal files already contain the selected player ranking.
+  if(state.periodType!=="all"&&(state.periodLoading||state.periodData||state.periodError)){render();return true;}
+  state.playersLoading=true;
+  state.playersLoadError="";
+  render();
+  try{
+    if(!state.playersLoadPromise){
+      state.playersLoadPromise=load("./data/leaderboard_players.json").then(data=>{
+        if(!Array.isArray(data))throw new Error("The player leaderboard has an unexpected format.");
+        state.players=data;
+        state.playersLoaded=true;
+        return true;
+      }).catch(error=>{
+        state.playersLoadPromise=null;
+        throw error;
+      });
+    }
+    await state.playersLoadPromise;
+    return true;
+  }catch(error){
+    console.error("Could not load the player leaderboard",error);
+    state.playersLoadError="The player leaderboard could not be loaded. Check the connection and select Players again to retry.";
+    return false;
+  }finally{
+    state.playersLoading=false;
+    render();
+  }
+}
+async function setView(view){
+  state.view=view;
+  state.page=1;
+  if(view==="players")await ensurePlayersLoaded();
+  else render();
+}
 function renderDashboard(){
   const seasons=state.periodsIndex&&Array.isArray(state.periodsIndex.seasons)?state.periodsIndex.seasons:[];
   const season=seasons[0];
@@ -586,7 +626,7 @@ function renderDashboard(){
     $("latest-battle-detail").textContent="The archive will appear after the first successful data refresh.";
     $("latest-battle-link").style.display="none";
   }
-  const team=state.teams[0],player=state.players[0];
+  const team=state.teams[0],player=state.dashboardOverview?.leaders?.players?.[0];
   if(team){
     $("leader-team-link").textContent=team.team_name||"Unknown team";
     $("leader-team-link").href=team.team_id?profileUrl(team):"#leaderboard";
@@ -597,13 +637,46 @@ function renderDashboard(){
     $("leader-team-points").textContent="—";
   }
   if(player){
-    $("leader-player-link").textContent=player.username||"Unknown player";
-    $("leader-player-link").href=player.username?profileUrl(player):"#leaderboard";
+    const playerName=player.name||player.id||"Unknown player";
+    $("leader-player-link").textContent=playerName;
+    $("leader-player-link").href=player.id?"./profile.html?type=player&id="+encodeURIComponent(player.id):"#leaderboard";
     $("leader-player-points").textContent=num(player.points)+" pts";
   }else{
     $("leader-player-link").textContent="Not available";
     $("leader-player-link").href="#leaderboard";
     $("leader-player-points").textContent="—";
+  }
+}
+const DATA_STALE_AFTER_MS=36*60*60*1000;
+function updateDataStatus(){
+  const status=$("status-pill");
+  if(!status)return;
+  const raw=state.meta.generated_at;
+  const timestamp=raw?Date.parse(raw):NaN;
+  const known=Number.isFinite(timestamp);
+  const age=known?Date.now()-timestamp:Infinity;
+  const future=known&&age < -5*60*1000;
+  const stale=!known||future||age>DATA_STALE_AFTER_MS;
+  const issues=Math.max(0,Number(state.meta.errors_count)||0);
+  status.classList.toggle("is-stale",stale);
+  status.classList.toggle("has-issues",issues>0);
+  if(!known){
+    status.textContent="UPDATE STATUS UNKNOWN";
+    status.title="No valid timestamp for the last successful data generation is available.";
+    return;
+  }
+  const label=date(raw);
+  status.textContent=future?"CHECK UPDATE TIMESTAMP":stale?"DATA STALE · "+label:issues?"UPDATED WITH ISSUES · "+label:"UPDATED · "+label;
+  status.title=future
+    ?"The published generation timestamp is in the future. Check the repository metadata."
+    :stale
+      ?"Last successful data generation: "+new Date(timestamp).toLocaleString()+" · Published data is older than 36 hours."
+      :issues
+        ?issues+" data collection issue(s) were recorded in the latest generation."
+        :"Data was generated within the last 36 hours.";
+  if(stale){
+    const updated=$("updated-label");
+    if(updated)updated.textContent="STALE DATA · Last successful update "+label;
   }
 }
 function populateHistoryPeriodFilter(){
@@ -666,7 +739,7 @@ async function load(path){const r=await fetch(path,{cache:"no-cache"});if(!r.ok)
 function periodEntries(type){if(!state.periodsIndex)return[];return type==="month"?(state.periodsIndex.months||[]):(state.periodsIndex.seasons||[]);}
 async function loadSelectedPeriod(){
   const type=$("period-type").value;state.page=1;state.periodType=type;state.periodRequest++;const token=state.periodRequest;
-  if(type==="all"){state.periodData=null;state.periodLoading=false;state.periodError="";state.periodKey="";$("period-select").classList.add("hidden");render();return;}
+  if(type==="all"){state.periodData=null;state.periodLoading=false;state.periodError="";state.periodKey="";$("period-select").classList.add("hidden");if(state.view==="players"&&!state.playersLoaded){await ensurePlayersLoaded();return;}render();return;}
   const entries=periodEntries(type),selector=$("period-select");selector.classList.remove("hidden");
   if(!entries.length){state.periodData=null;state.periodLoading=false;state.periodError="No "+(type==="month"?"monthly":"seasonal")+" index is available yet. Run the leaderboard refresh after deploying V1.2.";render();return;}
   const previous=selector.value,entry=entries.find(item=>item.key===previous)||entries[0];selector.innerHTML="";
@@ -678,17 +751,19 @@ async function loadSelectedPeriod(){
   }catch(error){console.error("Could not load period ranking",error);if(token!==state.periodRequest)return;delete state.periodCache[entry.data_file];state.periodData=null;state.periodLoading=false;state.periodError="The selected period could not be loaded. Try again or choose another period.";render();}
 }
 async function init(){
-  const res=await Promise.allSettled([load("./data/leaderboard_teams.json"),load("./data/leaderboard_players.json"),load("./data/meta.json"),load("./data/battle_history.json"),load("./data/periods_index.json")]);
-  state.teams=res[0].status==="fulfilled"&&Array.isArray(res[0].value)?res[0].value:[];state.players=res[1].status==="fulfilled"&&Array.isArray(res[1].value)?res[1].value:[];
-  state.meta=res[2].status==="fulfilled"?res[2].value:{};state.history=res[3].status==="fulfilled"&&Array.isArray(res[3].value)?res[3].value:[];
-  state.periodsIndex=res[4].status==="fulfilled"?res[4].value:null;
+  const res=await Promise.allSettled([load("./data/leaderboard_teams.json"),load("./data/meta.json"),load("./data/battle_history.json"),load("./data/periods_index.json"),load("./data/analytics/overview.json")]);
+  state.teams=res[0].status==="fulfilled"&&Array.isArray(res[0].value)?res[0].value:[];
+  state.meta=res[1].status==="fulfilled"?res[1].value:{};
+  state.history=res[2].status==="fulfilled"&&Array.isArray(res[2].value)?res[2].value:[];
+  state.periodsIndex=res[3].status==="fulfilled"?res[3].value:null;
+  state.dashboardOverview=res[4].status==="fulfilled"?res[4].value:null;
   populateHistoryPeriodFilter();
   $("stat-battles").textContent=num(state.meta.tournaments_processed);$("stat-teams").textContent=num(state.meta.teams_count??state.teams.length);$("stat-players").textContent=num(state.meta.players_count??state.players.length);
   $("updated-label").textContent=state.meta.generated_at?"Updated "+date(state.meta.generated_at):"No successful data refresh yet";
   $("filter-label").textContent=state.meta.selection_rule||"Regular numbered ULTRAbullet Team Battles only";
-  $("status-pill").textContent=state.meta.generated_at?"UPDATED "+date(state.meta.generated_at):"AWAITING FIRST UPDATE";
-  if(res.slice(0,3).some(x=>x.status==="rejected"))$("updated-label").classList.add("error");
-  if(res[3].status==="rejected")$("history-status").textContent="Battle archive unavailable — run the leaderboard workflow to generate it.";
+  updateDataStatus();
+  if(res[0].status==="rejected"||res[1].status==="rejected")$("updated-label").classList.add("error");
+  if(res[2].status==="rejected")$("history-status").textContent="Battle archive unavailable — run the leaderboard workflow to generate it.";
   else if(Number(state.meta.errors_count||0)>0)$("history-status").textContent="Archive refreshed · "+num(state.meta.errors_count)+" data collection issue(s) recorded.";
   else $("history-status").textContent="Archive from latest successful data refresh · no collection errors recorded";
   $("period-type").disabled=!state.periodsIndex;
@@ -717,8 +792,8 @@ $("compare-suggestions-b").addEventListener("click",e=>{
   $("compare-search-b").value=name(competitor);
   renderCompare();
 });
-$("teams-btn").addEventListener("click",()=>{state.view="teams";state.page=1;render();});
-$("players-btn").addEventListener("click",()=>{state.view="players";state.page=1;render();});
+$("teams-btn").addEventListener("click",()=>setView("teams"));
+$("players-btn").addEventListener("click",()=>setView("players"));
 $("period-type").addEventListener("change",loadSelectedPeriod);
 $("period-select").addEventListener("change",loadSelectedPeriod);
 $("search").addEventListener("input",e=>{state.query=e.target.value;state.page=1;render();});
