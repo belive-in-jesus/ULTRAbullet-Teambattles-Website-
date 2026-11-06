@@ -41,7 +41,7 @@ test("leader rows link to the existing profile system and escape competitor name
     id: "safe-id", name: "<img src=x onerror=alert(1)>", points: 1234,
     tournaments_played: 20, podiums: 5
   }], "team");
-  assert.match(html, /\.\.\/profile\.html\?type=team&id=safe-id/);
+  assert.match(html, /\.\.\/profile\.html\?type=team&amp;id=safe-id/);
   assert.match(html, /&lt;img/);
   assert.doesNotMatch(html, /<img/);
 });
