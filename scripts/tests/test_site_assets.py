@@ -353,5 +353,66 @@ class WebsiteAssetTests(unittest.TestCase):
         self.assertNotIn('href="./special-events.html"', source)
 
 
+    def test_redesign_wireframes_have_clear_boundaries_and_mobile_accessibility(self):
+        overview_path = DOCS / "redesign" / "overview.html"
+        rankings_path = DOCS / "redesign" / "rankings.html"
+        stylesheet_path = DOCS / "redesign" / "wireframes.css"
+        controller_path = DOCS / "js" / "redesign-wireframes.js"
+
+        overview = overview_path.read_text(encoding="utf-8")
+        rankings = rankings_path.read_text(encoding="utf-8")
+        stylesheet = stylesheet_path.read_text(encoding="utf-8")
+        controller = controller_path.read_text(encoding="utf-8")
+
+        self.assertIn("Open current website", overview)
+        self.assertIn("Open current website", rankings)
+        self.assertIn("2 November 2026 · 03:49 UTC", overview)
+        self.assertIn("2 November 2026 · 03:49 UTC", rankings)
+        self.assertIn("snapshot-status", overview)
+        self.assertIn('aria-live="polite"', overview)
+        self.assertIn('href="https://lichess.org/tournament/2vPEnd1i"', overview)
+        self.assertIn('Archived battles', overview)
+        self.assertIn('latest official number #644', overview)
+        self.assertNotIn('Numbered battles</span>', overview)
+
+        contributor_panel = rankings.split('data-mode-panel="contributors"', 1)[1].split('</section>', 1)[0]
+        self.assertIn("Total contribution points", contributor_panel)
+        self.assertIn("Top contributors", contributor_panel)
+        self.assertIn("Best single-battle score", contributor_panel)
+        self.assertIn("Last seen", contributor_panel)
+        self.assertNotIn("Last active", contributor_panel)
+        self.assertNotIn("Each row opens the corresponding", rankings)
+        self.assertIn("How the Performance Index is calculated", rankings)
+
+        regions = re.findall(r'<div class="table-scroll"([^>]*)>', rankings)
+        self.assertEqual(len(regions), 5, "All five ranking tables must have their own scroll region.")
+        labels = []
+        for attributes in regions:
+            self.assertIn('role="region"', attributes)
+            self.assertIn('tabindex="0"', attributes)
+            label = re.search(r'aria-label="([^"]+)"', attributes)
+            self.assertIsNotNone(label, "Every scroll region must have an accessible name.")
+            labels.append(label.group(1))
+        self.assertEqual(len(labels), len(set(labels)), "Table scroll-region labels must be unique.")
+        self.assertEqual(len(re.findall(r'<th scope="col"', rankings)), 35,
+                         "Every ranking table column must have a scoped header.")
+        self.assertNotRegex(rankings, r'<th(?=\s|>)(?![^>]*\bscope=)')
+        self.assertIn("text-overflow: ellipsis", stylesheet)
+
+        ids = re.findall(r'\bid="([^"]+)"', rankings)
+        self.assertEqual(len(ids), len(set(ids)), "Rankings preview contains duplicate HTML IDs.")
+        self.assertIn('event.key === "ArrowRight"', controller)
+        self.assertIn('event.key === "Home"', controller)
+        self.assertIn('event.key === "End"', controller)
+        self.assertIn("@media (max-width: 700px)", stylesheet)
+        self.assertIn("@media (max-width: 400px)", stylesheet)
+        self.assertIn(".table-scroll-hint", stylesheet)
+        self.assertIn("position: sticky", stylesheet)
+        self.assertTrue(
+            css_delimiters_are_balanced(stylesheet),
+            "The redesign wireframe stylesheet contains an unbalanced delimiter.",
+        )
+
+
 if __name__ == "__main__":
     unittest.main()

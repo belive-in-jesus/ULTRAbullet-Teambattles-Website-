@@ -10,7 +10,7 @@
   <script src="../js/redesign-wireframes.js" defer></script>
 </head>
 <body>
-  <div class="preview-banner">Redesign wireframe · 02 / Rankings <span>Layout concept only — ranking logic and production data are not connected.</span></div>
+  <div class="preview-banner">Redesign preview · 02 / Rankings <span>Ranking data and controls are illustrative only. Analysis, History and Guide still open the current production pages.</span><a href="../index.html">Open current website ↗</a></div>
   <div class="shell">
     <header class="topbar">
       <a class="brand" href="./overview.html" aria-label="UltraBullet Team Battles redesign overview">
@@ -41,11 +41,11 @@
       </section>
 
       <div class="data-note">
-        <span><strong>Sample snapshot:</strong> 2 November 2026 · published dataset figures used for layout illustration</span>
+        <span><strong>Published data snapshot:</strong> 2 November 2026 · 03:49 UTC</span>
         <span>Visual concept · no live data connection</span>
       </div>
 
-      <div class="ranking-tabs" role="tablist" aria-label="Ranking type">
+      <div class="ranking-tabs" role="tablist" aria-label="Ranking type" aria-orientation="horizontal">
         <button class="ranking-tab" id="tab-teams" type="button" role="tab" aria-selected="true" aria-controls="panel-teams" data-mode="teams">
           <strong>Teams</strong><small>Cumulative team points</small>
         </button>
@@ -60,7 +60,7 @@
         </button>
       </div>
 
-      <section class="ranking-panel" id="panel-teams" role="tabpanel" aria-labelledby="tab-teams" data-mode-panel="teams">
+      <section class="ranking-panel" id="panel-teams" role="tabpanel" tabindex="0" aria-labelledby="tab-teams" data-mode-panel="teams">
         <div class="mode-summary">
           <div>
             <h2>Team standings</h2>
@@ -84,23 +84,24 @@
               <div class="filter-actions"><button type="button" class="action primary">Export CSV</button></div>
             </div>
           </div>
-          <div class="table-summary"><strong>All-time team leaderboard</strong><span>Showing 1–50 of 821 · sorted by rank</span></div>
-          <div class="table-scroll">
+          <div class="table-summary"><strong>All-time team leaderboard</strong><span>4 sample rows shown · 821 teams in the source dataset</span></div>
+          <p class="table-scroll-hint">On small screens, scroll horizontally to view additional columns. Rank and competitor columns remain visible.</p>
+          <div class="table-scroll" role="region" aria-label="Team ranking results" tabindex="0">
             <table class="ranking-table">
-              <thead><tr><th>Rank</th><th>Team</th><th class="number">Battles</th><th class="number">Total points</th><th class="number">Avg. / battle</th><th></th></tr></thead>
+              <thead><tr><th scope="col">Rank</th><th scope="col">Team</th><th scope="col" class="number">Battles</th><th scope="col" class="number">Total points</th><th scope="col" class="number">Avg. / battle</th><th scope="col"></th></tr></thead>
               <tbody>
-                <tr><td>#1</td><td class="name-cell">itachi-n-friends</td><td class="number">640</td><td class="number main-number">338,368</td><td class="number">528.7</td><td class="row-open">↗</td></tr>
-                <tr><td>#2</td><td class="name-cell">darkonteams</td><td class="number">539</td><td class="number main-number">291,989</td><td class="number">541.7</td><td class="row-open">↗</td></tr>
-                <tr><td>#3</td><td class="name-cell">the-house-discord-server</td><td class="number">640</td><td class="number main-number">151,372</td><td class="number">236.5</td><td class="row-open">↗</td></tr>
-                <tr><td>#4</td><td class="name-cell">thejagdtiger--friends_new</td><td class="number">291</td><td class="number main-number">100,956</td><td class="number">346.9</td><td class="row-open">↗</td></tr>
+                <tr><td>#1</td><td class="name-cell">itachi-n-friends</td><td class="number">640</td><td class="number main-number">338,368</td><td class="number">528.7</td><td class="row-open" aria-hidden="true">↗</td></tr>
+                <tr><td>#2</td><td class="name-cell">darkonteams</td><td class="number">539</td><td class="number main-number">291,989</td><td class="number">541.7</td><td class="row-open" aria-hidden="true">↗</td></tr>
+                <tr><td>#3</td><td class="name-cell">the-house-discord-server</td><td class="number">640</td><td class="number main-number">151,372</td><td class="number">236.5</td><td class="row-open" aria-hidden="true">↗</td></tr>
+                <tr><td>#4</td><td class="name-cell">thejagdtiger--friends_new</td><td class="number">291</td><td class="number main-number">100,956</td><td class="number">346.9</td><td class="row-open" aria-hidden="true">↗</td></tr>
               </tbody>
             </table>
           </div>
-          <div class="table-bottom"><span>Each row opens the corresponding team profile.</span><div class="page-controls"><span>50 rows</span><button type="button">← Previous</button><span>1 / 17</span><button type="button">Next →</button></div></div>
+          <div class="table-bottom"><span>Profile links will be connected to these rows in the functional version.</span><div class="page-controls"><span>50 rows / page</span><button type="button">← Previous</button><span>1 / 17</span><button type="button">Next →</button></div></div>
         </div>
       </section>
 
-      <section class="ranking-panel" id="panel-players" role="tabpanel" aria-labelledby="tab-players" data-mode-panel="players" hidden>
+      <section class="ranking-panel" id="panel-players" role="tabpanel" tabindex="0" aria-labelledby="tab-players" data-mode-panel="players" hidden>
         <div class="mode-summary">
           <div>
             <h2>Player standings</h2>
@@ -124,23 +125,24 @@
               <div class="filter-actions"><button type="button" class="action primary">Export CSV</button></div>
             </div>
           </div>
-          <div class="table-summary"><strong>All-time player leaderboard</strong><span>Showing 1–50 of 13,372 · sorted by rank</span></div>
-          <div class="table-scroll">
+          <div class="table-summary"><strong>All-time player leaderboard</strong><span>4 sample rows shown · 13,372 players in the source dataset</span></div>
+          <p class="table-scroll-hint">On small screens, scroll horizontally to view additional columns. Rank and competitor columns remain visible.</p>
+          <div class="table-scroll" role="region" aria-label="Player ranking results" tabindex="0">
             <table class="ranking-table">
-              <thead><tr><th>Rank</th><th>Player</th><th class="number">Battles</th><th class="number">Total points</th><th class="number">Avg. / battle</th><th></th></tr></thead>
+              <thead><tr><th scope="col">Rank</th><th scope="col">Player</th><th scope="col" class="number">Battles</th><th scope="col" class="number">Total points</th><th scope="col" class="number">Avg. / battle</th><th scope="col"></th></tr></thead>
               <tbody>
-                <tr><td>#1</td><td class="name-cell">Nathanael01</td><td class="number">640</td><td class="number main-number">94,925</td><td class="number">148.3</td><td class="row-open">↗</td></tr>
-                <tr><td>#2</td><td class="name-cell">Cupidust123</td><td class="number">349</td><td class="number main-number">35,045</td><td class="number">100.4</td><td class="row-open">↗</td></tr>
-                <tr><td>#3</td><td class="name-cell">DarkOnCrack</td><td class="number">506</td><td class="number main-number">27,348</td><td class="number">54.0</td><td class="row-open">↗</td></tr>
-                <tr><td>#4</td><td class="name-cell">Y0uNg_12345</td><td class="number">92</td><td class="number main-number">14,010</td><td class="number">152.3</td><td class="row-open">↗</td></tr>
+                <tr><td>#1</td><td class="name-cell">Nathanael01</td><td class="number">640</td><td class="number main-number">94,925</td><td class="number">148.3</td><td class="row-open" aria-hidden="true">↗</td></tr>
+                <tr><td>#2</td><td class="name-cell">Cupidust123</td><td class="number">349</td><td class="number main-number">35,045</td><td class="number">100.4</td><td class="row-open" aria-hidden="true">↗</td></tr>
+                <tr><td>#3</td><td class="name-cell">DarkOnCrack</td><td class="number">506</td><td class="number main-number">27,348</td><td class="number">54.0</td><td class="row-open" aria-hidden="true">↗</td></tr>
+                <tr><td>#4</td><td class="name-cell">Y0uNg_12345</td><td class="number">92</td><td class="number main-number">14,010</td><td class="number">152.3</td><td class="row-open" aria-hidden="true">↗</td></tr>
               </tbody>
             </table>
           </div>
-          <div class="table-bottom"><span>Each row opens the corresponding player profile.</span><div class="page-controls"><span>50 rows</span><button type="button">← Previous</button><span>1 / 268</span><button type="button">Next →</button></div></div>
+          <div class="table-bottom"><span>Profile links will be connected to these rows in the functional version.</span><div class="page-controls"><span>50 rows / page</span><button type="button">← Previous</button><span>1 / 268</span><button type="button">Next →</button></div></div>
         </div>
       </section>
 
-      <section class="ranking-panel" id="panel-contributors" role="tabpanel" aria-labelledby="tab-contributors" data-mode-panel="contributors" hidden>
+      <section class="ranking-panel" id="panel-contributors" role="tabpanel" tabindex="0" aria-labelledby="tab-contributors" data-mode-panel="contributors" hidden>
         <div class="mode-summary">
           <div>
             <h2>Global contributors</h2>
@@ -148,37 +150,51 @@
           </div>
           <span class="mode-count">12,730 contributor records</span>
         </div>
-        <div class="contributor-stats">
+        <div class="contributor-stats contributor-stats--four">
           <article class="contributor-stat"><span>Contributors recorded</span><strong>12,730</strong></article>
-          <article class="contributor-stat"><span>Recorded battle appearances</span><strong>69,722</strong></article>
-          <article class="contributor-stat"><span>Teams with member data</span><strong>705</strong></article>
+          <article class="contributor-stat"><span>Total contribution points</span><strong class="preview-placeholder">—</strong><small>Combined listed career scores</small></article>
+          <article class="contributor-stat"><span>Battle appearances</span><strong>69,722</strong><small>One player counted once per battle</small></article>
+          <article class="contributor-stat"><span>Teams represented</span><strong>705</strong></article>
         </div>
-        <div class="context-note">Contributor ranking is cumulative across the archive. Period controls from the team/player standings do not apply here; search and sorting are specific to contribution points, appearances, teams represented and average contribution.</div>
+        <div class="panel contributor-podium-panel">
+          <div class="panel-head">
+            <div><span class="eyebrow">Career leaders</span><h3>Top contributors</h3></div>
+            <span class="panel-tag">Top 3</span>
+          </div>
+          <div class="contributor-podium-preview">
+            <div><span class="rank-number">01</span><strong>Highest listed contribution</strong><small>Player identity, career total, battle appearances and represented teams populate from the contributor archive.</small></div>
+            <div><span class="rank-number">02</span><strong>Second-highest contribution</strong><small>Player identity, career total, battle appearances and represented teams populate from the contributor archive.</small></div>
+            <div><span class="rank-number">03</span><strong>Third-highest contribution</strong><small>Player identity, career total, battle appearances and represented teams populate from the contributor archive.</small></div>
+          </div>
+        </div>
+        <div class="context-note">Contributor ranking is cumulative across the archive. Period controls from the team/player standings do not apply here; search and sorting are specific to contribution points, battle appearances, teams represented, average contribution and best single-battle score.</div>
         <div class="panel ranking-workspace">
           <div class="filter-area">
             <div class="filter-row">
               <label class="search-wrap"><input class="field" type="search" placeholder="Search players, Lichess IDs or teams…" aria-label="Search contributors"></label>
-              <select class="select-field" aria-label="Sort contributors"><option>Sort: Contribution points</option><option>Battle appearances</option><option>Teams represented</option><option>Average contribution</option><option>Last active</option></select>
+              <select class="select-field" aria-label="Sort contributors"><option>Sort: Contribution points</option><option>Battle appearances</option><option>Teams represented</option><option>Average contribution</option><option>Best single-battle score</option></select>
               <select class="select-field" aria-label="Rows per page"><option>50 rows</option><option>25 rows</option><option>100 rows</option></select>
               <div class="filter-actions"><span class="panel-tag">All-time</span></div>
             </div>
           </div>
           <div class="table-summary"><strong>Contributor leaderboard</strong><span>Search can match a player, Lichess ID or team name.</span></div>
-          <div class="table-scroll">
+          <p class="table-scroll-hint">On small screens, scroll horizontally to view additional columns. Rank and competitor columns remain visible.</p>
+          <div class="table-scroll" role="region" aria-label="Contributor ranking results" tabindex="0">
             <table class="ranking-table">
-              <thead><tr><th>Rank</th><th>Contributor</th><th class="number">Contribution points</th><th class="number">Battles</th><th class="number">Teams</th><th class="number">Avg. contribution</th><th>Last active</th></tr></thead>
+              <thead><tr><th scope="col">Rank</th><th scope="col">Contributor</th><th scope="col" class="number">Contribution points</th><th scope="col" class="number">Battles</th><th scope="col" class="number">Teams</th><th scope="col" class="number">Avg. contribution</th><th scope="col">Last seen</th></tr></thead>
               <tbody><tr><td colspan="7" class="preview-placeholder">Existing contributor records populate this table. Real row values are intentionally not fabricated in this layout preview.</td></tr></tbody>
             </table>
           </div>
-          <div class="table-bottom"><span>Team membership details remain expandable from each contributor row.</span><div class="page-controls"><span>50 rows</span><button type="button">← Previous</button><span>Page 1</span><button type="button">Next →</button></div></div>
+          <div class="table-bottom"><span>Team details expand within each contributor row. Row count and pagination are preview placeholders.</span><div class="page-controls"><span>50 rows / page</span><button type="button">← Previous</button><span>Page 1</span><button type="button">Next →</button></div></div>
         </div>
       </section>
 
-      <section class="ranking-panel" id="panel-pi" role="tabpanel" aria-labelledby="tab-pi" data-mode-panel="pi" hidden>
+      <section class="ranking-panel" id="panel-pi" role="tabpanel" tabindex="0" aria-labelledby="tab-pi" data-mode-panel="pi" hidden>
         <div class="mode-summary">
           <div>
             <h2>Performance Index</h2>
-            <p>A normalized measure of performance, consistency, recent form and participation. It answers a different question from cumulative points: how consistently strong is the competitor relative to the field?</p>
+            <p>A normalized measure of performance, consistency, recent form and participation. It answers a different question from cumulative points: how consistently strong is the competitor relative to the field.</p>
+            <a class="panel-link" href="../performance-index.html">How the Performance Index is calculated ↗</a>
           </div>
           <span class="mode-count">Minimum eligibility: 10 battles</span>
         </div>
@@ -198,9 +214,10 @@
 
         <div class="panel ranking-workspace" data-pi-panel="teams">
           <div class="table-summary"><strong>Team Performance Index</strong><span>637 eligible teams</span></div>
-          <div class="table-scroll">
+          <p class="table-scroll-hint">On small screens, scroll horizontally to view additional columns. Rank and competitor columns remain visible.</p>
+          <div class="table-scroll" role="region" aria-label="Team Performance Index results" tabindex="0">
             <table class="ranking-table">
-              <thead><tr><th>Rank</th><th>Team</th><th class="number">PI score</th><th class="number">Avg. performance</th><th class="number">Consistency</th><th class="number">Recent form</th><th class="number">Participation</th><th class="number">Battles</th></tr></thead>
+              <thead><tr><th scope="col">Rank</th><th scope="col">Team</th><th scope="col" class="number">PI score</th><th scope="col" class="number">Avg. performance</th><th scope="col" class="number">Consistency</th><th scope="col" class="number">Recent form</th><th scope="col" class="number">Participation</th><th scope="col" class="number">Battles</th></tr></thead>
               <tbody>
                 <tr><td>#1</td><td class="name-cell">itachi-n-friends</td><td class="number main-number">98.5</td><td class="number preview-placeholder">—</td><td class="number preview-placeholder">—</td><td class="number preview-placeholder">—</td><td class="number preview-placeholder">—</td><td class="number">640</td></tr>
                 <tr><td>#2</td><td class="name-cell">darkonteams</td><td class="number main-number">98.4</td><td class="number preview-placeholder">—</td><td class="number preview-placeholder">—</td><td class="number preview-placeholder">—</td><td class="number preview-placeholder">—</td><td class="number">539</td></tr>
@@ -213,9 +230,10 @@
 
         <div class="panel ranking-workspace" data-pi-panel="players" hidden>
           <div class="table-summary"><strong>Player Performance Index</strong><span>1,485 eligible players</span></div>
-          <div class="table-scroll">
+          <p class="table-scroll-hint">On small screens, scroll horizontally to view additional columns. Rank and competitor columns remain visible.</p>
+          <div class="table-scroll" role="region" aria-label="Player Performance Index results" tabindex="0">
             <table class="ranking-table">
-              <thead><tr><th>Rank</th><th>Player</th><th class="number">PI score</th><th class="number">Avg. performance</th><th class="number">Consistency</th><th class="number">Recent form</th><th class="number">Participation</th><th class="number">Battles</th></tr></thead>
+              <thead><tr><th scope="col">Rank</th><th scope="col">Player</th><th scope="col" class="number">PI score</th><th scope="col" class="number">Avg. performance</th><th scope="col" class="number">Consistency</th><th scope="col" class="number">Recent form</th><th scope="col" class="number">Participation</th><th scope="col" class="number">Battles</th></tr></thead>
               <tbody>
                 <tr><td>#1</td><td class="name-cell">RodrigoMarrou2012</td><td class="number main-number">94.8</td><td class="number preview-placeholder">—</td><td class="number preview-placeholder">—</td><td class="number preview-placeholder">—</td><td class="number preview-placeholder">—</td><td class="number">52</td></tr>
                 <tr><td>#2</td><td class="name-cell">pknm</td><td class="number main-number">91.3</td><td class="number preview-placeholder">—</td><td class="number preview-placeholder">—</td><td class="number preview-placeholder">—</td><td class="number preview-placeholder">—</td><td class="number">46</td></tr>

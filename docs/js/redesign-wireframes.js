@@ -24,8 +24,29 @@
     }
   }
 
-  modeButtons.forEach((button) => {
+  modeButtons.forEach((button, index) => {
     button.addEventListener("click", () => activateMode(button.dataset.mode));
+
+    button.addEventListener("keydown", (event) => {
+      let nextIndex = null;
+
+      if (event.key === "ArrowRight" || event.key === "ArrowDown") {
+        nextIndex = (index + 1) % modeButtons.length;
+      } else if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
+        nextIndex = (index - 1 + modeButtons.length) % modeButtons.length;
+      } else if (event.key === "Home") {
+        nextIndex = 0;
+      } else if (event.key === "End") {
+        nextIndex = modeButtons.length - 1;
+      }
+
+      if (nextIndex !== null) {
+        event.preventDefault();
+        const nextButton = modeButtons[nextIndex];
+        activateMode(nextButton.dataset.mode);
+        nextButton.focus();
+      }
+    });
   });
 
   const requestedMode = window.location.hash.replace(/^#/, "");
