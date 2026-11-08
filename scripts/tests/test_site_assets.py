@@ -123,6 +123,16 @@ class WebsiteAssetTests(unittest.TestCase):
                     )
 
     def test_all_public_pages_share_the_same_primary_navigation(self):
+        expected_labels = (
+            "Overview",
+            "Rankings",
+            "Performance",
+            "Analytics",
+            "Compare",
+            "Records",
+            "Community",
+            "Guide",
+        )
         expected_links = (
             "./index.html",
             "./rankings.html",
@@ -140,6 +150,20 @@ class WebsiteAssetTests(unittest.TestCase):
                 nav = nav_match.group(0)
                 for href in expected_links:
                     self.assertIn(f'href="{href}"', nav)
+                labels = tuple(
+                    re.sub(r"<[^>]+>", "", label).strip()
+                    for label in re.findall(
+                        r'<a\b[^>]*class="[^"]*\bnav-link\b[^"]*"[^>]*>([\s\S]*?)</a>',
+                        nav,
+                    )
+                )
+                self.assertEqual(labels, expected_labels)
+                community_href = (
+                    "#official-community"
+                    if page_name == "index.html"
+                    else "./index.html#official-community"
+                )
+                self.assertIn(f'href="{community_href}"', nav)
                 self.assertEqual(
                     len(re.findall(r'class="nav-link active"', nav)),
                     1,
