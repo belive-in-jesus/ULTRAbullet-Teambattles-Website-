@@ -49,6 +49,36 @@
 .compare-profile-links{display:flex;flex-wrap:wrap;gap:9px;margin:12px 0 20px}.compare-profile-links .profile-link{margin-top:0}
 
 .history-detail-link{color:inherit;text-decoration:none;transition:color .15s ease}.history-detail-link:hover{color:var(--cyan);text-decoration:underline;text-underline-offset:3px}.history-detail-link:focus-visible{outline:2px solid var(--cyan);outline-offset:3px;border-radius:3px}
+
+/* Official community information — presentation only. */
+.official-community{margin:28px 0 34px}
+.official-community-heading{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;margin-bottom:14px}
+.official-community-heading h2{margin:8px 0 5px;color:#edf5fb;font-size:1.35rem;letter-spacing:-.04em}
+.official-community-heading p{max-width:690px;margin:0;color:#98adbf;font-size:.77rem;line-height:1.7}
+.official-community-cta{display:inline-flex;align-items:center;justify-content:center;min-height:38px;padding:0 13px;border:1px solid rgba(112,220,229,.32);border-radius:9px;background:rgba(112,220,229,.07);color:#70dce5;font-size:.7rem;font-weight:800;text-decoration:none;white-space:nowrap}
+.official-community-cta:hover{border-color:rgba(112,220,229,.55);background:rgba(112,220,229,.12)}
+.official-community-grid{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(260px,.75fr);gap:12px}
+.official-community-summary,.official-community-links{min-width:0;padding:20px;border:1px solid rgba(91,126,159,.3);border-radius:15px;background:linear-gradient(145deg,rgba(17,33,52,.9),rgba(10,21,36,.9))}
+.official-community-kicker{color:#70dce5;font-family:"DM Mono",monospace;font-size:.58rem;letter-spacing:.14em}
+.official-community-summary h3{margin:13px 0 7px;color:#f0f6fb;font-size:1.05rem;letter-spacing:-.03em}
+.official-community-summary>p{max-width:750px;margin:0;color:#9aafc1;font-size:.75rem;line-height:1.75}
+.official-community-format{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:17px}
+.official-community-format div{min-width:0;padding:10px 11px;border:1px solid rgba(142,170,196,.14);border-radius:9px;background:rgba(255,255,255,.025)}
+.official-community-format span{display:block;color:#94aabd;font-size:.63rem}
+.official-community-format strong{display:block;margin-top:5px;color:#eaf4f7;font-size:.72rem}
+.official-community-summary>p.official-community-source{margin-top:12px;color:#8299ad;font-size:.64rem}
+.official-community-links{display:flex;flex-direction:column;gap:8px}
+.official-community-links>.official-community-kicker{margin-bottom:3px}
+.official-community-links>a{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 12px;border:1px solid rgba(142,170,196,.16);border-radius:9px;background:rgba(255,255,255,.02);text-decoration:none;transition:border-color .16s ease,background .16s ease}
+.official-community-links>a:hover{border-color:rgba(112,220,229,.4);background:rgba(112,220,229,.045)}
+.official-community-links strong{display:block;color:#eaf3f7;font-size:.69rem}
+.official-community-links small{display:block;margin-top:4px;color:#94aabd;font-size:.62rem;line-height:1.5}
+.official-community-links b{color:#70dce5;font-size:.9rem;font-weight:500}
+.official-community-links>a.official-community-legacy{border-color:rgba(223,187,123,.24);background:rgba(223,187,123,.035)}
+.official-community-links>a.official-community-legacy b{color:#dfbb7b}
+@media(max-width:980px){.official-community-grid{grid-template-columns:1fr}.official-community-heading{align-items:flex-start;flex-direction:column}}
+@media(max-width:700px){.official-community-format{grid-template-columns:repeat(2,minmax(0,1fr))}.official-community-summary,.official-community-links{padding:16px}}
+
 </style>
   <link href="css/design-system.css" rel="stylesheet">
   <link href="css/design-refresh.css" rel="stylesheet">
@@ -71,6 +101,7 @@
         <a class="nav-link" href="./analytics.html">Analytics</a>
         <a class="nav-link" href="./compare.html">Compare</a>
         <a class="nav-link" href="./records.html">Records</a>
+        <a class="nav-link" href="#official-community">Community</a>
         <a class="nav-link" href="./information.html">Guide</a>
         <span class="pill status-pill" id="status-pill" role="status" aria-live="polite">LOADING DATA</span>
       </div>
@@ -139,6 +170,43 @@
           <span>Season champions, career achievements and the complete battle archive.</span>
           <span class="pathway-cta">Explore records <span aria-hidden="true">↗</span></span>
         </a>
+      </div>
+    </section>
+
+    <section class="official-community" id="official-community" aria-labelledby="official-community-title">
+      <div class="official-community-heading">
+        <div>
+          <span class="eyebrow">OFFICIAL LICHESS TEAM</span>
+          <h2 id="official-community-title">The community behind the battles</h2>
+          <p>Join the recurring UltraBullet team-battle series, explore the official team and find the links currently shared by its organisers.</p>
+        </div>
+        <a class="official-community-cta" href="https://lichess.org/team/official-ultrabullet-teambattles" target="_blank" rel="noopener noreferrer">Visit the official team ↗</a>
+      </div>
+      <div class="official-community-grid">
+        <article class="official-community-summary">
+          <span class="official-community-kicker">ABOUT THE SERIES</span>
+          <h3>Fast, friendly and open to all teams.</h3>
+          <p>The current regular battle description welcomes every team — competitive squads, casual groups and anyone who enjoys ultrafast chess. The series is presented as a recurring community competition where everyone is welcome.</p>
+          <div class="official-community-format" aria-label="Details shown in recent regular tournament listings">
+            <div><span>Variant</span><strong>UltraBullet · ¼+0</strong></div>
+            <div><span>Format</span><strong>Rated Arena</strong></div>
+            <div><span>Duration</span><strong>90 minutes</strong></div>
+            <div><span>Per-team entry</span><strong>20 leaders</strong></div>
+          </div>
+          <p class="official-community-source">These details reflect recent regular tournament listings and may differ for special events. Check the individual Lichess tournament for its current format and rules.</p>
+        </article>
+        <aside class="official-community-links" aria-label="Official community links">
+          <span class="official-community-kicker">EXPLORE THE COMMUNITY</span>
+          <a href="https://lichess.org/team/official-ultrabullet-teambattles" target="_blank" rel="noopener noreferrer">
+            <span><strong>Official Lichess team</strong><small>Team information and updates</small></span><b aria-hidden="true">↗</b>
+          </a>
+          <a href="https://lichess.org/team/official-ultrabullet-teambattles/tournaments" target="_blank" rel="noopener noreferrer">
+            <span><strong>Tournament archive</strong><small>Upcoming and completed battles</small></span><b aria-hidden="true">↗</b>
+          </a>
+          <a class="official-community-legacy" href="https://lichessbotacc.github.io/Gift-For-Nathanael/" target="_blank" rel="noopener noreferrer">
+            <span><strong>Currently linked website</strong><small>Existing external destination, retained while the replacement website is in development</small></span><b aria-hidden="true">↗</b>
+          </a>
+        </aside>
       </div>
     </section>
 
