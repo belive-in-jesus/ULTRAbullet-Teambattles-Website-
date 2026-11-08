@@ -589,19 +589,19 @@ body {
   text-rendering: optimizeLegibility;
 }
 
-body :where(h1,h2,h3,h4) {
+body .shell :is(h1,h2,h3,h4) {
   text-wrap: balance;
 }
 
-body :where(p,li) {
+body .shell :is(p,li) {
   text-wrap: pretty;
 }
 
-body :where(a) {
+body .shell :is(a) {
   text-underline-offset: 3px;
 }
 
-body :where(button,input,select,textarea) {
+body .shell :is(button,input,select,textarea) {
   font-family: var(--arena-sans);
 }
 
@@ -610,7 +610,7 @@ body :where(button,input,select,textarea) {
 }
 
 /* One consistent content rhythm across overview, hubs, reports and profiles. */
-:where(
+.shell :is(
   .hero,
   .hub-hero,
   .rank-hero,
@@ -626,7 +626,7 @@ body :where(button,input,select,textarea) {
   scroll-margin-top: 124px;
 }
 
-:where(
+.shell :is(
   .hero h1,
   .hub-hero h1,
   .rank-hero h1,
@@ -647,7 +647,7 @@ body :where(button,input,select,textarea) {
   overflow-wrap: anywhere;
 }
 
-:where(
+.shell :is(
   .hero .lede,
   .hub-hero p,
   .rank-hero-copy p,
@@ -665,7 +665,7 @@ body :where(button,input,select,textarea) {
   line-height: 1.82;
 }
 
-:where(
+.shell :is(
   .section-heading,
   .contributors-section-heading,
   .achievement-section,
@@ -677,7 +677,7 @@ body :where(button,input,select,textarea) {
   scroll-margin-top: 126px;
 }
 
-:where(
+.shell :is(
   .section-heading h2,
   .contributors-section-heading h2,
   .achievement-section h2,
@@ -695,7 +695,7 @@ body :where(button,input,select,textarea) {
 }
 
 /* Shared surfaces: the same material language across every section. */
-:where(
+.shell :is(
   .dashboard-card,
   .global-analytics-panel,
   .compare-form-panel,
@@ -732,7 +732,7 @@ body :where(button,input,select,textarea) {
   box-shadow: var(--site-panel-shadow);
 }
 
-:where(
+.shell :is(
   .dashboard-card,
   .global-analytics-panel,
   .compare-form-panel,
@@ -763,7 +763,7 @@ body :where(button,input,select,textarea) {
   background: var(--site-panel-bg);
 }
 
-:where(
+.shell :is(
   .dashboard-card,
   .global-analytics-panel,
   .compare-form-panel,
@@ -778,7 +778,7 @@ body :where(button,input,select,textarea) {
   overflow: hidden;
 }
 
-:where(
+.shell :is(
   .dashboard-card,
   .global-analytics-panel,
   .compare-form-panel,
@@ -792,7 +792,7 @@ body :where(button,input,select,textarea) {
   padding: clamp(16px, 2.2vw, 23px);
 }
 
-:where(
+.shell :is(
   .stat,
   .global-analytics-stat,
   .profile-stat,
@@ -807,7 +807,7 @@ body :where(button,input,select,textarea) {
   background: linear-gradient(145deg, rgba(20,39,59,.88), rgba(10,21,35,.91));
 }
 
-:where(
+.shell :is(
   .stat-label,
   .global-analytics-stat > span,
   .profile-stat span,
@@ -823,7 +823,7 @@ body :where(button,input,select,textarea) {
   letter-spacing: .025em;
 }
 
-:where(
+.shell :is(
   .stat-value,
   .global-analytics-stat strong,
   .profile-stat strong,
@@ -839,7 +839,7 @@ body :where(button,input,select,textarea) {
 }
 
 /* Data controls share one height, border, surface and focus treatment. */
-:where(
+.shell :is(
   input[type="text"],
   input[type="search"],
   input[type="number"],
@@ -862,7 +862,7 @@ body :where(button,input,select,textarea) {
   box-shadow: inset 0 1px 0 rgba(255,255,255,.018);
 }
 
-:where(
+.shell :is(
   input[type="text"],
   input[type="search"],
   input[type="number"],
@@ -878,7 +878,7 @@ body :where(button,input,select,textarea) {
   opacity: 1;
 }
 
-:where(
+.shell :is(
   input[type="text"],
   input[type="search"],
   input[type="number"],
@@ -897,14 +897,14 @@ body :where(button,input,select,textarea) {
   box-shadow: 0 0 0 3px rgba(112,220,229,.09);
 }
 
-:where(button, .primary-action, .secondary-action, .filter-button, .compare-submit, .battle-more-button, .page-button, .pi-pagination button, .contributors-pagination button, .profile-actions button, .profile-actions a) {
+.shell :is(button, .primary-action, .secondary-action, .filter-button, .compare-submit, .battle-more-button, .page-button, .pi-pagination button, .contributors-pagination button, .profile-actions button, .profile-actions a) {
   border-radius: 9px;
   font-family: var(--arena-sans);
   font-weight: 750;
   transition: color .16s ease, background .16s ease, border-color .16s ease, transform .16s ease, box-shadow .16s ease;
 }
 
-:where(
+.shell :is(
   .secondary-action,
   .filter-button,
   .battle-more-button,
@@ -924,7 +924,7 @@ body :where(button,input,select,textarea) {
   color: #c4d2de;
 }
 
-:where(
+.shell :is(
   .secondary-action,
   .filter-button,
   .battle-more-button,
@@ -943,7 +943,7 @@ body :where(button,input,select,textarea) {
   color: #f2fbfd;
 }
 
-:where(
+.shell :is(
   .primary-action,
   .compare-submit
 ) {
@@ -954,29 +954,29 @@ body :where(button,input,select,textarea) {
   box-shadow: 0 8px 22px rgba(26,105,126,.16);
 }
 
-:where(.primary-action, .compare-submit):hover:not(:disabled) {
+.shell :is(.primary-action, .compare-submit):hover:not(:disabled) {
   transform: translateY(-1px);
   border-color: rgba(112,220,229,.58);
   background: linear-gradient(110deg, #2b8490, #4b6ca8);
   box-shadow: 0 11px 26px rgba(26,105,126,.22);
 }
 
-:where(button, input, select, textarea, a) {
+.shell :is(button, input, select, textarea, a) {
   -webkit-tap-highlight-color: transparent;
 }
 
-:where(button, input, select, textarea, a, [tabindex]):focus-visible {
+.shell :is(button, input, select, textarea, a, [tabindex]):focus-visible {
   outline: 2px solid var(--arena-cyan);
   outline-offset: 3px;
 }
 
-:where(button:disabled, .contributors-pagination button:disabled, .pi-pagination button:disabled, .page-button:disabled) {
+.shell :is(button:disabled, .contributors-pagination button:disabled, .pi-pagination button:disabled, .page-button:disabled) {
   cursor: not-allowed;
   opacity: .42;
 }
 
 /* Segmented controls always communicate the selected view consistently. */
-:where(
+.shell :is(
   .segmented,
   .pi-switch,
   .chart-mode-switch,
@@ -988,7 +988,7 @@ body :where(button,input,select,textarea) {
   background: rgba(6,15,26,.74);
 }
 
-:where(
+.shell :is(
   .segmented button.active,
   .pi-switch button.active,
   .chart-mode-button.active,
@@ -1003,7 +1003,7 @@ body :where(button,input,select,textarea) {
 }
 
 /* Unified table grammar, without changing row or column behaviour. */
-:where(
+.shell :is(
   .contributors-table,
   .pi-table,
   .battle-table,
@@ -1017,7 +1017,7 @@ body :where(button,input,select,textarea) {
   font-variant-numeric: tabular-nums;
 }
 
-:where(
+.shell :is(
   .contributors-table th,
   .pi-table th,
   .battle-table th,
@@ -1038,7 +1038,7 @@ body :where(button,input,select,textarea) {
   text-transform: uppercase;
 }
 
-:where(
+.shell :is(
   .contributors-table td,
   .pi-table td,
   .battle-table td,
@@ -1054,7 +1054,7 @@ body :where(button,input,select,textarea) {
   line-height: 1.55;
 }
 
-:where(
+.shell :is(
   .contributors-table tbody tr,
   .pi-table tbody tr,
   .battle-table tbody tr,
@@ -1066,7 +1066,7 @@ body :where(button,input,select,textarea) {
   transition: background .14s ease;
 }
 
-:where(
+.shell :is(
   .contributors-table tbody tr:hover,
   .pi-table tbody tr:hover,
   .battle-table tbody tr:hover,
@@ -1078,7 +1078,7 @@ body :where(button,input,select,textarea) {
   background: rgba(112,220,229,.045);
 }
 
-:where(
+.shell :is(
   .contributors-table-wrap,
   .pi-table-wrap,
   .battle-table-wrap,
@@ -1094,19 +1094,19 @@ body :where(button,input,select,textarea) {
   scrollbar-width: thin;
 }
 
-:where(.contributors-table, .pi-table, .battle-table, .compare-table, .profile-history-table, .analytics-season-table, .pi-history-table) a {
+.shell :is(.contributors-table, .pi-table, .battle-table, .compare-table, .profile-history-table, .analytics-season-table, .pi-history-table) a {
   color: var(--arena-cyan);
   text-decoration: none;
 }
 
-:where(.contributors-table, .pi-table, .battle-table, .compare-table, .profile-history-table, .analytics-season-table, .pi-history-table) a:hover {
+.shell :is(.contributors-table, .pi-table, .battle-table, .compare-table, .profile-history-table, .analytics-season-table, .pi-history-table) a:hover {
   color: #b4f1f1;
   text-decoration: underline;
   text-underline-offset: 3px;
 }
 
 /* Section headers and helper text use shared spacing and contrast. */
-:where(
+.shell :is(
   .contributors-board-head,
   .contributors-section-heading,
   .achievement-section-heading,
@@ -1121,7 +1121,7 @@ body :where(button,input,select,textarea) {
   gap: 14px;
 }
 
-:where(
+.shell :is(
   .contributors-board-head p,
   .contributors-section-note,
   .section-description,
@@ -1142,7 +1142,7 @@ body :where(button,input,select,textarea) {
   line-height: 1.72;
 }
 
-:where(
+.shell :is(
   .contributors-board-count,
   .contributors-hero-meta,
   .pi-count,
@@ -1156,7 +1156,7 @@ body :where(button,input,select,textarea) {
 }
 
 /* State messages: loading, empty, warning and errors remain distinguishable. */
-:where(
+.shell :is(
   .empty,
   .global-analytics-empty,
   .profile-empty,
@@ -1171,24 +1171,24 @@ body :where(button,input,select,textarea) {
   line-height: 1.7;
 }
 
-:where(.battle-status, .profile-feedback, .compare-message, .pi-message) {
+.shell :is(.battle-status, .profile-feedback, .compare-message, .pi-message) {
   border-radius: 10px;
   line-height: 1.7;
 }
 
-:where(.battle-status, .profile-feedback) {
+.shell :is(.battle-status, .profile-feedback) {
   border-color: rgba(135,165,193,.2);
   background: rgba(255,255,255,.025);
 }
 
-:where(.battle-status.error, .profile-feedback.error, .compare-message.error, .pi-message.error) {
+.shell :is(.battle-status.error, .profile-feedback.error, .compare-message.error, .pi-message.error) {
   border-color: rgba(242,132,149,.35);
   background: rgba(170,57,77,.09);
   color: #ffc0c9;
 }
 
 /* Badges, notes and small metadata keep the same restrained treatment. */
-:where(
+.shell :is(
   .pill,
   .contributors-board-count,
   .contributors-live-mark,
@@ -1201,7 +1201,7 @@ body :where(button,input,select,textarea) {
   letter-spacing: .045em;
 }
 
-:where(
+.shell :is(
   .hub-note-panel,
   .info-callout,
   .battle-status,
@@ -1211,7 +1211,7 @@ body :where(button,input,select,textarea) {
   border-radius: 12px;
 }
 
-:where(
+.shell :is(
   .hub-footer,
   .profile-footer,
   .compare-footer,
@@ -1229,7 +1229,7 @@ body :where(button,input,select,textarea) {
   line-height: 1.7;
 }
 
-:where(
+.shell :is(
   .hub-footer a,
   .profile-footer a,
   .compare-footer a,
@@ -1245,7 +1245,7 @@ body :where(button,input,select,textarea) {
   text-decoration: none;
 }
 
-:where(
+.shell :is(
   .hub-footer a:hover,
   .profile-footer a:hover,
   .compare-footer a:hover,
@@ -1262,32 +1262,32 @@ body :where(button,input,select,textarea) {
 }
 
 /* Page-specific corrections that bring specialist pages into the same system. */
-.page-contributors :where(.contributors-hero-note, .contributors-board, .contributor-podium-card) {
+.page-contributors .shell :is(.contributors-hero-note, .contributors-board, .contributor-podium-card) {
   border-radius: var(--site-radius-lg);
 }
 .page-contributors .contributors-table-wrap,
 .page-profile .profile-history-table-wrap {
   border-radius: 0 0 var(--site-radius-md) var(--site-radius-md);
 }
-.page-achievements :where(.achievement-card, .achievement-summary-card) {
+.page-achievements .shell :is(.achievement-card, .achievement-summary-card) {
   border-radius: var(--site-radius-md);
 }
 .page-battle .battle-results-panel {
   border-radius: var(--site-radius-lg);
 }
-.page-profile :where(.profile-stat, .profile-record, .profile-panel, .profile-identity-card) {
+.page-profile .shell :is(.profile-stat, .profile-record, .profile-panel, .profile-identity-card) {
   border-radius: var(--site-radius-md);
 }
-.page-hall-of-fame :where(.hof-stat, .period-item) {
+.page-hall-of-fame .shell :is(.hof-stat, .period-item) {
   border-radius: var(--site-radius-md);
 }
 .page-information .info-card {
   border-radius: var(--site-radius-md);
 }
-.page-dashboard :where(.dashboard-card, .global-analytics-panel, .history-panel, .board) {
+.page-dashboard .shell :is(.dashboard-card, .global-analytics-panel, .history-panel, .board) {
   border-radius: var(--site-radius-md);
 }
-.page-ranking-hub :where(.rank-card, .rank-method, .rank-profile-callout) {
+.page-ranking-hub .shell :is(.rank-card, .rank-method, .rank-profile-callout) {
   border-radius: var(--site-radius-lg);
 }
 
@@ -1296,7 +1296,7 @@ body :where(button,input,select,textarea) {
   .shell {
     width: min(100% - 40px, 1380px);
   }
-  :where(.contributors-hero, .profile-hero, .rank-hero, .hub-hero) {
+  .shell :is(.contributors-hero, .profile-hero, .rank-hero, .hub-hero) {
     gap: 22px;
   }
 }
@@ -1305,7 +1305,7 @@ body :where(button,input,select,textarea) {
   .shell {
     width: min(100% - 28px, 1380px);
   }
-  :where(
+  .shell :is(
     .contributors-summary,
     .achievement-summary,
     .profile-stats,
@@ -1315,7 +1315,7 @@ body :where(button,input,select,textarea) {
   ) {
     grid-template-columns: repeat(2, minmax(0,1fr));
   }
-  :where(
+  .shell :is(
     .contributors-hero,
     .profile-hero,
     .compare-identities,
@@ -1324,7 +1324,7 @@ body :where(button,input,select,textarea) {
   ) {
     grid-template-columns: 1fr;
   }
-  :where(
+  .shell :is(
     .contributors-board-head,
     .contributors-section-heading,
     .profile-section-heading,
@@ -1336,7 +1336,7 @@ body :where(button,input,select,textarea) {
     align-items: flex-start;
     flex-direction: column;
   }
-  :where(
+  .shell :is(
     .contributors-controls,
     .pi-controls,
     .battle-table-controls,
@@ -1344,7 +1344,7 @@ body :where(button,input,select,textarea) {
   ) {
     flex-wrap: wrap;
   }
-  :where(
+  .shell :is(
     .contributors-search,
     .contributors-sort,
     .contributors-page-size,
@@ -1354,17 +1354,17 @@ body :where(button,input,select,textarea) {
     min-width: 0;
     max-width: 100%;
   }
-  :where(.contributors-search input, #pi-search, #result-search) {
+  .shell :is(.contributors-search input, #pi-search, #result-search) {
     width: 100%;
     max-width: none;
   }
-  :where(.compare-form) {
+  .shell :is(.compare-form) {
     grid-template-columns: 1fr;
   }
-  :where(.compare-versus) {
+  .shell :is(.compare-versus) {
     display: none;
   }
-  :where(.compare-submit) {
+  .shell :is(.compare-submit) {
     width: 100%;
   }
 }
@@ -1373,16 +1373,16 @@ body :where(button,input,select,textarea) {
   body {
     font-size: 14px;
   }
-  :where(.contributors-summary, .achievement-summary, .profile-stats, .compare-summary-grid, .pi-hero-stats) {
+  .shell :is(.contributors-summary, .achievement-summary, .profile-stats, .compare-summary-grid, .pi-hero-stats) {
     gap: 8px;
   }
-  :where(.stat, .profile-stat, .contributors-summary-card, .achievement-summary-card, .battle-summary-card) {
+  .shell :is(.stat, .profile-stat, .contributors-summary-card, .achievement-summary-card, .battle-summary-card) {
     padding: 13px;
   }
-  :where(.contributors-table th, .contributors-table td, .pi-table th, .pi-table td, .battle-table th, .battle-table td, .compare-table th, .compare-table td, .profile-history-table th, .profile-history-table td) {
+  .shell :is(.contributors-table th, .contributors-table td, .pi-table th, .pi-table td, .battle-table th, .battle-table td, .compare-table th, .compare-table td, .profile-history-table th, .profile-history-table td) {
     padding: 10px 11px;
   }
-  :where(.battle-footer, .profile-footer, .compare-footer, .pi-footer, .contributors-footer, .achievement-footer, .hof-footer, .info-footer, .hub-footer) {
+  .shell :is(.battle-footer, .profile-footer, .compare-footer, .pi-footer, .contributors-footer, .achievement-footer, .hof-footer, .info-footer, .hub-footer) {
     gap: 8px;
   }
 }
