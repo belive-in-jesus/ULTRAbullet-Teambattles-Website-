@@ -171,6 +171,26 @@ class WebsiteAssetTests(unittest.TestCase):
                     if path is not None:
                         self.assertTrue(path.is_file(), f"{page_name} references missing asset {reference}")
 
+    def test_shared_arena_layer_unifies_all_page_component_families(self):
+        source = (DOCS / "css" / "arena-design-system.css").read_text(encoding="utf-8")
+        for selector in (
+            ".contributors-table th",
+            ".pi-table th",
+            ".battle-table th",
+            ".compare-table th",
+            ".profile-history-table th",
+            ".dashboard-card",
+            ".profile-panel",
+            ".achievement-card",
+            ".battle-results-panel",
+            ".contributors-board",
+        ):
+            self.assertIn(selector, source)
+        self.assertIn("--site-radius-md", source)
+        self.assertIn("SITE-WIDE VISUAL UNIFICATION", source)
+        self.assertIn("@media (max-width: 760px)", source)
+        self.assertIn("@media (prefers-reduced-motion: reduce)", source)
+
     def test_v2_stylesheets_have_balanced_delimiters(self):
         for filename in ("v2-visual-system.css", "arena-design-system.css", "profile.css", "profile-analytics.css", "dashboard-analytics.css", "battle.css", "performance-index.css", "compare.css", "achievements.css", "ranking-hub.css"):
             with self.subTest(stylesheet=filename):
