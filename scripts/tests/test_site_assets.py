@@ -133,6 +133,8 @@ class WebsiteAssetTests(unittest.TestCase):
             "Community",
             "Guide",
         )
+        homepage = (DOCS / "index.html").read_text(encoding="utf-8")
+        self.assertIn('id="official-community"', homepage)
         expected_links = (
             "./index.html",
             "./rankings.html",
