@@ -199,14 +199,14 @@ class WebsiteAssetTests(unittest.TestCase):
         # .shell :is(...) gives shared rules enough specificity to beat legacy
         # single-class rules, while keeping the stylesheet free of !important.
         for selector in (
-            ".shell :is(\\n  .dashboard-card",
-            ".shell :is(\\n  .stat",
-            ".shell :is(\\n  input[type=\"text\"]",
+            ".shell :is(\n  .dashboard-card",
+            ".shell :is(\n  .stat",
+            ".shell :is(\n  input[type=\"text\"]",
             ".shell :is(button, .primary-action",
-            ".shell :is(\\n  .contributors-table th",
-            ".shell :is(\\n  .contributors-table tbody tr:hover",
-            ".shell :is(\\n  .contributors-board-head",
-            ".shell :is(\\n  .empty",
+            ".shell :is(\n  .contributors-table th",
+            ".shell :is(\n  .contributors-table tbody tr:hover",
+            ".shell :is(\n  .contributors-board-head",
+            ".shell :is(\n  .empty",
         ):
             with self.subTest(selector=selector):
                 self.assertIn(selector, shared)
@@ -220,9 +220,9 @@ class WebsiteAssetTests(unittest.TestCase):
         for page_name in PAGES:
             with self.subTest(page=page_name):
                 page = (DOCS / page_name).read_text(encoding="utf-8")
-                self.assertRegex(
+                self.assertIn(
+                    '<main class="shell',
                     page,
-                    r"<main\\b[^>]*\\bclass=[\"'][^\"']*\\bshell\\b",
                     "Every public page must provide the shared shell scope.",
                 )
 
