@@ -1,24 +1,26 @@
-# Redesign wireframes — Overview and Rankings
+# Redesign preview — UltraBullet Team Battles
 
-These pages are isolated layout prototypes for the first redesign phase:
+The redesign is being developed as a visual and navigation layer for the standalone UltraBullet Team Battles leaderboard. It is not connected to UBWC 2026.
 
-- `overview.html`: a focused homepage dashboard
-- `rankings.html`: one ranking workspace with Teams, Players, Contributors and Performance Index views
-- `wireframes.css`: shared neutral, grayscale layout rules
-- `../js/redesign-wireframes.js`: preview-only tab switching
+## Preview pages
 
-## What this phase decides
+- `overview.html` — focused overview with competition snapshot, current-season progress, latest battle, short leader previews and an official-community section
+- `rankings.html` — one ranking workspace with Teams, Players, Contributors and Performance Index perspectives
+- `wireframes.css` — responsive layout and the current arena-inspired visual theme
+- `../js/redesign-wireframes.js` — preview-only tab switching
 
-The Overview is limited to the competition snapshot, season progress, latest battle, monthly activity and short leader previews. Full tables and detailed analytics are moved out of the homepage.
+## Community information
 
-The Rankings workspace uses four perspectives. Team and Player views retain all-time, monthly and 50-battle seasonal periods, minimum-battle filtering, sorting, pagination and CSV export in the eventual production implementation. Contributors keeps contribution-specific search and sort dimensions. Performance Index retains team/player selection, eligibility (10+ battles) and its component measures.
+The overview includes the current public invitation from the regular ULTRAbullet battle descriptions: the series is described as friendly and recurring, and welcomes all teams and anyone who enjoys ultrafast chess. Recent regular tournament listings show UltraBullet ¼+0, Rated Arena, 90 minutes and 20 leaders per team. These are presented as details from recent listings, not as permanent rules; each tournament page remains authoritative for its own event.
 
-## Data and implementation boundaries
+The official Lichess team and tournament archive are linked directly. The existing external website destination, `https://lichessbotacc.github.io/Gift-For-Nathanael/`, is retained and labelled as the currently linked website while the replacement project is being developed.
 
-- Displayed sample figures are from the published analytics snapshot generated on 2 November 2026.
-- Contributor table rows and detailed Performance Index component values are intentionally not fabricated in the wireframe.
-- These prototypes do not load production JSON, invoke the current ranking scripts, or modify existing application pages.
-- The prototype tabs are interactive for layout review; filters, sorting, pagination, profile links and CSV export are visual placeholders.
-- No production logic, data pipeline, existing page, or navigation entry is changed by this phase.
+## Implementation boundary
 
-The next step after layout approval is to decide responsive behaviour and component details, then migrate the existing functionality behind these approved layouts in small, testable steps.
+- The redesign preview is separate from UBWC 2026.
+- Existing production ranking, profile, analytics, contributor, archive and Performance Index functions remain untouched.
+- The website's data pipeline, aggregation scripts, scheduled workflows, JSON datasets, IDs, query parameters and CSV/export logic are not changed.
+- The production homepage receives only a new static community-information section and corresponding styles. Existing JavaScript and all current controls remain unchanged.
+- The redesign pages are layout previews; their sample figures are illustrative and are not live data.
+
+The next step is a visual review of the overview and ranking hierarchy before any further page-by-page migration.
