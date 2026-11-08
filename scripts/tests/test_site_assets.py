@@ -125,7 +125,7 @@ class WebsiteAssetTests(unittest.TestCase):
     def test_all_public_pages_share_the_same_primary_navigation(self):
         expected_links = (
             "./index.html",
-            "./index.html#leaderboard",
+            "./rankings.html",
             "./performance-index.html",
             "./analytics.html",
             "./compare.html",
@@ -146,6 +146,21 @@ class WebsiteAssetTests(unittest.TestCase):
                     "Exactly one primary navigation item must be active.",
                 )
 
+
+    def test_rankings_hub_routes_to_existing_functional_ranking_views(self):
+        source = (DOCS / "rankings.html").read_text(encoding="utf-8")
+        for href in (
+            "./index.html#leaderboard",
+            "./contributors.html",
+            "./performance-index.html",
+            "./compare.html",
+        ):
+            self.assertIn(f'href="{href}"', source)
+        self.assertIn("Choose Teams or Players above the table.", source)
+        self.assertIn("At least 10 ranked battle results", source)
+        self.assertNotIn("<input", source)
+        self.assertNotIn("<select", source)
+
     def test_local_stylesheets_and_scripts_exist(self):
         for page_name in PAGES:
             with self.subTest(page=page_name):
@@ -157,7 +172,7 @@ class WebsiteAssetTests(unittest.TestCase):
                         self.assertTrue(path.is_file(), f"{page_name} references missing asset {reference}")
 
     def test_v2_stylesheets_have_balanced_delimiters(self):
-        for filename in ("v2-visual-system.css", "arena-design-system.css", "profile.css", "profile-analytics.css", "dashboard-analytics.css", "battle.css", "performance-index.css", "compare.css", "achievements.css"):
+        for filename in ("v2-visual-system.css", "arena-design-system.css", "profile.css", "profile-analytics.css", "dashboard-analytics.css", "battle.css", "performance-index.css", "compare.css", "achievements.css", "ranking-hub.css"):
             with self.subTest(stylesheet=filename):
                 source = (DOCS / "css" / filename).read_text(encoding="utf-8")
                 self.assertTrue(
