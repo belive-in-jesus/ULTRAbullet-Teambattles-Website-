@@ -694,7 +694,8 @@ body .shell :is(button,input,select,textarea) {
   letter-spacing: -.04em;
 }
 
-/* Shared surfaces: the same material language across every section. */
+/* Shared surfaces: the same material language across every section.
+   Gold Hall of Fame cards and Guide period cards retain their page-specific accents. */
 .shell :is(
   .dashboard-card,
   .global-analytics-panel,
@@ -718,13 +719,10 @@ body .shell :is(button,input,select,textarea) {
   .contributor-podium-card,
   .achievement-summary-card,
   .achievement-card,
-  .hof-stat,
   .hof-panel,
-  .period-item,
   .info-card,
   .battle-summary-card,
   .battle-results-panel,
-  .record-group,
   .hub-hero-note
 ) {
   border-color: var(--arena-line);
@@ -752,14 +750,11 @@ body .shell :is(button,input,select,textarea) {
   .contributor-podium-card,
   .achievement-summary-card,
   .achievement-card,
-  .hof-stat,
   .hof-panel,
-  .period-item,
   .info-card,
   .battle-summary-card,
   .battle-results-panel,
-  .record-group
-) {
+ ) {
   background: var(--site-panel-bg);
 }
 
