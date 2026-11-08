@@ -216,6 +216,10 @@ class WebsiteAssetTests(unittest.TestCase):
         self.assertEqual(shared.count(":where("), 1)
         self.assertIn(":where(*, *::before, *::after)", shared)
         self.assertNotIn("!important", shared)
+        self.assertNotIn("  .hof-stat,", shared)
+        self.assertNotIn("  .period-item,", shared)
+        self.assertNotIn("  .record-group,", shared)
+        self.assertNotIn("  .record-group\\n)", shared)
 
         for page_name in PAGES:
             with self.subTest(page=page_name):
