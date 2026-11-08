@@ -191,6 +191,45 @@ class WebsiteAssetTests(unittest.TestCase):
         self.assertIn("@media (max-width: 760px)", source)
         self.assertIn("@media (prefers-reduced-motion: reduce)", source)
 
+    def test_shared_design_layer_has_cascade_priority_over_legacy_page_css(self):
+        source = (DOCS / "css" / "arena-design-system.css").read_text(encoding="utf-8")
+        shared = source.split("SITE-WIDE VISUAL UNIFICATION", 1)[1]
+
+        # Components are rendered inside the shared .shell wrapper on every page.
+        # .shell :is(...) gives shared rules enough specificity to beat legacy
+        # single-class rules, while keeping the stylesheet free of !important.
+        for selector in (
+            ".shell :is(\n  .dashboard-card",
+            ".shell :is(\n  .stat",
+            ".shell :is(\n  input[type=\"text\"]",
+            ".shell :is(button, .primary-action",
+            ".shell :is(\n  .contributors-table th",
+            ".shell :is(\n  .contributors-table tbody tr:hover",
+            ".shell :is(\n  .contributors-board-head",
+            ".shell :is(\n  .empty",
+        ):
+            with self.subTest(selector=selector):
+                self.assertIn(selector, shared)
+
+        # :where() remains only for the global reduced-motion reset. Shared
+        # component rules must not silently fall back to zero specificity.
+        self.assertEqual(shared.count(":where("), 1)
+        self.assertIn(":where(*, *::before, *::after)", shared)
+        component_rules = shared.split("@media (prefers-reduced-motion: reduce)", 1)[0]
+        self.assertNotIn("!important", component_rules)
+        self.assertNotIn("  .hof-stat,", shared)
+        self.assertNotIn("  .period-item,", shared)
+        self.assertNotIn("  .record-group,", shared)
+
+        for page_name in PAGES:
+            with self.subTest(page=page_name):
+                page = (DOCS / page_name).read_text(encoding="utf-8")
+                self.assertIn(
+                    '<main class="shell',
+                    page,
+                    "Every public page must provide the shared shell scope.",
+                )
+
     def test_v2_stylesheets_have_balanced_delimiters(self):
         for filename in ("v2-visual-system.css", "arena-design-system.css", "profile.css", "profile-analytics.css", "dashboard-analytics.css", "battle.css", "performance-index.css", "compare.css", "achievements.css", "ranking-hub.css"):
             with self.subTest(stylesheet=filename):
