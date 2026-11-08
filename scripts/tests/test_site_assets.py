@@ -157,7 +157,7 @@ class WebsiteAssetTests(unittest.TestCase):
         ):
             self.assertIn(f'href="{href}"', source)
         self.assertIn("Choose Teams or Players above the table.", source)
-        self.assertIn("At least 10 ranked battle results", source)
+        self.assertIn("at least 10 ranked battle results", source)
         self.assertNotIn("<input", source)
         self.assertNotIn("<select", source)
 
