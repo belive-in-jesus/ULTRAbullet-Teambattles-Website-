@@ -3,13 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#f0f2f4">
-  <meta name="description" content="Structural wireframe for the redesigned UltraBullet Team Battles overview page.">
-  <title>Overview Wireframe — UltraBullet Team Battles</title>
+  <meta name="theme-color" content="#08111d">
+  <meta name="description" content="Visual redesign preview for the standalone UltraBullet Team Battles community leaderboard.">
+  <title>Overview Preview — UltraBullet Team Battles</title>
   <link rel="stylesheet" href="./wireframes.css">
 </head>
 <body>
-  <div class="preview-banner">Redesign wireframe · 01 / Overview <span>Layout concept only — the live homepage and all current features remain unchanged.</span></div>
+  <div class="preview-banner">Redesign wireframe · 01 / Overview <span>Visual redesign preview · the live data and existing site features remain unchanged.</span></div>
   <div class="shell">
     <header class="topbar">
       <a class="brand" href="./overview.html" aria-label="UltraBullet Team Battles redesign overview">
@@ -19,6 +19,7 @@
       <nav class="main-nav" aria-label="Redesign preview navigation">
         <a href="./overview.html" aria-current="page">Overview</a>
         <a href="./rankings.html">Rankings</a>
+        <a href="#community">Community</a>
         <a href="../analytics.html">Analysis ↗</a>
         <a href="../records.html">History ↗</a>
         <a href="../information.html">Guide ↗</a>
@@ -29,7 +30,7 @@
       <section class="page-intro">
         <div>
           <span class="eyebrow">Competitive overview</span>
-          <h1>Every battle. One competitive picture.</h1>
+          <h1>Every battle.<br><span>One competitive picture.</span></h1>
           <p>A focused snapshot of the UltraBullet Team Battles: the size of the archive, the current season, recent activity and the leading competitors. Detailed exploration starts in Rankings and the specialist areas.</p>
         </div>
         <div class="intro-actions">
@@ -169,8 +170,49 @@
         </div>
       </section>
 
+      <section class="community-section" id="community" aria-labelledby="community-heading">
+        <div class="section-head">
+          <div>
+            <span class="eyebrow">Official community</span>
+            <h2 id="community-heading">The people behind the battles</h2>
+            <p>Find the official Lichess team, explore the recurring tournament series and reach the website that is currently linked from its event descriptions.</p>
+          </div>
+          <a class="action primary" href="https://lichess.org/team/official-ultrabullet-teambattles" target="_blank" rel="noopener noreferrer">Official Lichess team <span aria-hidden="true">↗</span></a>
+        </div>
+        <div class="community-grid">
+          <article class="panel community-main">
+            <div class="community-panel-head">
+              <span class="eyebrow">About the series</span>
+              <span class="panel-tag">Official Lichess battles</span>
+            </div>
+            <h3>Fast, friendly and open to all teams.</h3>
+            <p>The current event description welcomes all teams to the recurring ULTRAbullet battles. Competitive squads, casual groups and anyone who enjoys ultrafast chess are invited to take part.</p>
+            <div class="community-facts" aria-label="Format shown in recent regular battle listings">
+              <div><span>Variant</span><strong>UltraBullet · ¼+0</strong></div>
+              <div><span>Format</span><strong>Rated Arena</strong></div>
+              <div><span>Duration</span><strong>90 minutes</strong></div>
+              <div><span>Team entry</span><strong>20 leaders</strong></div>
+            </div>
+            <p class="community-source">These are details shown in recent regular-battle listings; always check the individual Lichess tournament for the applicable format and rules.</p>
+          </article>
+          <aside class="panel community-links" aria-label="Official links">
+            <span class="eyebrow">Explore the community</span>
+            <a class="community-link" href="https://lichess.org/team/official-ultrabullet-teambattles" target="_blank" rel="noopener noreferrer">
+              <span><strong>Official team page</strong><small>Visit the team on Lichess</small></span><b aria-hidden="true">↗</b>
+            </a>
+            <a class="community-link" href="https://lichess.org/team/official-ultrabullet-teambattles/tournaments" target="_blank" rel="noopener noreferrer">
+              <span><strong>Tournament archive</strong><small>Upcoming and completed battles</small></span><b aria-hidden="true">↗</b>
+            </a>
+            <a class="community-link" href="https://lichessbotacc.github.io/Gift-For-Nathanael/" target="_blank" rel="noopener noreferrer">
+              <span><strong>Currently linked website</strong><small>Existing external destination</small></span><b aria-hidden="true">↗</b>
+            </a>
+            <p class="community-note">The current external website destination is intentionally retained while the new website project is being developed. This project remains independent.</p>
+          </aside>
+        </div>
+      </section>
+
       <footer class="footer">
-        <span>UltraBullet Team Battles · Overview layout concept</span>
+        <span>UltraBullet Team Battles · Overview redesign preview</span>
         <span>Production homepage has not been changed.</span>
       </footer>
     </main>
