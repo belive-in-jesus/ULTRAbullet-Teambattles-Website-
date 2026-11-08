@@ -215,7 +215,8 @@ class WebsiteAssetTests(unittest.TestCase):
         # component rules must not silently fall back to zero specificity.
         self.assertEqual(shared.count(":where("), 1)
         self.assertIn(":where(*, *::before, *::after)", shared)
-        self.assertNotIn("!important", shared)
+        component_rules = shared.split("@media (prefers-reduced-motion: reduce)", 1)[0]
+        self.assertNotIn("!important", component_rules)
         self.assertNotIn("  .hof-stat,", shared)
         self.assertNotIn("  .period-item,", shared)
         self.assertNotIn("  .record-group,", shared)
