@@ -753,8 +753,8 @@ body .shell :is(button,input,select,textarea) {
   .hof-panel,
   .info-card,
   .battle-summary-card,
-  .battle-results-panel,
- ) {
+  .battle-results-panel
+) {
   background: var(--site-panel-bg);
 }
 
