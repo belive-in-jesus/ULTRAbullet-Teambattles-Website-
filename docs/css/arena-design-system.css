@@ -544,3 +544,853 @@ button:disabled { cursor: not-allowed; }
   background: rgba(223, 187, 123, .10);
   color: #f2d7a8;
 }
+
+
+/* -------------------------------------------------------------------------
+   SITE-WIDE VISUAL UNIFICATION
+   Shared presentation layer for every public page. This block deliberately
+   changes appearance only: it does not change selectors, IDs, data hooks,
+   table structure, URLs, or interaction states used by application scripts.
+   ------------------------------------------------------------------------- */
+
+:root {
+  --bg: var(--arena-bg);
+  --surface: var(--arena-panel);
+  --surface-raised: var(--arena-panel-strong);
+  --line: var(--arena-line);
+  --text: var(--arena-text);
+  --muted: var(--arena-muted);
+  --accent: var(--arena-cyan);
+  --cyan: var(--arena-cyan);
+  --gold: var(--arena-gold);
+  --panel: var(--arena-panel);
+  --font-sans: var(--arena-sans);
+  --font-mono: var(--arena-mono);
+  --site-radius-sm: 9px;
+  --site-radius-md: 13px;
+  --site-radius-lg: 16px;
+  --site-border: 1px solid var(--arena-line);
+  --site-panel-bg: linear-gradient(145deg, rgba(18,36,55,.92), rgba(10,21,35,.94));
+  --site-panel-shadow: inset 0 1px 0 rgba(255,255,255,.03), 0 14px 36px rgba(0,0,0,.13);
+}
+
+html {
+  color-scheme: dark;
+  scroll-behavior: smooth;
+  scroll-padding-top: 116px;
+}
+
+body {
+  color: var(--arena-text);
+  font-family: var(--arena-sans);
+  font-size: 15px;
+  line-height: 1.62;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+body :where(h1,h2,h3,h4) {
+  text-wrap: balance;
+}
+
+body :where(p,li) {
+  text-wrap: pretty;
+}
+
+body :where(a) {
+  text-underline-offset: 3px;
+}
+
+body :where(button,input,select,textarea) {
+  font-family: var(--arena-sans);
+}
+
+.shell {
+  width: min(1380px, calc(100% - 56px));
+}
+
+/* One consistent content rhythm across overview, hubs, reports and profiles. */
+:where(
+  .hero,
+  .hub-hero,
+  .rank-hero,
+  .contributors-hero,
+  .profile-hero,
+  .compare-hero,
+  .pi-hero,
+  .battle-hero,
+  .achievements-hero,
+  .hof-hero,
+  .info-hero
+) {
+  scroll-margin-top: 124px;
+}
+
+:where(
+  .hero h1,
+  .hub-hero h1,
+  .rank-hero h1,
+  .contributors-hero h1,
+  .profile-hero h1,
+  .compare-hero h1,
+  .pi-hero h1,
+  .battle-hero h1,
+  .achievements-hero h1,
+  .hof-hero h1,
+  .info-hero h1
+) {
+  color: #f3f7fb;
+  font-family: var(--arena-display);
+  font-weight: 750;
+  line-height: .99;
+  letter-spacing: -.065em;
+  overflow-wrap: anywhere;
+}
+
+:where(
+  .hero .lede,
+  .hub-hero p,
+  .rank-hero-copy p,
+  .contributors-lede,
+  .profile-hero .lede,
+  .compare-hero p,
+  .pi-hero > p,
+  .battle-hero p,
+  .achievements-hero p,
+  .hof-hero p,
+  .info-hero p
+) {
+  color: #a2b5c6;
+  font-size: .86rem;
+  line-height: 1.82;
+}
+
+:where(
+  .section-heading,
+  .contributors-section-heading,
+  .achievement-section,
+  .profile-section,
+  .global-analytics,
+  .home-pathways,
+  .rank-method
+) {
+  scroll-margin-top: 126px;
+}
+
+:where(
+  .section-heading h2,
+  .contributors-section-heading h2,
+  .achievement-section h2,
+  .profile-section-heading h2,
+  .global-analytics-heading h2,
+  .global-analytics-panel-head h3,
+  .compare-panel-heading h2,
+  .pi-panel-heading h2,
+  .rank-method-heading h2
+) {
+  color: #edf5fa;
+  font-family: var(--arena-display);
+  font-weight: 700;
+  letter-spacing: -.04em;
+}
+
+/* Shared surfaces: the same material language across every section. */
+:where(
+  .dashboard-card,
+  .global-analytics-panel,
+  .compare-form-panel,
+  .compare-panel,
+  .compare-identity,
+  .compare-metric,
+  .compare-pi-card,
+  .profile-identity-card,
+  .profile-stat,
+  .profile-record,
+  .profile-panel,
+  .pi-panel,
+  .pi-method,
+  .pi-profile-card,
+  .performance-index-panel,
+  .pi-table-wrap,
+  .contributors-hero-note,
+  .contributors-summary-card,
+  .contributors-board,
+  .contributor-podium-card,
+  .achievement-summary-card,
+  .achievement-card,
+  .hof-stat,
+  .hof-panel,
+  .period-item,
+  .info-card,
+  .battle-summary-card,
+  .battle-results-panel,
+  .record-group,
+  .hub-hero-note
+) {
+  border-color: var(--arena-line);
+  border-radius: var(--site-radius-lg);
+  box-shadow: var(--site-panel-shadow);
+}
+
+:where(
+  .dashboard-card,
+  .global-analytics-panel,
+  .compare-form-panel,
+  .compare-panel,
+  .compare-identity,
+  .compare-metric,
+  .compare-pi-card,
+  .profile-stat,
+  .profile-record,
+  .profile-panel,
+  .pi-panel,
+  .pi-method,
+  .performance-index-panel,
+  .contributors-hero-note,
+  .contributors-summary-card,
+  .contributors-board,
+  .contributor-podium-card,
+  .achievement-summary-card,
+  .achievement-card,
+  .hof-stat,
+  .hof-panel,
+  .period-item,
+  .info-card,
+  .battle-summary-card,
+  .battle-results-panel,
+  .record-group
+) {
+  background: var(--site-panel-bg);
+}
+
+:where(
+  .dashboard-card,
+  .global-analytics-panel,
+  .compare-form-panel,
+  .compare-panel,
+  .profile-panel,
+  .pi-panel,
+  .pi-method,
+  .performance-index-panel,
+  .contributors-board,
+  .battle-results-panel
+) {
+  overflow: hidden;
+}
+
+:where(
+  .dashboard-card,
+  .global-analytics-panel,
+  .compare-form-panel,
+  .compare-panel,
+  .profile-panel,
+  .pi-panel,
+  .pi-method,
+  .contributors-board,
+  .battle-results-panel
+) {
+  padding: clamp(16px, 2.2vw, 23px);
+}
+
+:where(
+  .stat,
+  .global-analytics-stat,
+  .profile-stat,
+  .contributors-summary-card,
+  .achievement-summary-card,
+  .battle-summary-card,
+  .pi-hero-stats > div,
+  .compare-metric
+) {
+  border: var(--site-border);
+  border-radius: var(--site-radius-md);
+  background: linear-gradient(145deg, rgba(20,39,59,.88), rgba(10,21,35,.91));
+}
+
+:where(
+  .stat-label,
+  .global-analytics-stat > span,
+  .profile-stat span,
+  .profile-stat small,
+  .contributors-summary-card span,
+  .achievement-summary-card span,
+  .battle-summary-card span,
+  .pi-hero-stats span,
+  .compare-metric span
+) {
+  color: #9db1c2;
+  font-size: .66rem;
+  letter-spacing: .025em;
+}
+
+:where(
+  .stat-value,
+  .global-analytics-stat strong,
+  .profile-stat strong,
+  .contributors-summary-card strong,
+  .achievement-summary-card strong,
+  .battle-summary-card strong,
+  .pi-hero-stats strong,
+  .compare-metric strong
+) {
+  color: #f1f6fa;
+  font-family: var(--arena-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Data controls share one height, border, surface and focus treatment. */
+:where(
+  input[type="text"],
+  input[type="search"],
+  input[type="number"],
+  input[type="email"],
+  select,
+  textarea,
+  .select-input,
+  .search input,
+  .contributors-search input,
+  .compare-form input,
+  #pi-search,
+  #result-search
+) {
+  min-height: 40px;
+  border: 1px solid rgba(135,165,193,.24);
+  border-radius: 9px;
+  background: #091625;
+  color: #edf5f9;
+  font: 500 .73rem var(--arena-sans);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.018);
+}
+
+:where(
+  input[type="text"],
+  input[type="search"],
+  input[type="number"],
+  input[type="email"],
+  textarea,
+  .search input,
+  .contributors-search input,
+  .compare-form input,
+  #pi-search,
+  #result-search
+)::placeholder {
+  color: #7890a5;
+  opacity: 1;
+}
+
+:where(
+  input[type="text"],
+  input[type="search"],
+  input[type="number"],
+  input[type="email"],
+  select,
+  textarea,
+  .select-input,
+  .search input,
+  .contributors-search input,
+  .compare-form input,
+  #pi-search,
+  #result-search
+):focus {
+  border-color: rgba(112,220,229,.6);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(112,220,229,.09);
+}
+
+:where(button, .primary-action, .secondary-action, .filter-button, .compare-submit, .battle-more-button, .page-button, .pi-pagination button, .contributors-pagination button, .profile-actions button, .profile-actions a) {
+  border-radius: 9px;
+  font-family: var(--arena-sans);
+  font-weight: 750;
+  transition: color .16s ease, background .16s ease, border-color .16s ease, transform .16s ease, box-shadow .16s ease;
+}
+
+:where(
+  .secondary-action,
+  .filter-button,
+  .battle-more-button,
+  .page-button,
+  .pi-pagination button,
+  .contributors-pagination button,
+  .profile-actions .secondary-action,
+  .chart-mode-button,
+  .battle-view-button,
+  .pi-switch button,
+  .compare-kind button,
+  .segmented button
+) {
+  border: 1px solid rgba(135,165,193,.24);
+  border-radius: 8px;
+  background: rgba(255,255,255,.025);
+  color: #c4d2de;
+}
+
+:where(
+  .secondary-action,
+  .filter-button,
+  .battle-more-button,
+  .page-button,
+  .pi-pagination button,
+  .contributors-pagination button,
+  .profile-actions .secondary-action,
+  .chart-mode-button,
+  .battle-view-button,
+  .pi-switch button,
+  .compare-kind button,
+  .segmented button
+):hover:not(:disabled) {
+  border-color: rgba(112,220,229,.34);
+  background: rgba(112,220,229,.065);
+  color: #f2fbfd;
+}
+
+:where(
+  .primary-action,
+  .compare-submit
+) {
+  border: 1px solid rgba(112,220,229,.36);
+  border-radius: 9px;
+  background: linear-gradient(110deg, #246f7d, #405f9b);
+  color: #f4fbfc;
+  box-shadow: 0 8px 22px rgba(26,105,126,.16);
+}
+
+:where(.primary-action, .compare-submit):hover:not(:disabled) {
+  transform: translateY(-1px);
+  border-color: rgba(112,220,229,.58);
+  background: linear-gradient(110deg, #2b8490, #4b6ca8);
+  box-shadow: 0 11px 26px rgba(26,105,126,.22);
+}
+
+:where(button, input, select, textarea, a) {
+  -webkit-tap-highlight-color: transparent;
+}
+
+:where(button, input, select, textarea, a, [tabindex]):focus-visible {
+  outline: 2px solid var(--arena-cyan);
+  outline-offset: 3px;
+}
+
+:where(button:disabled, .contributors-pagination button:disabled, .pi-pagination button:disabled, .page-button:disabled) {
+  cursor: not-allowed;
+  opacity: .42;
+}
+
+/* Segmented controls always communicate the selected view consistently. */
+:where(
+  .segmented,
+  .pi-switch,
+  .chart-mode-switch,
+  .battle-view-switch,
+  .compare-kind
+) {
+  border: 1px solid rgba(135,165,193,.2);
+  border-radius: 10px;
+  background: rgba(6,15,26,.74);
+}
+
+:where(
+  .segmented button.active,
+  .pi-switch button.active,
+  .chart-mode-button.active,
+  .battle-view-button.active,
+  .compare-kind button.active
+) {
+  border-color: rgba(112,220,229,.28);
+  border-radius: 7px;
+  background: linear-gradient(110deg, rgba(39,126,139,.82), rgba(68,91,151,.84));
+  color: #f5fbfd;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.05), 0 4px 12px rgba(31,103,127,.13);
+}
+
+/* Unified table grammar, without changing row or column behaviour. */
+:where(
+  .contributors-table,
+  .pi-table,
+  .battle-table,
+  .compare-table,
+  .profile-history-table,
+  .analytics-season-table,
+  .pi-history-table
+) {
+  border-collapse: collapse;
+  color: #dce7ef;
+  font-variant-numeric: tabular-nums;
+}
+
+:where(
+  .contributors-table th,
+  .pi-table th,
+  .battle-table th,
+  .compare-table th,
+  .profile-history-table th,
+  .analytics-season-table th,
+  .pi-history-table th
+) {
+  padding: 12px 14px;
+  border-bottom: 1px solid rgba(142,170,196,.18);
+  background: #14253a;
+  color: #9bb0c2;
+  font-family: var(--arena-mono);
+  font-size: .57rem;
+  font-weight: 500;
+  letter-spacing: .095em;
+  line-height: 1.45;
+  text-transform: uppercase;
+}
+
+:where(
+  .contributors-table td,
+  .pi-table td,
+  .battle-table td,
+  .compare-table td,
+  .profile-history-table td,
+  .analytics-season-table td,
+  .pi-history-table td
+) {
+  padding: 12px 14px;
+  border-top: 1px solid rgba(142,170,196,.105);
+  color: #d2dfe8;
+  font-size: .71rem;
+  line-height: 1.55;
+}
+
+:where(
+  .contributors-table tbody tr,
+  .pi-table tbody tr,
+  .battle-table tbody tr,
+  .compare-table tbody tr,
+  .profile-history-table tbody tr,
+  .analytics-season-table tbody tr,
+  .pi-history-table tbody tr
+) {
+  transition: background .14s ease;
+}
+
+:where(
+  .contributors-table tbody tr:hover,
+  .pi-table tbody tr:hover,
+  .battle-table tbody tr:hover,
+  .compare-table tbody tr:hover,
+  .profile-history-table tbody tr:hover,
+  .analytics-season-table tbody tr:hover,
+  .pi-history-table tbody tr:hover
+) {
+  background: rgba(112,220,229,.045);
+}
+
+:where(
+  .contributors-table-wrap,
+  .pi-table-wrap,
+  .battle-table-wrap,
+  .compare-table-wrap,
+  .profile-history-table-wrap,
+  .analytics-table-wrap,
+  .pi-history-table-wrap
+) {
+  max-width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-color: #34516a #0b1726;
+  scrollbar-width: thin;
+}
+
+:where(.contributors-table, .pi-table, .battle-table, .compare-table, .profile-history-table, .analytics-season-table, .pi-history-table) a {
+  color: var(--arena-cyan);
+  text-decoration: none;
+}
+
+:where(.contributors-table, .pi-table, .battle-table, .compare-table, .profile-history-table, .analytics-season-table, .pi-history-table) a:hover {
+  color: #b4f1f1;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* Section headers and helper text use shared spacing and contrast. */
+:where(
+  .contributors-board-head,
+  .contributors-section-heading,
+  .achievement-section-heading,
+  .profile-section-heading,
+  .global-analytics-heading,
+  .compare-panel-heading,
+  .pi-panel-heading,
+  .battle-results-heading,
+  .section-heading,
+  .hub-section-heading
+) {
+  gap: 14px;
+}
+
+:where(
+  .contributors-board-head p,
+  .contributors-section-note,
+  .section-description,
+  .profile-section-note,
+  .dashboard-sub,
+  .global-analytics-caption,
+  .global-analytics-legend,
+  .pi-footnote,
+  .pi-method-note,
+  .compare-hint,
+  .compare-message,
+  .battle-panel-footer,
+  .battle-footer,
+  .contributors-footer
+) {
+  color: #91a7ba;
+  font-size: .68rem;
+  line-height: 1.72;
+}
+
+:where(
+  .contributors-board-count,
+  .contributors-hero-meta,
+  .pi-count,
+  .compare-count,
+  .battle-result-count,
+  .dashboard-status,
+  .pill
+) {
+  font-family: var(--arena-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* State messages: loading, empty, warning and errors remain distinguishable. */
+:where(
+  .empty,
+  .global-analytics-empty,
+  .profile-empty,
+  .loading-state,
+  .empty-state,
+  .achievement-loading,
+  .contributors-loading,
+  .battle-empty,
+  .pi-message
+) {
+  color: #9aafc1;
+  line-height: 1.7;
+}
+
+:where(.battle-status, .profile-feedback, .compare-message, .pi-message) {
+  border-radius: 10px;
+  line-height: 1.7;
+}
+
+:where(.battle-status, .profile-feedback) {
+  border-color: rgba(135,165,193,.2);
+  background: rgba(255,255,255,.025);
+}
+
+:where(.battle-status.error, .profile-feedback.error, .compare-message.error, .pi-message.error) {
+  border-color: rgba(242,132,149,.35);
+  background: rgba(170,57,77,.09);
+  color: #ffc0c9;
+}
+
+/* Badges, notes and small metadata keep the same restrained treatment. */
+:where(
+  .pill,
+  .contributors-board-count,
+  .contributors-live-mark,
+  .dashboard-status,
+  .battle-result-count,
+  .pi-count,
+  .compare-count,
+  .profile-section-note
+) {
+  letter-spacing: .045em;
+}
+
+:where(
+  .hub-note-panel,
+  .info-callout,
+  .battle-status,
+  .context-note,
+  .rank-profile-callout
+) {
+  border-radius: 12px;
+}
+
+:where(
+  .hub-footer,
+  .profile-footer,
+  .compare-footer,
+  .hof-footer,
+  .info-footer,
+  .pi-footer,
+  .battle-footer,
+  .achievement-footer,
+  .contributors-footer,
+  .rank-footer
+) {
+  border-top-color: var(--arena-line);
+  color: #849bad;
+  font-size: .67rem;
+  line-height: 1.7;
+}
+
+:where(
+  .hub-footer a,
+  .profile-footer a,
+  .compare-footer a,
+  .hof-footer a,
+  .info-footer a,
+  .pi-footer a,
+  .battle-footer a,
+  .achievement-footer a,
+  .contributors-footer a,
+  .rank-footer a
+) {
+  color: #b4c8d8;
+  text-decoration: none;
+}
+
+:where(
+  .hub-footer a:hover,
+  .profile-footer a:hover,
+  .compare-footer a:hover,
+  .hof-footer a:hover,
+  .info-footer a:hover,
+  .pi-footer a:hover,
+  .battle-footer a:hover,
+  .achievement-footer a:hover,
+  .contributors-footer a:hover,
+  .rank-footer a:hover
+) {
+  color: var(--arena-cyan);
+  text-decoration: underline;
+}
+
+/* Page-specific corrections that bring specialist pages into the same system. */
+.page-contributors :where(.contributors-hero-note, .contributors-board, .contributor-podium-card) {
+  border-radius: var(--site-radius-lg);
+}
+.page-contributors .contributors-table-wrap,
+.page-profile .profile-history-table-wrap {
+  border-radius: 0 0 var(--site-radius-md) var(--site-radius-md);
+}
+.page-achievements :where(.achievement-card, .achievement-summary-card) {
+  border-radius: var(--site-radius-md);
+}
+.page-battle .battle-results-panel {
+  border-radius: var(--site-radius-lg);
+}
+.page-profile :where(.profile-stat, .profile-record, .profile-panel, .profile-identity-card) {
+  border-radius: var(--site-radius-md);
+}
+.page-hall-of-fame :where(.hof-stat, .period-item) {
+  border-radius: var(--site-radius-md);
+}
+.page-information .info-card {
+  border-radius: var(--site-radius-md);
+}
+.page-dashboard :where(.dashboard-card, .global-analytics-panel, .history-panel, .board) {
+  border-radius: var(--site-radius-md);
+}
+.page-ranking-hub :where(.rank-card, .rank-method, .rank-profile-callout) {
+  border-radius: var(--site-radius-lg);
+}
+
+/* Responsive consistency: keep dense controls usable and cards aligned. */
+@media (max-width: 1120px) {
+  .shell {
+    width: min(100% - 40px, 1380px);
+  }
+  :where(.contributors-hero, .profile-hero, .rank-hero, .hub-hero) {
+    gap: 22px;
+  }
+}
+
+@media (max-width: 760px) {
+  .shell {
+    width: min(100% - 28px, 1380px);
+  }
+  :where(
+    .contributors-summary,
+    .achievement-summary,
+    .profile-stats,
+    .battle-summary,
+    .compare-summary-grid,
+    .pi-hero-stats
+  ) {
+    grid-template-columns: repeat(2, minmax(0,1fr));
+  }
+  :where(
+    .contributors-hero,
+    .profile-hero,
+    .compare-identities,
+    .compare-pi-grid,
+    .battle-summary
+  ) {
+    grid-template-columns: 1fr;
+  }
+  :where(
+    .contributors-board-head,
+    .contributors-section-heading,
+    .profile-section-heading,
+    .global-analytics-heading,
+    .compare-panel-heading,
+    .pi-panel-heading,
+    .battle-results-heading
+  ) {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  :where(
+    .contributors-controls,
+    .pi-controls,
+    .battle-table-controls,
+    .history-controls
+  ) {
+    flex-wrap: wrap;
+  }
+  :where(
+    .contributors-search,
+    .contributors-sort,
+    .contributors-page-size,
+    .pi-search-label,
+    .analytics-range-control
+  ) {
+    min-width: 0;
+    max-width: 100%;
+  }
+  :where(.contributors-search input, #pi-search, #result-search) {
+    width: 100%;
+    max-width: none;
+  }
+  :where(.compare-form) {
+    grid-template-columns: 1fr;
+  }
+  :where(.compare-versus) {
+    display: none;
+  }
+  :where(.compare-submit) {
+    width: 100%;
+  }
+}
+
+@media (max-width: 520px) {
+  body {
+    font-size: 14px;
+  }
+  :where(.contributors-summary, .achievement-summary, .profile-stats, .compare-summary-grid, .pi-hero-stats) {
+    gap: 8px;
+  }
+  :where(.stat, .profile-stat, .contributors-summary-card, .achievement-summary-card, .battle-summary-card) {
+    padding: 13px;
+  }
+  :where(.contributors-table th, .contributors-table td, .pi-table th, .pi-table td, .battle-table th, .battle-table td, .compare-table th, .compare-table td, .profile-history-table th, .profile-history-table td) {
+    padding: 10px 11px;
+  }
+  :where(.battle-footer, .profile-footer, .compare-footer, .pi-footer, .contributors-footer, .achievement-footer, .hof-footer, .info-footer, .hub-footer) {
+    gap: 8px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :where(*, *::before, *::after) {
+    scroll-behavior: auto !important;
+    animation-duration: .01ms !important;
+    transition-duration: .01ms !important;
+  }
+}
