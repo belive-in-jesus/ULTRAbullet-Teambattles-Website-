@@ -170,7 +170,7 @@ test("full player-profile startup renders every new analytics module", async () 
   assert.match(elements.get("profile-pi-card").innerHTML, /82.4/);
   assert.match(elements.get("profile-chart").innerHTML, /<svg/);
   elements.get("chart-mode-rank").listeners.click();
-  assert.match(elements.get("profile-chart").innerHTML, /All-time place over time/);
+  assert.match(elements.get("profile-chart").innerHTML, /All-time place history/);
   assert.match(elements.get("profile-chart").innerHTML, /After Battle 643/);
   assert.equal(elements.get("chart-mode-rank").attributes["aria-pressed"], "true");
   elements.get("chart-mode-score").listeners.click();
