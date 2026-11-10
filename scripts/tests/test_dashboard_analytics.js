@@ -126,8 +126,8 @@ test("Performance Index leader lists use official ranks and link to profiles", (
   assert.match(html, /profile.html\?type=player&amp;id=top-player|profile.html\?type=player&id=top-player/);
   assert.match(html, /#1/);
   assert.match(html, /93.6/);
-  assert.match(html, /25 ranked battles/);
-  assert.match(analytics.performanceIndexList([], "team"), /No officially eligible Performance Index results/);
+  assert.match(html, /25 battles counted/);
+  assert.match(analytics.performanceIndexList([], "team"), /No Performance Index results are ready yet/);
 });
 
 test("leader and record names are escaped before entering dashboard markup", () => {
