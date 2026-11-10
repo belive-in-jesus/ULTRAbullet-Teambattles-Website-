@@ -23,14 +23,14 @@
     const row=comp.entry;
     if(row.performance_index==null)return '<article class="compare-pi-card"><h3>'+esc(comp.name)+'</h3><strong>—</strong><small>PI not available yet</small><p>The index will appear after the next data update.</p></article>';
     const eligible=Boolean(row.performance_index_eligible)&&row.performance_index_rank!=null;
-    return '<article class="compare-pi-card"><h3>'+esc(comp.name)+'</h3><strong>'+fmt(row.performance_index)+'</strong><small>Performance Index · '+(eligible?"Rank #"+esc(row.performance_index_rank):"Not ranked yet")+'</small><p>'+esc(row.performance_index_battles||0)+' ranked battle results</p></article>';
+    return '<article class="compare-pi-card"><h3>'+esc(comp.name)+'</h3><strong>'+fmt(row.performance_index)+'</strong><small>Performance Index · '+(eligible?"Rank #"+esc(row.performance_index_rank):"Not ranked yet")+'</small><p>'+esc(row.performance_index_battles||0)+' counted battles</p></article>';
   }
   function renderPiHistory(a,b){
     const rows=window.UBTCompareCore.comparePerformanceIndexHistories(
       a.entry.performance_index_history,
       b.entry.performance_index_history
     );
-    $("pi-history-name-a").textContent=a.name+" · Career PI / rank / season PI";
+    $("pi-history-name-a").textContent=a.name+" · All-time PI / place / season PI";
     $("pi-history-name-b").textContent=b.name+" · Career PI / rank / season PI";
     if(!rows.length){
       $("compare-pi-history").innerHTML='<tr><td colspan="3" class="compare-message">Past PI data will appear after the next full data update.</td></tr>';
@@ -75,7 +75,7 @@
       return '<tr><td><a href="'+link+'" target="_blank" rel="noopener noreferrer">'+esc(battle)+'</a></td><td>'+esc(date)+'</td><td>'+fmt(sa)+' · #'+fmt(row.a.rank)+'</td><td>'+fmt(sb)+' · #'+fmt(row.b.rank)+'</td><td>'+result+'</td></tr>';
     }).join(""):'<tr><td colspan="5" class="compare-message">These teams or players have no shared battles in the archive.</td></tr>';
     $("compare-results").classList.remove("hidden");
-    $("compare-message").textContent="Done · "+common.length+" shared battle(s) found. Score totals: "+fmt(pointsA)+" vs "+fmt(pointsB)+" from "+summary.comparableScoreBattles+" comparable battles. Higher places: "+rankWinsA+" vs "+rankWinsB+" from "+summary.comparableRankBattles+" battles with both ranks available.";
+    $("compare-message").textContent="Done · "+common.length+" shared battle(s) found. Score totals: "+fmt(pointsA)+" vs "+fmt(pointsB)+" from "+summary.comparableScoreBattles+" comparable battles. Higher places: "+rankWinsA+" vs "+rankWinsB+" from "+summary.comparableRankBattles+" battles with rank data.";
   }
   async function compare(){
     $("compare-message").textContent="Loading profiles and finding shared battles…";
