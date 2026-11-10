@@ -16,6 +16,7 @@
   <link href="css/profile-analytics.css" rel="stylesheet">
   <link href="css/navigation-hubs.css" rel="stylesheet">
   <link href="css/arena-design-system.css" rel="stylesheet">
+  <link href="css/site-footer.css" rel="stylesheet">
 </head>
 <body class="page-profile">
   <main class="shell profile-shell">
@@ -38,9 +39,9 @@
 
     <section class="profile-hero">
       <div class="profile-hero-copy">
-        <span class="eyebrow" id="profile-kind">COMPETITOR PROFILE</span>
+        <span class="eyebrow" id="profile-kind">TEAM OR PLAYER PROFILE</span>
         <div class="profile-title-row"><span class="profile-initial-mark" id="profile-initial" aria-hidden="true">?</span><h1 id="profile-name">Loading profile…</h1></div>
-        <p class="lede" id="profile-description">Loading verified statistics from the UltraBullet Team Battles archive.</p>
+        <p class="lede" id="profile-description">Loading results from the UltraBullet Team Battles archive.</p>
         <div class="profile-actions">
           <a class="primary-action" id="lichess-profile-link" href="#" target="_blank" rel="noopener noreferrer">Open on Lichess ↗</a>
           <button class="secondary-action" id="share-profile" type="button">Copy profile link</button>
@@ -52,7 +53,7 @@
       <aside class="profile-identity-card">
         <span class="note-label">ALL-TIME POSITION</span>
         <strong id="profile-rank">—</strong>
-        <span id="profile-rank-caption">Current cumulative ranking</span>
+        <span id="profile-rank-caption">Current place by total points</span>
         <div class="identity-divider"></div>
         <span class="identity-label">LAST RECORDED BATTLE</span>
         <strong class="identity-secondary" id="profile-last-active">—</strong>
@@ -60,15 +61,15 @@
     </section>
 
     <section class="profile-stats" aria-label="Competitor statistics">
-      <article class="profile-stat"><span>Total points</span><strong id="stat-points">—</strong><small id="stat-points-caption">Cumulative score</small></article>
-      <article class="profile-stat"><span>Battles played</span><strong id="stat-battles">—</strong><small>Recorded eligible battles</small></article>
-      <article class="profile-stat"><span>Average points</span><strong id="stat-average">—</strong><small>Points per recorded battle</small></article>
-      <article class="profile-stat"><span>Podiums</span><strong id="stat-podiums">—</strong><small id="stat-podium-caption">Top-three finishes</small></article>
+      <article class="profile-stat"><span>Total points</span><strong id="stat-points">—</strong><small id="stat-points-caption">Total score</small></article>
+      <article class="profile-stat"><span>Battles played</span><strong id="stat-battles">—</strong><small>Numbered battles with recorded results</small></article>
+      <article class="profile-stat"><span>Average points</span><strong id="stat-average">—</strong><small>Points per battle</small></article>
+      <article class="profile-stat"><span>Podiums</span><strong id="stat-podiums">—</strong><small id="stat-podium-caption">Top-three places</small></article>
     </section>
 
     <section class="profile-section">
       <div class="profile-section-heading">
-        <div><span class="eyebrow">CAREER OVERVIEW</span><h2>Performance records</h2></div>
+        <div><span class="eyebrow">CAREER OVERVIEW</span><h2>Results and records</h2></div>
         <span class="profile-section-note" id="profile-period-caption">All recorded battles</span>
       </div>
       <div class="profile-record-grid" id="profile-records">
@@ -78,7 +79,7 @@
 
     <section class="profile-section pi-profile-section" id="profile-performance-index" aria-labelledby="profile-pi-title">
       <div class="profile-section-heading">
-        <div><span class="eyebrow">NORMALIZED PERFORMANCE</span><h2 id="profile-pi-title">Performance Index</h2><p class="section-description">A separate 0–100 measure that compares finishes across battles of different sizes.</p></div>
+        <div><span class="eyebrow">NORMALIZED PERFORMANCE</span><h2 id="profile-pi-title">Performance Index</h2><p class="section-description">A separate score from 0 to 100. It helps compare results from battles of different sizes.</p></div>
         <a class="profile-section-note" href="./performance-index.html">PI methodology ↗</a>
       </div>
       <div class="pi-profile-card" id="profile-pi-card">
@@ -88,7 +89,7 @@
 
     <section class="profile-section" id="profile-achievements-section">
       <div class="profile-section-heading">
-        <div><span class="eyebrow">CAREER ACHIEVEMENTS</span><h2>Earned badges</h2><p class="section-description">Milestones earned from all recorded official numbered battles.</p></div>
+        <div><span class="eyebrow">CAREER ACHIEVEMENTS</span><h2>Earned badges</h2><p class="section-description">Badges earned in numbered battles.</p></div>
         <a class="profile-section-note" href="./achievements.html">Achievement guide ↗</a>
       </div>
       <div class="achievement-badge-grid" id="profile-achievements">
@@ -98,7 +99,7 @@
 
     <section class="profile-section" id="team-member-statistics">
       <div class="profile-section-heading">
-        <div><span class="eyebrow">TEAM CONTRIBUTIONS</span><h2 id="member-stat-title">Team-member statistics</h2><p class="section-description" id="member-stat-description">Historical contribution snapshots from Lichess team standings.</p></div>
+        <div><span class="eyebrow">TEAM CONTRIBUTIONS</span><h2 id="member-stat-title">Team-member statistics</h2><p class="section-description" id="member-stat-description">Past player lists from Lichess team results.</p></div>
       </div>
       <article class="profile-panel">
         <div class="history-summary" id="member-stat-summary">Loading contribution data…</div>
@@ -113,7 +114,7 @@
 
     <section class="profile-section" id="competitive-trajectory">
       <div class="profile-section-heading analytics-heading">
-        <div><span class="eyebrow">COMPETITIVE TRAJECTORY</span><h2>Performance over time</h2><p class="section-description">Switch between event scores and the cumulative all-time ranking. Lower rank numbers are better.</p></div>
+        <div><span class="eyebrow">COMPETITIVE TRAJECTORY</span><h2>Performance over time</h2><p class="section-description">Switch between points in each battle and the all-time ranking. A lower rank number means a better place.</p></div>
         <div class="chart-controls">
           <div class="chart-mode-switch" role="group" aria-label="Choose performance chart">
             <button class="chart-mode-button active" id="chart-mode-score" type="button" aria-pressed="true">Score</button>
@@ -140,16 +141,16 @@
         <span class="profile-section-note" id="analytics-period-label">ALL-TIME DATA</span>
       </div>
       <div class="analytics-insight-grid" aria-label="Recent performance insights">
-        <article class="analytics-insight insight-cyan"><span>LAST 10 · AVG POINTS</span><strong id="analytics-recent-average">—</strong><small id="analytics-average-delta">Compared with period average</small></article>
+        <article class="analytics-insight insight-cyan"><span>LAST 10 · AVG POINTS</span><strong id="analytics-recent-average">—</strong><small id="analytics-average-delta">Compared with the average for this period</small></article>
         <article class="analytics-insight insight-violet"><span>LAST 10 · PODIUM RATE</span><strong id="analytics-recent-podium-rate">—</strong><small id="analytics-recent-podium-caption">Top-three finishes</small></article>
-        <article class="analytics-insight insight-gold"><span>LATEST PODIUM RUN</span><strong id="analytics-latest-streak">—</strong><small>Consecutive numbered battles with a top-three finish</small></article>
+        <article class="analytics-insight insight-gold"><span>LATEST PODIUM RUN</span><strong id="analytics-latest-streak">—</strong><small>Numbered battles in a row with a top-three finish</small></article>
       </div>
 
       <div class="analytics-grid">
         <article class="profile-panel analytics-card">
-          <div class="analytics-card-heading"><div><span class="analytics-kicker">FINISH DISTRIBUTION</span><h3>Placement breakdown</h3></div><span class="analytics-card-note" id="analytics-ranked-count">—</span></div>
+          <div class="analytics-card-heading"><div><span class="analytics-kicker">FINISH DISTRIBUTION</span><h3>Finish breakdown</h3></div><span class="analytics-card-note" id="analytics-ranked-count">—</span></div>
           <div class="analytics-donut-layout"><div class="analytics-donut-wrap" id="analytics-donut"><div class="profile-loading">Calculating placements…</div></div><div class="analytics-donut-legend" id="analytics-donut-legend"></div></div>
-          <p class="analytics-footnote">Share of recorded tournament finishes in each placement group.</p>
+          <p class="analytics-footnote">Shows how often each finish place appears in the recorded results.</p>
         </article>
 
         <article class="profile-panel analytics-card">
@@ -159,13 +160,13 @@
         </article>
 
         <article class="profile-panel analytics-card analytics-wide">
-          <div class="analytics-card-heading"><div><span class="analytics-kicker">PARTICIPATION PATTERN</span><h3>Battle activity calendar</h3><p>Each square represents a UTC date; brighter days indicate more recorded battles.</p></div><span class="analytics-card-note">LAST 52 WEEKS</span></div>
+          <div class="analytics-card-heading"><div><span class="analytics-kicker">PARTICIPATION PATTERN</span><h3>Battle activity calendar</h3><p>Each square is one date in UTC. Brighter squares mean more battles were played.</p></div><span class="analytics-card-note">LAST 52 WEEKS</span></div>
           <div class="analytics-heatmap-wrap" id="analytics-heatmap"><div class="profile-loading">Preparing activity calendar…</div></div>
           <div class="analytics-heatmap-legend"><span>Less</span><i class="heat-level-0"></i><i class="heat-level-1"></i><i class="heat-level-2"></i><i class="heat-level-3"></i><i class="heat-level-4"></i><span>More battles</span></div>
         </article>
 
         <article class="profile-panel analytics-card analytics-wide">
-          <div class="analytics-card-heading"><div><span class="analytics-kicker">LONG-TERM DEVELOPMENT</span><h3>Season-by-season performance</h3><p>Compare points, average score and podium rate across fixed 50-battle seasons.</p></div><span class="analytics-card-note">LATEST 8 SEASONS</span></div>
+          <div class="analytics-card-heading"><div><span class="analytics-kicker">LONG-TERM DEVELOPMENT</span><h3>Season-by-season performance</h3><p>Compare points, average score and top-three finishes across seasons of 50 battles.</p></div><span class="analytics-card-note">LATEST 8 SEASONS</span></div>
           <div class="analytics-table-wrap"><table class="analytics-season-table"><thead><tr><th>Season</th><th class="number-cell">Battles</th><th class="number-cell">Points</th><th class="number-cell">Avg / battle</th><th class="number-cell">Podiums</th><th class="number-cell">Podium rate</th></tr></thead><tbody id="analytics-season-rows"><tr><td colspan="6" class="profile-loading">Preparing season statistics…</td></tr></tbody></table></div>
         </article>
       </div>
@@ -173,7 +174,7 @@
 
     <section class="profile-section" id="battle-history">
       <div class="profile-section-heading">
-        <div><span class="eyebrow">COMPETITION HISTORY</span><h2>Battle history</h2><p class="section-description">Browse the recorded results and open each original Lichess tournament.</p></div>
+        <div><span class="eyebrow">COMPETITION HISTORY</span><h2>Battle history</h2><p class="section-description">Browse the results and open each Lichess tournament.</p></div>
       </div>
       <article class="profile-panel history-panel">
         <div class="history-controls">
@@ -199,10 +200,15 @@
 
     <footer class="profile-footer">
       <span>UltraBullet Team Battles · Competitor profile</span>
-      <span>Statistics are calculated from recorded eligible numbered battles.</span>
+      <span>Stats use recorded results from regular numbered battles.</span>
     </footer>
   </main>
   <script src="js/analytics.js" defer></script>
   <script src="js/profile.js" defer></script>
+
+  <footer class="site-credit-footer" aria-label="Website information">
+    <p><span class="site-credit-title">Website made with AI-assisted vibecoding.</span><span class="site-credit-detail">Built for the ULTRAbullet Team Battles community.</span></p>
+    <p>Prefer the classic version without AI assistance? <a href="https://lichessbotacc.github.io/Gift-For-Nathanael/" target="_blank" rel="noopener noreferrer">Visit the original DarkOnCrack website</a>.</p>
+  </footer>
 </body>
 </html>
