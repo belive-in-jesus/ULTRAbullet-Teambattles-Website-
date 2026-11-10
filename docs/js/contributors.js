@@ -25,11 +25,11 @@
   }
   function renderPodium(){
     const rows=state.all.slice(0,3);
-    if(!rows.length){$("contributors-podium").innerHTML='<div class="contributors-empty">No contributor records are available in this data snapshot.</div>';return;}
+    if(!rows.length){$("contributors-podium").innerHTML='<div class="contributors-empty">There are no player contribution records in this data update.</div>';return;}
     $("contributors-podium").innerHTML=rows.map((row,index)=>
       '<article class="contributor-podium-card"><span class="contributor-podium-rank">#'+(index+1)+' · '+(index===0?"LEADER":index===1?"RUNNER-UP":"THIRD PLACE")+'</span>'+
       playerLink(row)+'<strong class="contributor-podium-points">'+number(row.contribution_points)+'</strong>'+
-      '<span class="contributor-podium-label">listed contribution points</span>'+
+      '<span class="contributor-podium-label">points from team results</span>'+
       '<div class="contributor-podium-meta"><span>'+number(row.battles_listed)+' battles</span><span>'+number(row.teams_count)+' teams</span></div></article>'
     ).join("");
   }
@@ -68,10 +68,10 @@
   }
   function showError(error){
     console.error("Contributor leaderboard could not be loaded:",error);
-    $("contributors-updated").textContent="CONTRIBUTOR DATA NOT PUBLISHED";
-    $("contributors-podium").innerHTML='<div class="contributors-error">The contributor index has not been generated yet. Run the <a href="https://github.com/belive-in-jesus/ULTRAbullet-Teambattles-Website-/actions/workflows/leaderboard.yml" target="_blank" rel="noopener noreferrer">Leaderboard data workflow</a> once after this update, then reload this page.</div>';
-    $("contributors-rows").innerHTML='<tr><td colspan="7" class="contributors-error">The global contributor index is not available yet. The next successful full data refresh will publish it.</td></tr>';
-    $("contributors-range").textContent="Contributor index unavailable";$("contributors-count").textContent="— entries";
+    $("contributors-updated").textContent="PLAYER DATA NOT READY";
+    $("contributors-podium").innerHTML='<div class="contributors-error">The player contribution list is not ready yet. An organiser can check the data update. <a href="https://github.com/belive-in-jesus/ULTRAbullet-Teambattles-Website-/actions/workflows/leaderboard.yml" target="_blank" rel="noopener noreferrer">Leaderboard data workflow</a> once after this update, then reload this page.</div>';
+    $("contributors-rows").innerHTML='<tr><td colspan="7" class="contributors-error">The player contribution list is not ready yet. It will appear after the next data update.</td></tr>';
+    $("contributors-range").textContent="Player contribution list not ready";$("contributors-count").textContent="— entries";
   }
   async function init(){
     try{
@@ -81,7 +81,7 @@
       state.all=Array.isArray(payload.contributors)?payload.contributors:[];
       renderSummary(payload.summary||{});renderPodium();
       const updated=payload.generated_at?new Date(payload.generated_at):null;
-      $("contributors-updated").textContent=updated&&!Number.isNaN(updated.getTime())?"UPDATED "+updated.toLocaleString(undefined,{dateStyle:"medium",timeStyle:"short"}):"CONTRIBUTOR ARCHIVE";
+      $("contributors-updated").textContent=updated&&!Number.isNaN(updated.getTime())?"UPDATED "+updated.toLocaleString(undefined,{dateStyle:"medium",timeStyle:"short"}):"PLAYER CONTRIBUTIONS";
       renderRows();
     }catch(error){showError(error);}
   }
