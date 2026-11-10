@@ -15,6 +15,7 @@
   <link href="css/battle.css" rel="stylesheet">
   <link href="css/navigation-hubs.css" rel="stylesheet">
   <link href="css/arena-design-system.css" rel="stylesheet">
+  <link href="css/site-footer.css" rel="stylesheet">
 </head>
 <body class="page-battle">
   <main class="shell battle-shell">
@@ -37,9 +38,9 @@
 
     <header class="battle-hero">
       <a class="battle-back-link" href="./index.html#battle-history">← Back to battle archive</a>
-      <span class="eyebrow">TOURNAMENT ARCHIVE / BATTLE REPORT</span>
+      <span class="eyebrow">TOURNAMENT ARCHIVE / BATTLE RESULTS</span>
       <h1 id="battle-title">Battle report</h1>
-      <p id="battle-subtitle">Detailed results from a numbered UltraBullet Team Battle.</p>
+      <p id="battle-subtitle">Full results from a numbered UltraBullet Team Battle.</p>
       <a class="battle-original-link" id="battle-original-link" href="https://lichess.org/" target="_blank" rel="noopener noreferrer">Open original Lichess battle ↗</a>
     </header>
 
@@ -54,9 +55,9 @@
     <section class="battle-results-panel" id="battle-results-panel" hidden aria-labelledby="results-heading">
       <div class="battle-results-heading">
         <div>
-          <span class="battle-kicker">OFFICIAL RECORDED STANDINGS</span>
+          <span class="battle-kicker">PUBLISHED RESULTS</span>
           <h2 id="results-heading">Tournament results</h2>
-          <p id="results-description">Choose teams or individual players to view the published standings.</p>
+          <p id="results-description">Choose teams or players to see the results.</p>
         </div>
         <div class="battle-view-switch" role="group" aria-label="Choose results">
           <button type="button" class="battle-view-button active" id="view-teams" aria-pressed="true">Teams</button>
@@ -77,16 +78,21 @@
         </table>
       </div>
       <div class="battle-panel-footer">
-        <span id="result-footnote">Results are shown as recorded for this tournament.</span>
+        <span id="result-footnote">These are the results recorded for this tournament.</span>
         <button type="button" class="battle-more-button" id="results-more" hidden>Show all results ↓</button>
       </div>
     </section>
 
     <footer class="battle-footer">
-      <span>UltraBullet Team Battles · Community statistics archive</span>
-      <span>Results are derived from recorded Lichess tournament standings.</span>
+      <span>UltraBullet Team Battles · Community results</span>
+      <span>Results come from the standings published on Lichess.</span>
     </footer>
   </main>
   <script src="js/battle.js" defer></script>
+
+  <footer class="site-credit-footer" aria-label="Website information">
+    <p><span class="site-credit-title">Website made with AI-assisted vibecoding.</span><span class="site-credit-detail">Built for the ULTRAbullet Team Battles community.</span></p>
+    <p>Prefer the classic version without AI assistance? <a href="https://lichessbotacc.github.io/Gift-For-Nathanael/" target="_blank" rel="noopener noreferrer">Visit the original DarkOnCrack website</a>.</p>
+  </footer>
 </body>
 </html>
