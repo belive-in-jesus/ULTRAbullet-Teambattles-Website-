@@ -134,7 +134,7 @@ function renderAchievements(){
   ];
   const earned=definitions.filter(([,metric,threshold])=>Number(row[metric]||0)>=threshold).map(([id])=>id);
   if(!earned.length){
-    $("profile-achievements").innerHTML='<div class="profile-empty">No career badges earned yet. Achievement thresholds are based on the all-time record.</div>';
+    $("profile-achievements").innerHTML='<div class="profile-empty">No badges earned yet. Each badge has its own all-time target.</div>';
     return;
   }
   $("profile-achievements").innerHTML=earned.map(id=>{
@@ -147,14 +147,14 @@ function renderMemberStatistics(profile){
   const isTeam=type==="team";
   $("member-stat-title").textContent=isTeam?"Top team contributors":"Recorded team affiliations";
   $("member-stat-description").textContent=isTeam
-    ?"Players listed in this team's historical Lichess team-battle standings, with their recorded contributions."
-    :"Teams in whose historical Lichess team-battle standings this player was listed, with the recorded contribution.";
+    ?"Players shown in this team's past Lichess team results, with the points they scored."
+    :"Teams this player appeared for in past Lichess team results, with their recorded points.";
   const rows=isTeam?(Array.isArray(profile.members)?profile.members:[]):(Array.isArray(profile.teams)?profile.teams:[]);
   const subject=isTeam?"Player":"Team";
   $("member-stat-head").innerHTML='<tr><th>'+subject+'</th><th class="number-cell">Battles listed</th><th class="number-cell">Contribution pts</th><th class="number-cell">Avg / battle</th><th>Last seen</th></tr>';
   if(!rows.length){
-    $("member-stat-summary").textContent="No contributor snapshots are published for this profile yet.";
-    $("member-stat-rows").innerHTML='<tr><td colspan="5" class="profile-empty">These statistics will be populated by the next successful full data refresh. Lichess exposes the players listed in each team standing; this is not a complete team roster.</td></tr>';
+    $("member-stat-summary").textContent="No player contribution records are available for this profile yet.";
+    $("member-stat-rows").innerHTML='<tr><td colspan="5" class="profile-empty">These stats will appear after the next full data update. Lichess only shows the players listed in each team result, not every team member.</td></tr>';
     return;
   }
   const total=rows.reduce((sum,row)=>sum+(Number(row.battles_listed)||0),0);
@@ -179,7 +179,7 @@ function buildPerformanceIndexHistoryMarkup(checkpoints){
     }))
     .filter(item=>Number.isFinite(item.battle)&&item.battle>0&&Number.isFinite(item.cumulative))
     .sort((a,b)=>a.battle-b.battle);
-  if(!rows.length)return '<div class="pi-history-empty">Historical PI checkpoints will be available after the next successful full statistics refresh.</div>';
+  if(!rows.length)return '<div class="pi-history-empty">Past PI scores will be available after the next full data update.</div>';
 
   const width=960,height=250,left=58,right=24,top=22,bottom=44;
   const plotWidth=width-left-right,plotHeight=height-top-bottom;
@@ -205,7 +205,7 @@ function buildPerformanceIndexHistoryMarkup(checkpoints){
     const eligibility=row.seasonalBattles>=10?"Official":"Provisional";
     return '<tr><td>Season '+season+'</td><td class="number-cell">#'+row.battle+'</td><td class="number-cell">'+row.cumulative.toFixed(1)+'</td><td class="number-cell">'+(row.rank==null?"—":"#"+row.rank)+'</td><td class="number-cell">'+seasonValue+'</td><td class="number-cell">'+row.seasonalBattles+'</td><td>'+eligibility+'</td></tr>';
   }).join("");
-  return '<div class="pi-history-block"><div class="pi-history-heading"><div><strong>Historical PI development</strong><span>Cumulative index and official rank at each season checkpoint</span></div><small>'+rows.length+' checkpoints</small></div><div class="pi-history-chart">'+svg+'</div><div class="pi-history-table-wrap"><table class="pi-history-table"><thead><tr><th>Season</th><th class="number-cell">Checkpoint</th><th class="number-cell">Career PI</th><th class="number-cell">Career PI rank</th><th class="number-cell">Season PI</th><th class="number-cell">Season battles</th><th>Status</th></tr></thead><tbody>'+table+'</tbody></table></div><p class="pi-history-note">Career PI uses all ranked results up to the checkpoint. Season PI uses only that season’s results and is official from 10 ranked battles. Seasons without a recorded result are omitted.</p></div>';
+  return '<div class="pi-history-block"><div class="pi-history-heading"><div><strong>PI over time</strong><span>All-time score and place after each season</span></div><small>'+rows.length+' checkpoints</small></div><div class="pi-history-chart">'+svg+'</div><div class="pi-history-table-wrap"><table class="pi-history-table"><thead><tr><th>Season</th><th class="number-cell">Checkpoint</th><th class="number-cell">Career PI</th><th class="number-cell">Career PI rank</th><th class="number-cell">Season PI</th><th class="number-cell">Season battles</th><th>Status</th></tr></thead><tbody>'+table+'</tbody></table></div><p class="pi-history-note">Career PI uses all ranked results up to the checkpoint. Season PI uses only that season’s results and is official from 10 ranked battles. Seasons without a recorded result are omitted.</p></div>';
 }
 
 function renderPerformanceIndex(){
@@ -282,7 +282,7 @@ function buildRankHistorySvg(checkpoints){
   const line='<path d="'+path+'" fill="none" stroke="#70e2e8" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>';
   const circles=points.map(point=>'<circle cx="'+point.x.toFixed(1)+'" cy="'+point.y.toFixed(1)+'" r="5" fill="#b19cff" stroke="#101c2d" stroke-width="2"><title>After Battle '+point.battle+' · All-time rank #'+point.rank+' · Season '+point.season+'</title></circle>').join("");
   const labels=points.map(point=>'<text x="'+point.x.toFixed(1)+'" y="'+(height-19)+'" text-anchor="middle" class="analytics-axis-label">S'+point.season+'</text>').join("");
-  return '<svg class="analytics-svg" viewBox="0 0 '+width+' '+height+'" role="img" aria-label="Cumulative all-time rank history. Lower rank numbers are better.">'+grid+line+circles+labels+'</svg>';
+  return '<svg class="analytics-svg" viewBox="0 0 '+width+' '+height+'" role="img" aria-label="All-time place history. Lower rank numbers are better.">'+grid+line+circles+labels+'</svg>';
 }
 function renderChart(){
   const scoreButton=$("chart-mode-score"),rankButton=$("chart-mode-rank");
@@ -314,7 +314,7 @@ function renderChart(){
   $("chart-legend-primary").textContent="Score per battle";
   $("chart-legend-secondary").textContent="Period average";
   const analytics=window.UBTAnalytics;
-  if(!analytics){$("profile-chart").innerHTML='<div class="profile-empty">The analytics module could not be loaded.</div>';return;}
+  if(!analytics){$("profile-chart").innerHTML='<div class="profile-empty">The stats could not be loaded.</div>';return;}
   const rows=analytics.chronological(filteredHistoryForStats());
   const limit=state.chartRange==="all"?null:Number(state.chartRange)||25;
   const visible=limit?rows.slice(-limit):rows;
@@ -335,7 +335,7 @@ function renderAnalytics(){
     $("analytics-average-delta").textContent=prefix+(delta*100).toFixed(1)+"% "+verb+" the selected-period average";
   }else $("analytics-average-delta").textContent="Not enough results for a comparison";
   $("analytics-recent-podium-rate").textContent=summary.recentRankedBattles?(summary.recentPodiumRate*100).toFixed(1)+"%":"—";
-  $("analytics-recent-podium-caption").textContent=summary.recentRankedBattles?number(summary.recentPodiums)+" podiums from "+number(summary.recentRankedBattles)+" ranked battles":"No placement data in the latest results";
+  $("analytics-recent-podium-caption").textContent=summary.recentRankedBattles?number(summary.recentPodiums)+" podiums from "+number(summary.recentRankedBattles)+" ranked battles":"No finish-place data in the latest results";
   $("analytics-latest-streak").textContent=summary.latestPodiumRun?number(summary.latestPodiumRun)+" battles":"—";
   $("analytics-ranked-count").textContent=number(summary.rankedBattles)+" ranked battles";
   $("analytics-donut").innerHTML=analytics.buildFinishDonutSvg(summary);
