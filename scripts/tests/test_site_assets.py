@@ -105,9 +105,9 @@ class WebsiteAssetTests(unittest.TestCase):
                     "The Arena visual layer must load after the shared navigation and hub layer.",
                 )
                 self.assertEqual(
-                    parser.stylesheets[-1],
-                    "css/arena-design-system.css",
-                    "The shared Competitive Arena layer must load last on every public page.",
+                    parser.stylesheets[-2:],
+                    ["css/arena-design-system.css", "css/site-footer.css"],
+                    "The shared Arena layer must load before the small site-wide footer layer.",
                 )
                 if page_name == "index.html":
                     self.assertIn("css/dashboard-analytics.css", parser.stylesheets)
@@ -121,6 +121,15 @@ class WebsiteAssetTests(unittest.TestCase):
                         parser.stylesheets.index("css/profile-analytics.css"),
                         parser.stylesheets.index("css/navigation-hubs.css"),
                     )
+
+    def test_every_public_page_includes_the_shared_credit_footer(self):
+        for page_name in PAGES:
+            with self.subTest(page=page_name):
+                source = (DOCS / page_name).read_text(encoding="utf-8")
+                self.assertIn('href="css/site-footer.css"', source)
+                self.assertEqual(source.count('class="site-credit-footer"'), 1)
+                self.assertIn("Website made with AI-assisted vibecoding.", source)
+                self.assertIn("https://lichessbotacc.github.io/Gift-For-Nathanael/", source)
 
     def test_all_public_pages_share_the_same_primary_navigation(self):
         expected_labels = (
