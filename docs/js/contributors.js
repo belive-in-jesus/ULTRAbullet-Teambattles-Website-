@@ -82,6 +82,18 @@
       renderSummary(payload.summary||{});renderPodium();
       const updated=payload.generated_at?new Date(payload.generated_at):null;
       $("contributors-updated").textContent=updated&&!Number.isNaN(updated.getTime())?"UPDATED "+updated.toLocaleString(undefined,{dateStyle:"medium",timeStyle:"short"}):"PLAYER CONTRIBUTIONS";
+      try{
+        const metaResponse=await fetch("./data/meta.json",{cache:"no-cache"});
+        if(!metaResponse.ok)throw new Error("Data coverage details are not available.");
+        const meta=await metaResponse.json();
+        const covered=Number(meta.teams_with_member_data_count);
+        const total=Number(meta.teams_count);
+        if(!Number.isFinite(covered)||!Number.isFinite(total)||total<1)throw new Error("Data coverage details are incomplete.");
+        const percent=Math.round(covered/total*100);
+        $("contributors-coverage-note").textContent="Historical player lists are available for "+number(covered)+" of "+number(total)+" teams ("+percent+"%). These lists only show players recorded in past team results; they are not full team rosters.";
+      }catch(coverageError){
+        $("contributors-coverage-note").textContent="The number of teams with historical player lists is not available right now. These lists show players recorded in past team results, not every team member.";
+      }
       renderRows();
     }catch(error){showError(error);}
   }
