@@ -76,6 +76,7 @@
   <link href="css/v2-visual-system.css" rel="stylesheet">
   <link href="css/navigation-hubs.css" rel="stylesheet">
   <link href="css/arena-design-system.css" rel="stylesheet">
+  <link href="css/site-footer.css" rel="stylesheet">
 </head>
 <body class="page-hall-of-fame">
   <main class="shell">
@@ -97,9 +98,9 @@
     </nav>
 
     <section class="hof-hero">
-      <span class="eyebrow">THE HISTORY OF THE COMPETITION</span>
+      <span class="eyebrow">BATTLE HISTORY</span>
       <h1>Hall of <em>Fame.</em></h1>
-      <p>Celebrating the teams and players who shaped the ULTRAbullet Team Battles. Explore season podiums, career records and the leaders of the all-time rankings.</p>
+      <p>A look back at the teams and players with the best results in the ULTRAbullet Team Battles. See season winners, top results and the all-time leaders.</p>
     </section>
 
     <section class="hof-stats" aria-label="Hall of Fame summary">
@@ -110,21 +111,21 @@
     </section>
 
     <section class="hof-section" aria-labelledby="records-title">
-      <div class="hof-section-head"><div><span class="eyebrow">CAREER ACHIEVEMENTS</span><h2 id="records-title">All-time records</h2><p>Best recorded career totals across eligible numbered battles.</p></div></div>
-      <div class="record-groups" id="record-groups"><div class="loading-state"><strong>Loading records…</strong>Reading verified all-time statistics.</div></div>
+      <div class="hof-section-head"><div><span class="eyebrow">ALL-TIME RECORDS</span><h2 id="records-title">All-time records</h2><p>The best totals from all numbered battles in the archive.</p></div></div>
+      <div class="record-groups" id="record-groups"><div class="loading-state"><strong>Loading records…</strong>Loading the latest all-time stats.</div></div>
     </section>
 
     <section class="hof-section" aria-labelledby="leaders-title">
-      <div class="hof-section-head"><div><span class="eyebrow">CAREER RANKINGS</span><h2 id="leaders-title">All-time leaders</h2><p>The top five teams and players by cumulative points.</p></div></div>
-      <div class="leaders-grid" id="leaders-grid"><div class="loading-state"><strong>Loading leaders…</strong>Preparing the all-time rankings.</div></div>
+      <div class="hof-section-head"><div><span class="eyebrow">CAREER RANKINGS</span><h2 id="leaders-title">All-time leaders</h2><p>The top five teams and players by total points.</p></div></div>
+      <div class="leaders-grid" id="leaders-grid"><div class="loading-state"><strong>Loading leaders…</strong>Loading the all-time rankings.</div></div>
     </section>
 
     <section class="hof-section" aria-labelledby="seasons-title">
-      <div class="hof-section-head"><div><span class="eyebrow">SEASON HISTORY</span><h2 id="seasons-title">Champions and podiums</h2><p>Season winners are shown only after the official battle-number range is complete. Ongoing seasons are clearly marked as provisional.</p></div><span class="pill" id="hof-season-count">LOADING SEASONS</span></div>
-      <div class="seasons-list" id="seasons-list"><div class="loading-state"><strong>Loading season archive…</strong>Collecting historical podiums.</div></div>
+      <div class="hof-section-head"><div><span class="eyebrow">SEASON HISTORY</span><h2 id="seasons-title">Champions and podiums</h2><p>Season winners are shown after all battles in that season are finished. Current seasons are marked as not final.</p></div><span class="pill" id="hof-season-count">LOADING SEASONS</span></div>
+      <div class="seasons-list" id="seasons-list"><div class="loading-state"><strong>Loading season archive…</strong>Loading past season results.</div></div>
     </section>
 
-    <footer class="hof-footer"><span id="hof-updated">Waiting for Hall of Fame data.</span><br>Only regular numbered ULTRAbullet Team Battles are included. Special and unnumbered events are excluded from these records.</footer>
+    <footer class="hof-footer"><span id="hof-updated">Waiting for Hall of Fame data.</span><br>Only regular numbered ULTRAbullet Team Battles count here. Special events and battles without a number are not included.</footer>
   </main>
 
   <script>
@@ -272,5 +273,10 @@
     init();
   })();
   </script>
+
+  <footer class="site-credit-footer" aria-label="Website information">
+    <p><span class="site-credit-title">Website made with AI-assisted vibecoding.</span><span class="site-credit-detail">Built for the ULTRAbullet Team Battles community.</span></p>
+    <p>Prefer the classic version without AI assistance? <a href="https://lichessbotacc.github.io/Gift-For-Nathanael/" target="_blank" rel="noopener noreferrer">Visit the original DarkOnCrack website</a>.</p>
+  </footer>
 </body>
 </html>
