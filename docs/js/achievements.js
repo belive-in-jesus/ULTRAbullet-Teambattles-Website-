@@ -5,22 +5,22 @@
   const num=value=>Number(value||0).toLocaleString();
   const DEFINITIONS={
     players:[
-      {id:"battles_100",name:"Century Challenger",description:"Recorded results in 100 official battles.",criteria:"100 battles",metric:"tournaments_played",threshold:100,icon:"100"},
-      {id:"battles_200",name:"Double Century",description:"Recorded results in 200 official battles.",criteria:"200 battles",metric:"tournaments_played",threshold:200,icon:"200"},
-      {id:"battles_400",name:"Battle Marathon",description:"Recorded results in 400 official battles.",criteria:"400 battles",metric:"tournaments_played",threshold:400,icon:"400"},
-      {id:"battles_600",name:"Ultra Veteran",description:"Recorded results in 600 official battles.",criteria:"600 battles",metric:"tournaments_played",threshold:600,icon:"600"},
+      {id:"battles_100",name:"Century Challenger",description:"Played in 100 numbered battles.",criteria:"100 battles",metric:"tournaments_played",threshold:100,icon:"100"},
+      {id:"battles_200",name:"Double Century",description:"Played in 200 numbered battles.",criteria:"200 battles",metric:"tournaments_played",threshold:200,icon:"200"},
+      {id:"battles_400",name:"Battle Marathon",description:"Played in 400 numbered battles.",criteria:"400 battles",metric:"tournaments_played",threshold:400,icon:"400"},
+      {id:"battles_600",name:"Ultra Veteran",description:"Played in 600 numbered battles.",criteria:"600 battles",metric:"tournaments_played",threshold:600,icon:"600"},
       {id:"podiums_25",name:"Podium Specialist",description:"Finished in the top three at least 25 times.",criteria:"25 podiums",metric:"podiums",threshold:25,icon:"25×"},
       {id:"podiums_50",name:"Podium Elite",description:"Finished in the top three at least 50 times.",criteria:"50 podiums",metric:"podiums",threshold:50,icon:"50×"},
       {id:"podiums_100",name:"Podium Legend",description:"Finished in the top three at least 100 times.",criteria:"100 podiums",metric:"podiums",threshold:100,icon:"100"},
       {id:"podiums_300",name:"Podium Immortal",description:"Finished in the top three at least 300 times.",criteria:"300 podiums",metric:"podiums",threshold:300,icon:"300"},
-      {id:"wins_10",name:"10-Time Champion",description:"Won at least 10 official battles.",criteria:"10 wins",metric:"first_places",threshold:10,icon:"10 W"},
-      {id:"wins_25",name:"Grand Champion",description:"Won at least 25 official battles.",criteria:"25 wins",metric:"first_places",threshold:25,icon:"25 W"},
-      {id:"wins_50",name:"Supreme Champion",description:"Won at least 50 official battles.",criteria:"50 wins",metric:"first_places",threshold:50,icon:"50 W"},
-      {id:"wins_75",name:"Ultra Champion",description:"Won at least 75 official battles.",criteria:"75 wins",metric:"first_places",threshold:75,icon:"75 W"},
-      {id:"streak_8",name:"Podium Momentum",description:"Reached the podium in eight consecutive numbered battles.",criteria:"8 consecutive podiums",metric:"longest_podium_streak",threshold:8,icon:"8×"},
-      {id:"streak_10",name:"Unbroken Momentum",description:"Reached the podium in 10 consecutive numbered battles.",criteria:"10 consecutive podiums",metric:"longest_podium_streak",threshold:10,icon:"10×"},
-      {id:"streak_12",name:"Unstoppable Run",description:"Reached the podium in 12 consecutive numbered battles.",criteria:"12 consecutive podiums",metric:"longest_podium_streak",threshold:12,icon:"12×"},
-      {id:"streak_15",name:"Perfect Podium Run",description:"Reached the podium in 15 consecutive numbered battles.",criteria:"15 consecutive podiums",metric:"longest_podium_streak",threshold:15,icon:"15×"}
+      {id:"wins_10",name:"10-Time Champion",description:"Finished first in at least 10 numbered battles.",criteria:"10 wins",metric:"first_places",threshold:10,icon:"10 W"},
+      {id:"wins_25",name:"Grand Champion",description:"Finished first in at least 25 numbered battles.",criteria:"25 wins",metric:"first_places",threshold:25,icon:"25 W"},
+      {id:"wins_50",name:"Supreme Champion",description:"Finished first in at least 50 numbered battles.",criteria:"50 wins",metric:"first_places",threshold:50,icon:"50 W"},
+      {id:"wins_75",name:"Ultra Champion",description:"Finished first in at least 75 numbered battles.",criteria:"75 wins",metric:"first_places",threshold:75,icon:"75 W"},
+      {id:"streak_8",name:"Podium Momentum",description:"Finished in the top three in eight numbered battles in a row.",criteria:"8 consecutive podiums",metric:"longest_podium_streak",threshold:8,icon:"8×"},
+      {id:"streak_10",name:"Unbroken Momentum",description:"Finished in the top three in 10 numbered battles in a row.",criteria:"10 consecutive podiums",metric:"longest_podium_streak",threshold:10,icon:"10×"},
+      {id:"streak_12",name:"Unstoppable Run",description:"Finished in the top three in 12 numbered battles in a row.",criteria:"12 consecutive podiums",metric:"longest_podium_streak",threshold:12,icon:"12×"},
+      {id:"streak_15",name:"Perfect Podium Run",description:"Finished in the top three in 15 numbered battles in a row.",criteria:"15 consecutive podiums",metric:"longest_podium_streak",threshold:15,icon:"15×"}
     ],
     teams:[
       {id:"battles_300",name:"Established Club",description:"Recorded results in 300 official battles.",criteria:"300 battles",metric:"tournaments_played",threshold:300,icon:"300"},
@@ -122,12 +122,12 @@
     renderLeaders(data,"players","player-achievement-leaders");
     renderLeaders(data,"teams","team-achievement-leaders");
     $("achievement-updated").textContent=data.generated_at
-      ?"Achievement index refreshed "+new Date(data.generated_at).toLocaleString()
+      ?"Achievement data updated "+new Date(data.generated_at).toLocaleString()
       :"Showing achievements calculated from the currently published leaderboard.";
   }).catch(error=>{
     console.error("Could not load achievement data",error);
     $("achievement-summary").innerHTML='<div class="achievement-loading">Achievement data is currently unavailable.</div>';
-    $("player-achievements").innerHTML='<div class="achievement-loading">The achievement index could not be loaded.</div>';
+    $("player-achievements").innerHTML='<div class="achievement-loading">Achievement data could not be loaded.</div>';
     $("team-achievements").innerHTML='<div class="achievement-loading">The achievement index could not be loaded.</div>';
     $("player-achievement-leaders").innerHTML="";
     $("team-achievement-leaders").innerHTML="";
