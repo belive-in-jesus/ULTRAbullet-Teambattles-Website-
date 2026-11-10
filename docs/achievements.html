@@ -15,6 +15,7 @@
   <link href="css/achievements.css" rel="stylesheet">
   <link href="css/navigation-hubs.css" rel="stylesheet">
   <link href="css/arena-design-system.css" rel="stylesheet">
+  <link href="css/site-footer.css" rel="stylesheet">
 </head>
 <body class="page-achievements">
   <main class="shell">
@@ -36,9 +37,9 @@
     </nav>
 
     <section class="achievements-hero">
-      <span class="eyebrow">CAREER MILESTONES</span>
+      <span class="eyebrow">ACHIEVEMENTS</span>
       <h1>Earn your <em>place in history.</em></h1>
-      <p>Achievements recognise measurable career milestones in official numbered ULTRAbullet Team Battles. Player and team badges are calculated automatically from the published all-time results.</p>
+      <p>Badges show what players and teams have achieved in numbered ULTRAbullet Team Battles. Badges are based on all results in the archive and update automatically.</p>
     </section>
 
     <section class="achievement-summary" id="achievement-summary" aria-label="Achievement totals">
@@ -46,23 +47,23 @@
     </section>
 
     <section class="achievement-section">
-      <span class="eyebrow">INDIVIDUAL ACHIEVEMENTS</span>
+      <span class="eyebrow">PLAYER BADGES</span>
       <h2>Player badges</h2>
-      <p>Milestones based on a player's recorded official battles, wins, podium finishes and consecutive podium streaks.</p>
+      <p>Badges are earned for taking part, winning, finishing in the top three and reaching top-three streaks.</p>
       <div class="achievement-cards" id="player-achievements"><div class="achievement-loading">Loading player achievements…</div></div>
     </section>
 
     <section class="achievement-section">
       <span class="eyebrow">TEAM ACHIEVEMENTS</span>
       <h2>Team badges</h2>
-      <p>Equivalent milestones calculated from each team's historical battle results.</p>
+      <p>Team badges are based on each team's results over time.</p>
       <div class="achievement-cards" id="team-achievements"><div class="achievement-loading">Loading team achievements…</div></div>
     </section>
 
     <section class="achievement-section">
-      <span class="eyebrow">MOST DECORATED</span>
+      <span class="eyebrow">TOP BADGE COUNTS</span>
       <h2>Achievement leaders</h2>
-      <p>Players and teams with the highest number of earned career badges.</p>
+      <p>Players and teams with the most badges.</p>
       <div class="achievement-leaders">
         <article class="achievement-leader-panel"><h3>Players</h3><div id="player-achievement-leaders"></div></article>
         <article class="achievement-leader-panel"><h3>Teams</h3><div id="team-achievement-leaders"></div></article>
@@ -71,9 +72,14 @@
 
     <footer class="achievement-footer">
       <span id="achievement-updated">Waiting for achievement data.</span><br>
-      Only regular numbered ULTRAbullet Team Battles are included. Team-contributor statistics are separate and represent the players listed by Lichess in historical team standings, not a complete membership roster.
+      Only regular numbered ULTRAbullet Team Battles count here. Team contribution stats are shown separately. They list the players shown in past Lichess team results, not every team member.
     </footer>
   </main>
   <script src="js/achievements.js" defer></script>
+
+  <footer class="site-credit-footer" aria-label="Website information">
+    <p><span class="site-credit-title">Website made with AI-assisted vibecoding.</span><span class="site-credit-detail">Built for the ULTRAbullet Team Battles community.</span></p>
+    <p>Prefer the classic version without AI assistance? <a href="https://lichessbotacc.github.io/Gift-For-Nathanael/" target="_blank" rel="noopener noreferrer">Visit the original DarkOnCrack website</a>.</p>
+  </footer>
 </body>
 </html>
