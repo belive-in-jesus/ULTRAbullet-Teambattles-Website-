@@ -81,7 +81,11 @@
         <div><span>Recent results · last 10 battles</span><strong>20%</strong></div>
         <div><span>Participation · up to 50 battles</span><strong>15%</strong></div>
       </div>
-      <p class="pi-method-note">The consistency score is higher when results stay similar from battle to battle. It starts at 100 and falls as results vary more. The participation score reaches its full value after 50 recorded battles. The PI is a statistic, not an official Lichess rating.</p>
+      <p class="pi-method-note">For each battle, your place is changed into a score from 0 to 100. The number of teams or players in that battle is taken into account, so results from different-sized battles can be compared.</p>
+      <p class="pi-method-note"><strong>Battle score:</strong> (teams or players in that battle − your place) ÷ (teams or players in that battle − 1) × 100. First place gets 100; last place gets 0. Only results with a valid place in a battle with at least two entries are counted.</p>
+      <p class="pi-method-note"><strong>Average:</strong> the average of all battle scores. <strong>Consistency:</strong> 100 minus twice the population standard deviation of those scores, with a minimum of 0. In simple terms, the score is higher when your results stay closer to your average.</p>
+      <p class="pi-method-note"><strong>Recent:</strong> the average of your last 10 ranked battle results. <strong>Participation:</strong> your number of ranked results divided by 50, as a percentage, up to 100.</p>
+      <p class="pi-method-note"><strong>Final PI:</strong> Average × 40% + Consistency × 25% + Recent × 20% + Participation × 15%. A PI rank is shown after at least 10 ranked results. The PI is a statistic, not an official Lichess rating.</p>
     </section>
 
     <footer class="pi-footer"><span>ULTRAbullet Team Battles · Performance Index methodology</span><a href="./rankings.html">Back to rankings ↑</a></footer>
