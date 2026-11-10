@@ -15,6 +15,7 @@
   <link href="css/contributors.css" rel="stylesheet">
   <link href="css/navigation-hubs.css" rel="stylesheet">
   <link href="css/arena-design-system.css" rel="stylesheet">
+  <link href="css/site-footer.css" rel="stylesheet">
 </head>
 <body class="page-contributors">
   <main class="shell contributors-shell">
@@ -37,40 +38,40 @@
 
     <section class="contributors-hero" aria-labelledby="contributors-title">
       <div class="contributors-hero-copy">
-        <span class="eyebrow">THE PEOPLE BEHIND THE TEAMS</span>
+        <span class="eyebrow">PLAYER CONTRIBUTIONS</span>
         <h1 id="contributors-title">Global <em>contributors.</em></h1>
-        <p class="contributors-lede">A career-wide ranking of players whose scores appear in the official Lichess team-battle standings. Contributions are combined across every recorded team and eligible battle.</p>
+        <p class="contributors-lede">This list shows players whose points appear in Lichess team-battle results. It adds their recorded points across all teams and numbered battles.</p>
         <div class="contributors-hero-meta">
           <span class="contributors-live-mark"><i></i> HISTORICAL ARCHIVE</span>
           <span id="contributors-updated">Loading contributor archive…</span>
         </div>
       </div>
       <aside class="contributors-hero-note">
-        <span class="note-label">RANKING METHOD</span>
+        <span class="note-label">HOW THE LIST WORKS</span>
         <strong>Listed contribution points</strong>
-        <p>Players are ranked by the sum of their recorded individual scores in team standings. Battle appearances and teams represented provide additional context.</p>
-        <span class="contributors-note-foot">CAREER TOTALS · OFFICIAL NUMBERED BATTLES</span>
+        <p>Players are ranked by the total points shown next to their names in team results. The list also shows how often they played and which teams they played for.</p>
+        <span class="contributors-note-foot">TOTALS · NUMBERED BATTLES</span>
       </aside>
     </section>
 
     <section class="contributors-summary" aria-label="Contributor archive summary">
-      <article class="contributors-summary-card"><span>Listed contributors</span><strong id="summary-contributors">—</strong><small>Players with a recorded contribution</small></article>
-      <article class="contributors-summary-card"><span>Contribution points</span><strong id="summary-points">—</strong><small>Combined listed career scores</small></article>
-      <article class="contributors-summary-card"><span>Battle appearances</span><strong id="summary-appearances">—</strong><small>One player counted once per battle</small></article>
-      <article class="contributors-summary-card"><span>Teams represented</span><strong id="summary-teams">—</strong><small>Teams with contributor snapshots</small></article>
+      <article class="contributors-summary-card"><span>Listed contributors</span><strong id="summary-contributors">—</strong><small>Players with recorded points</small></article>
+      <article class="contributors-summary-card"><span>Contribution points</span><strong id="summary-points">—</strong><small>Total recorded points</small></article>
+      <article class="contributors-summary-card"><span>Battle appearances</span><strong id="summary-appearances">—</strong><small>Each player counted once per battle</small></article>
+      <article class="contributors-summary-card"><span>Teams represented</span><strong id="summary-teams">—</strong><small>Teams with recorded player lists</small></article>
     </section>
 
     <section class="contributors-podium-section" aria-labelledby="contributors-podium-title">
       <div class="contributors-section-heading">
         <div><span class="eyebrow">CAREER LEADERS</span><h2 id="contributors-podium-title">Top contributors</h2></div>
-        <span class="contributors-section-note">Ranked by total listed contribution points</span>
+        <span class="contributors-section-note">Ranked by total recorded points</span>
       </div>
       <div class="contributors-podium" id="contributors-podium"><div class="contributors-loading">Loading top contributors…</div></div>
     </section>
 
     <section class="contributors-board" aria-labelledby="contributors-board-title">
       <div class="contributors-board-head">
-        <div><span class="eyebrow">GLOBAL RANKING</span><h2 id="contributors-board-title">All contributors</h2><p>Search players or represented teams, then sort the archive by the metric that matters to you.</p></div>
+        <div><span class="eyebrow">FULL LIST</span><h2 id="contributors-board-title">All contributors</h2><p>Search for a player or team, then sort the list by the stat you want to see.</p></div>
         <span class="contributors-board-count" id="contributors-count">— entries</span>
       </div>
       <div class="contributors-controls">
@@ -93,11 +94,16 @@
     </section>
 
     <footer class="contributors-footer">
-      <strong>How to read this ranking</strong>
-      <p>Contributor records are taken from the players listed in each official Lichess team-battle standing. A player’s listed score is added to their career total, and duplicate snapshots for the same player and battle are counted only once. This is a historical contribution snapshot, not a complete team-membership register; players may have represented different teams in different battles.</p>
-      <p>Only regular numbered UltraBullet Team Battles are included. Special and unnumbered events remain outside this ranking.</p>
+      <strong>How to read this list</strong>
+      <p>The list uses the players shown in each Lichess team-battle result. Their listed points are added together. The same player is counted only once in each battle. This is a record of players shown in past results, not a full list of team members. Players may have played for different teams in different battles.</p>
+      <p>Only regular numbered UltraBullet Team Battles count here. Special events and battles without a number are not included.</p>
     </footer>
   </main>
   <script src="js/contributors.js" defer></script>
+
+  <footer class="site-credit-footer" aria-label="Website information">
+    <p><span class="site-credit-title">Website made with AI-assisted vibecoding.</span><span class="site-credit-detail">Built for the ULTRAbullet Team Battles community.</span></p>
+    <p>Prefer the classic version without AI assistance? <a href="https://lichessbotacc.github.io/Gift-For-Nathanael/" target="_blank" rel="noopener noreferrer">Visit the original DarkOnCrack website</a>.</p>
+  </footer>
 </body>
 </html>
