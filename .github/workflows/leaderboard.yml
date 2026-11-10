@@ -26,6 +26,7 @@ on:
 
 permissions:
   contents: write
+  pages: write
 
 concurrency:
   group: leaderboard-refresh
@@ -150,3 +151,18 @@ jobs:
 
           echo "Could not publish leaderboard data after 3 attempts." >&2
           exit 1
+
+      - name: Request a GitHub Pages build
+        if: success()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          echo "Requesting a GitHub Pages build for the latest default-branch version."
+          curl --fail-with-body --silent --show-error \
+            --request POST \
+            --url "https://api.github.com/repos/${REPOSITORY}/pages/builds" \
+            --header "Accept: application/vnd.github+json" \
+            --header "Authorization: Bearer ${GH_TOKEN}" \
+            --header "X-GitHub-Api-Version: 2022-11-28"
