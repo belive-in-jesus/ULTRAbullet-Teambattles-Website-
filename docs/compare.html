@@ -15,6 +15,7 @@
   <link href="css/compare.css" rel="stylesheet">
   <link href="css/navigation-hubs.css" rel="stylesheet">
   <link href="css/arena-design-system.css" rel="stylesheet">
+  <link href="css/site-footer.css" rel="stylesheet">
 </head>
 <body>
   <main class="shell compare-shell">
@@ -35,9 +36,9 @@
       </div>
     </nav>
     <header class="compare-hero">
-      <span class="eyebrow">HEAD-TO-HEAD · SHARED BATTLE HISTORY</span>
+      <span class="eyebrow">COMPARE BATTLES</span>
       <h1>Compare <em>performance.</em></h1>
-      <p>Compare two players or two teams using their published profiles, normalized Performance Index and battles in which both appeared.</p>
+      <p>Compare two players or two teams using their profiles, Performance Index and the battles they both played.</p>
     </header>
     <section class="compare-form-panel">
       <div class="compare-kind" role="group" aria-label="Competitor type">
@@ -45,40 +46,45 @@
         <button type="button" data-kind="team" aria-pressed="false">Teams</button>
       </div>
       <form id="compare-form" class="compare-form">
-        <label>First competitor<input id="compare-a" required autocomplete="off" placeholder="Lichess username or team ID"></label>
+        <label>First team or player<input id="compare-a" required autocomplete="off" placeholder="Lichess username or team ID"></label>
         <span class="compare-versus">VS</span>
-        <label>Second competitor<input id="compare-b" required autocomplete="off" placeholder="Lichess username or team ID"></label>
+        <label>Second team or player<input id="compare-b" required autocomplete="off" placeholder="Lichess username or team ID"></label>
         <button type="submit" class="compare-submit">Compare results</button>
       </form>
-      <p class="compare-hint">Enter the exact Lichess username or team ID. Player and team comparisons are kept separate.</p>
-      <p id="compare-message" class="compare-message" role="status" aria-live="polite">Enter two competitors to begin.</p>
+      <p class="compare-hint">Enter the exact Lichess username or team ID. Compare players with players and teams with teams.</p>
+      <p id="compare-message" class="compare-message" role="status" aria-live="polite">Enter two names or team IDs to start.</p>
     </section>
     <section id="compare-results" class="compare-results hidden" aria-live="polite">
       <div class="compare-identities" id="compare-identities"></div>
       <div class="compare-summary-grid" id="compare-summary"></div>
       <section class="compare-panel">
-        <div class="compare-panel-heading"><div><span class="eyebrow">NORMALIZED PERFORMANCE</span><h2>Performance Index</h2></div><a href="./performance-index.html">Methodology ↗</a></div>
+        <div class="compare-panel-heading"><div><span class="eyebrow">PERFORMANCE INDEX</span><h2>Performance Index</h2></div><a href="./performance-index.html">Methodology ↗</a></div>
         <div class="compare-pi-grid" id="compare-pi"></div>
       </section>
       <section class="compare-panel">
-        <div class="compare-panel-heading"><div><span class="eyebrow">SEASON-BY-SEASON</span><h2>Performance Index history</h2></div><span class="compare-count">Fixed 50-battle seasons</span></div>
+        <div class="compare-panel-heading"><div><span class="eyebrow">BY SEASON</span><h2>Performance Index history</h2></div><span class="compare-count">Seasons with 50 battles each</span></div>
         <div class="compare-table-wrap">
           <table class="compare-table compare-pi-history-table">
             <thead><tr><th>Season</th><th id="pi-history-name-a">Competitor A · career PI / rank / season PI</th><th id="pi-history-name-b">Competitor B · career PI / rank / season PI</th></tr></thead>
-            <tbody id="compare-pi-history"><tr><td colspan="3" class="compare-message">Historical PI data will appear after the next successful full statistics refresh.</td></tr></tbody>
+            <tbody id="compare-pi-history"><tr><td colspan="3" class="compare-message">Past Performance Index data will appear after the next full data update.</td></tr></tbody>
           </table>
         </div>
-        <p class="compare-hint">Career PI is cumulative through the season checkpoint. Season PI uses only ranked results from that season and becomes official from ten ranked battles.</p>
+        <p class="compare-hint">Career PI includes results up to the end of each season. Season PI only uses results from that season. A season score is official after ten ranked battles.</p>
       </section>
       <section class="compare-panel">
         <div class="compare-panel-heading"><div><span class="eyebrow">DIRECT RECORD</span><h2>Shared battles</h2></div><span id="shared-count" class="compare-count">—</span></div>
         <div class="compare-table-wrap"><table class="compare-table"><thead><tr><th>Battle</th><th>Date</th><th id="compare-name-a">Competitor A</th><th id="compare-name-b">Competitor B</th><th>Result</th></tr></thead><tbody id="shared-battles"></tbody></table></div>
-        <p class="compare-hint">A direct win means the competitor recorded the higher score in the same battle. Equal scores count as a draw.</p>
+        <p class="compare-hint">A win means one side scored more points in the same battle. Equal scores are a draw.</p>
       </section>
     </section>
     <footer class="compare-footer"><span>UltraBullet Team Battles · Head-to-head comparison</span><a href="./rankings.html">Back to rankings ↑</a></footer>
   </main>
   <script src="js/compare-core.js" defer></script>
   <script src="js/compare.js" defer></script>
+
+  <footer class="site-credit-footer" aria-label="Website information">
+    <p><span class="site-credit-title">Website made with AI-assisted vibecoding.</span><span class="site-credit-detail">Built for the ULTRAbullet Team Battles community.</span></p>
+    <p>Prefer the classic version without AI assistance? <a href="https://lichessbotacc.github.io/Gift-For-Nathanael/" target="_blank" rel="noopener noreferrer">Visit the original DarkOnCrack website</a>.</p>
+  </footer>
 </body>
 </html>
