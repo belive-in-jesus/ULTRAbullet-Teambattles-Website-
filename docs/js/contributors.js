@@ -69,7 +69,7 @@
   function showError(error){
     console.error("Contributor leaderboard could not be loaded:",error);
     $("contributors-updated").textContent="PLAYER DATA NOT READY";
-    $("contributors-podium").innerHTML='<div class="contributors-error">The player contribution list is not ready yet. An organiser can check the data update. <a href="https://github.com/belive-in-jesus/ULTRAbullet-Teambattles-Website-/actions/workflows/leaderboard.yml" target="_blank" rel="noopener noreferrer">Leaderboard data workflow</a> once after this update, then reload this page.</div>';
+    $("contributors-podium").innerHTML='<div class="contributors-error">The player contribution list is not ready yet. Please check again after the next data update.</div>';
     $("contributors-rows").innerHTML='<tr><td colspan="7" class="contributors-error">The player contribution list is not ready yet. It will appear after the next data update.</td></tr>';
     $("contributors-range").textContent="Player contribution list not ready";$("contributors-count").textContent="— entries";
   }
