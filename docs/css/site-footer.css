@@ -1,0 +1,40 @@
+/* Shared footer shown on every public page. */
+.site-credit-footer {
+  width: min(1240px, calc(100% - 44px));
+  margin: 44px auto 0;
+  padding: 18px 0 26px;
+  border-top: 1px solid rgba(112, 149, 180, .22);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px 22px;
+  color: #98a9bf;
+  font-size: .76rem;
+  line-height: 1.7;
+}
+.site-credit-footer p { margin: 0; }
+.site-credit-footer .site-credit-title {
+  display: block;
+  color: #eaf3fb;
+  font-size: .8rem;
+  font-weight: 800;
+  letter-spacing: .025em;
+}
+.site-credit-footer .site-credit-detail { color: #98a9bf; }
+.site-credit-footer a {
+  color: #70dce5;
+  font-weight: 750;
+  text-decoration: underline;
+  text-decoration-color: rgba(112, 220, 229, .38);
+  text-underline-offset: 3px;
+}
+.site-credit-footer a:hover { text-decoration-color: currentColor; }
+@media (max-width: 600px) {
+  .site-credit-footer {
+    width: calc(100% - 28px);
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 6px;
+  }
+}
