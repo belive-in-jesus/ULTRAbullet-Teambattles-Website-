@@ -215,7 +215,7 @@
       <article class="dashboard-card season-card">
         <div class="dashboard-card-head"><span class="info-kicker">CURRENT SEASON</span><span class="dashboard-status" id="season-status">LOADING</span></div>
         <h2 id="season-title">Loading season…</h2>
-        <p class="dashboard-sub" id="season-detail">Reading the latest seasonal index.</p>
+        <p class="dashboard-sub" id="season-detail">Loading this season's results.</p>
         <div class="progress-track" id="season-progress" role="progressbar" aria-label="Current season progress" aria-valuemin="0" aria-valuemax="50" aria-valuenow="0"><span id="season-progress-bar"></span></div>
         <div class="progress-caption"><strong id="season-progress-text">—</strong><span id="season-progress-percent">—</span></div>
         <a class="dashboard-link" href="#leaderboard">View rankings ↓</a>
@@ -248,7 +248,7 @@
         <article class="global-analytics-stat">
           <span>Average participants per battle</span>
           <strong id="global-avg-participants">—</strong>
-          <small>Across battles with published entrant counts</small>
+          <small>Based on battles where Lichess shows the number of entrants</small>
         </article>
         <article class="global-analytics-stat">
           <span>Highest recorded participation</span>
@@ -315,7 +315,7 @@
         </article>
         <article class="global-analytics-panel">
           <div class="global-analytics-panel-head">
-            <div><span class="global-analytics-kicker">NORMALIZED PERFORMANCE</span><h3>Top teams · Performance Index</h3><p>Top team Performance Index scores. These are separate from total points.</p></div>
+            <div><span class="global-analytics-kicker">PERFORMANCE INDEX</span><h3>Top teams · Performance Index</h3><p>Top team Performance Index scores. These are separate from total points.</p></div>
             <a class="global-analytics-panel-note" href="./performance-index.html">FULL RANKING ↗</a>
           </div>
           <div class="global-leader-list" id="global-pi-teams"><div class="global-analytics-empty">Loading team Performance Index leaders…</div></div>
@@ -329,7 +329,7 @@
         </article>
         <article class="global-analytics-panel global-analytics-panel--wide">
           <div class="global-analytics-panel-head">
-            <div><span class="global-analytics-kicker">CAREER RECORDS</span><h3>Notable achievements</h3><p>Current top results for selected player and team records.</p></div>
+            <div><span class="global-analytics-kicker">ALL-TIME RECORDS</span><h3>Notable achievements</h3><p>Current top results for selected player and team records.</p></div>
           </div>
           <div class="global-record-list" id="global-records"><div class="global-analytics-empty">Loading career records…</div></div>
         </article>
@@ -344,14 +344,14 @@
   </div>
   <div class="compare-pickers">
     <div class="compare-picker">
-      <label class="compare-label" for="compare-search-a"><span class="compare-letter letter-a">A</span> Competitor A</label>
-      <input id="compare-search-a" class="compare-input" type="search" autocomplete="off" placeholder="Search a team or player…" aria-label="Search competitor A">
+      <label class="compare-label" for="compare-search-a"><span class="compare-letter letter-a">A</span> Team or player A</label>
+      <input id="compare-search-a" class="compare-input" type="search" autocomplete="off" placeholder="Search a team or player…" aria-label="Search for team or player A">
       <div class="compare-suggestions" id="compare-suggestions-a" role="listbox" aria-label="Competitor A search results"><p>Search for a competitor to compare.</p></div>
-      <div class="compare-picked" id="compare-picked-a"><span class="compare-empty-mark">A</span><span>Leading competitor</span></div>
+      <div class="compare-picked" id="compare-picked-a"><span class="compare-empty-mark">A</span><span>Leading team or player</span></div>
     </div>
     <div class="compare-picker">
-      <label class="compare-label" for="compare-search-b"><span class="compare-letter letter-b">B</span> Competitor B</label>
-      <input id="compare-search-b" class="compare-input" type="search" autocomplete="off" placeholder="Search a team or player…" aria-label="Search competitor B">
+      <label class="compare-label" for="compare-search-b"><span class="compare-letter letter-b">B</span> Team or player B</label>
+      <input id="compare-search-b" class="compare-input" type="search" autocomplete="off" placeholder="Search a team or player…" aria-label="Search for team or player B">
       <div class="compare-suggestions" id="compare-suggestions-b" role="listbox" aria-label="Competitor B search results"><p>Search for a competitor to compare.</p></div>
       <div class="compare-picked" id="compare-picked-b"><span class="compare-empty-mark">B</span><span>Second competitor</span></div>
     </div>
@@ -383,7 +383,7 @@
           <option value="0">Any activity</option><option value="5">5+ battles</option><option value="25">25+ battles</option><option value="50">50+ battles</option><option value="100">100+ battles</option>
         </select>
         <select id="sort-select" class="select-input" aria-label="Sort leaderboard" style="width:auto;min-width:155px">
-          <option value="rank">Sort: Rank</option><option value="points">Sort: Points</option><option value="avg_points">Sort: Average points</option><option value="battles">Sort: Battles</option><option value="podiums">Sort: Podiums</option><option value="first_places">Sort: First places</option><option value="best_finish">Sort: Best finish</option><option value="last_played">Sort: Recent activity</option>
+          <option value="rank">Sort: Rank</option><option value="points">Sort: Points</option><option value="avg_points">Sort: Average points</option><option value="battles">Sort: Battles</option><option value="podiums">Sort: Top-three finishes</option><option value="first_places">Sort: First places</option><option value="best_finish">Sort: Best finish</option><option value="last_played">Sort: Recent activity</option>
         </select>
         <button id="export-btn" class="filter-button" type="button">Export CSV ↗</button>
       </div>
@@ -393,7 +393,7 @@
             <tr><th scope="col">Rank</th><th scope="col">Name</th><th scope="col" class="optional-col">Battles</th><th scope="col" class="points">Points</th><th scope="col" class="optional-col points">Avg / Battle</th></tr>
           </thead>
           <tbody id="leaderboard-body">
-            <tr><td colspan="5"><div class="empty"><strong>Loading standings…</strong>Fetching the latest published data.</div></td></tr>
+            <tr><td colspan="5"><div class="empty"><strong>Loading standings…</strong>Loading the latest results.</div></td></tr>
           </tbody>
         </table>
       </div>
@@ -834,7 +834,7 @@ async function init(){
   if(res[0].status==="rejected"||res[1].status==="rejected")$("updated-label").classList.add("error");
   if(res[2].status==="rejected")$("history-status").textContent="Battle archive unavailable — run the leaderboard workflow to generate it.";
   else if(Number(state.meta.errors_count||0)>0)$("history-status").textContent="Archive refreshed · "+num(state.meta.errors_count)+" data collection issue(s) recorded.";
-  else $("history-status").textContent="Archive from latest successful data refresh · no collection errors recorded";
+  else $("history-status").textContent="Archive from the latest data update · no collection errors recorded";
   $("period-type").disabled=!state.periodsIndex;
   $("period-type").title=state.periodsIndex?"Choose all-time, monthly or 50-battle seasonal rankings":"Period rankings will become available after the V1.2 data refresh";
   render();renderHistory();renderDashboard();
