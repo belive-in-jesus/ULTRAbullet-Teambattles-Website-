@@ -182,6 +182,26 @@ class WebsiteAssetTests(unittest.TestCase):
                 )
 
 
+    def test_contributor_page_shows_dynamic_team_member_data_coverage(self):
+        page = (DOCS / "contributors.html").read_text(encoding="utf-8")
+        script = (DOCS / "js" / "contributors.js").read_text(encoding="utf-8")
+        self.assertIn('id="contributors-coverage-note"', page)
+        self.assertIn('fetch("./data/meta.json"', script)
+        self.assertIn("teams_with_member_data_count", script)
+        self.assertIn("teams_count", script)
+        self.assertIn("not full team rosters", script)
+
+    def test_performance_index_explains_the_full_calculation(self):
+        source = (DOCS / "performance-index.html").read_text(encoding="utf-8")
+        for phrase in (
+            "Battle score:",
+            "population standard deviation",
+            "last 10 ranked battle results",
+            "Final PI:",
+            "at least 10 ranked results",
+        ):
+            self.assertIn(phrase, source)
+
     def test_rankings_hub_routes_to_existing_functional_ranking_views(self):
         source = (DOCS / "rankings.html").read_text(encoding="utf-8")
         for href in (
