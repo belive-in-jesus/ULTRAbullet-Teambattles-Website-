@@ -10,20 +10,20 @@
   const dataPath=()=>state.kind==="team"?"teams":"players";
   async function load(path){const response=await fetch(path,{cache:"no-cache"});if(!response.ok)throw new Error("Could not load "+path+" ("+response.status+")");return response.json();}
   async function loadCompetitor(id){
-    const key=normalize(id);if(!key)throw new Error("Please enter both competitor IDs.");
+    const key=normalize(id);if(!key)throw new Error("Enter both team IDs or player usernames.");
     const kind=dataPath();
     const index=await load("./data/profiles/index/"+kind+"-"+bucket(key)+".json");
     const entry=index[key];if(!entry)throw new Error("No "+state.kind+" profile found for “"+id+"”. Check the exact ID.");
     const shard=await load("./data/"+entry.profile_file);
     const profile=shard&&shard[entry.profile_key];
-    if(!profile||!Array.isArray(profile.history))throw new Error("Detailed battle history is unavailable for "+id+".");
+    if(!profile||!Array.isArray(profile.history))throw new Error("Battle history is not available for "+id+".");
     return {entry,history:profile.history,name:state.kind==="team"?(entry.team_name||entry.name||id):(entry.username||entry.name||id),id:key};
   }
   function piCard(comp){
     const row=comp.entry;
-    if(row.performance_index==null)return '<article class="compare-pi-card"><h3>'+esc(comp.name)+'</h3><strong>—</strong><small>PI not available yet</small><p>Refresh the published statistics to calculate the index.</p></article>';
+    if(row.performance_index==null)return '<article class="compare-pi-card"><h3>'+esc(comp.name)+'</h3><strong>—</strong><small>PI not available yet</small><p>The index will appear after the next data update.</p></article>';
     const eligible=Boolean(row.performance_index_eligible)&&row.performance_index_rank!=null;
-    return '<article class="compare-pi-card"><h3>'+esc(comp.name)+'</h3><strong>'+fmt(row.performance_index)+'</strong><small>Performance Index · '+(eligible?"Rank #"+esc(row.performance_index_rank):"Provisional")+'</small><p>'+esc(row.performance_index_battles||0)+' valid ranked battle results</p></article>';
+    return '<article class="compare-pi-card"><h3>'+esc(comp.name)+'</h3><strong>'+fmt(row.performance_index)+'</strong><small>Performance Index · '+(eligible?"Rank #"+esc(row.performance_index_rank):"Not ranked yet")+'</small><p>'+esc(row.performance_index_battles||0)+' ranked battle results</p></article>';
   }
   function renderPiHistory(a,b){
     const rows=window.UBTCompareCore.comparePerformanceIndexHistories(
@@ -33,14 +33,14 @@
     $("pi-history-name-a").textContent=a.name+" · Career PI / rank / season PI";
     $("pi-history-name-b").textContent=b.name+" · Career PI / rank / season PI";
     if(!rows.length){
-      $("compare-pi-history").innerHTML='<tr><td colspan="3" class="compare-message">Historical PI data will appear after the next successful full statistics refresh.</td></tr>';
+      $("compare-pi-history").innerHTML='<tr><td colspan="3" class="compare-message">Past PI data will appear after the next full data update.</td></tr>';
       return;
     }
     const cell=value=>{
       if(!value)return '<span class="compare-pi-history-missing">—</span>';
       const rank=value.careerRank==null?"—":"#"+fmt(value.careerRank);
       const seasonal=value.seasonPI==null?"—":fmt(value.seasonPI);
-      return '<strong>'+fmt(value.careerPI)+'</strong><span>Career rank '+rank+' · Season PI '+seasonal+'</span><small>'+fmt(value.careerBattles)+' career / '+fmt(value.seasonBattles)+' season battles</small>';
+      return '<strong>'+fmt(value.careerPI)+'</strong><span>All-time place '+rank+' · Season PI '+seasonal+'</span><small>'+fmt(value.careerBattles)+' all-time / '+fmt(value.seasonBattles)+' season battles</small>';
     };
     $("compare-pi-history").innerHTML=rows.map(row=>
       '<tr><td>Season '+row.season+'</td><td>'+cell(row.a)+'</td><td>'+cell(row.b)+'</td></tr>'
@@ -73,25 +73,25 @@
       const link=row.a.id?"https://lichess.org/tournament/"+encodeURIComponent(row.a.id):"#";
       const date=row.a.startsAt?new Date(Number(row.a.startsAt)).toLocaleDateString():"—";
       return '<tr><td><a href="'+link+'" target="_blank" rel="noopener noreferrer">'+esc(battle)+'</a></td><td>'+esc(date)+'</td><td>'+fmt(sa)+' · #'+fmt(row.a.rank)+'</td><td>'+fmt(sb)+' · #'+fmt(row.b.rank)+'</td><td>'+result+'</td></tr>';
-    }).join(""):'<tr><td colspan="5" class="compare-message">No shared battle results were found for these two competitors.</td></tr>';
+    }).join(""):'<tr><td colspan="5" class="compare-message">These teams or players have no shared battles in the archive.</td></tr>';
     $("compare-results").classList.remove("hidden");
-    $("compare-message").textContent="Comparison complete · "+common.length+" shared battle(s) found. Score totals: "+fmt(pointsA)+" vs "+fmt(pointsB)+" from "+summary.comparableScoreBattles+" comparable battles. Placement advantages: "+rankWinsA+" vs "+rankWinsB+" from "+summary.comparableRankBattles+" battles with both ranks available.";
+    $("compare-message").textContent="Done · "+common.length+" shared battle(s) found. Score totals: "+fmt(pointsA)+" vs "+fmt(pointsB)+" from "+summary.comparableScoreBattles+" comparable battles. Higher places: "+rankWinsA+" vs "+rankWinsB+" from "+summary.comparableRankBattles+" battles with both ranks available.";
   }
   async function compare(){
-    $("compare-message").textContent="Loading profiles and matching battle histories…";
+    $("compare-message").textContent="Loading profiles and finding shared battles…";
     $("compare-results").classList.add("hidden");
     try{
       const aId=$("compare-a").value.trim(),bId=$("compare-b").value.trim();
-      if(normalize(aId)===normalize(bId))throw new Error("Choose two different competitors.");
+      if(normalize(aId)===normalize(bId))throw new Error("Choose two different teams or players.");
       const [a,b]=await Promise.all([loadCompetitor(aId),loadCompetitor(bId)]);
       render(a,b);
-    }catch(error){$("compare-message").textContent=error.message||"Comparison could not be loaded.";}
+    }catch(error){$("compare-message").textContent=error.message||"The comparison could not be loaded.";}
   }
   document.querySelectorAll("[data-kind]").forEach(button=>button.addEventListener("click",()=>{
     state.kind=button.dataset.kind;
     document.querySelectorAll("[data-kind]").forEach(item=>{const active=item===button;item.classList.toggle("active",active);item.setAttribute("aria-pressed",String(active));});
     $("compare-results").classList.add("hidden");
-    $("compare-message").textContent="Competitor type changed. Enter two "+(state.kind==="team"?"team IDs":"Lichess usernames")+".";
+    $("compare-message").textContent="Selection changed. Enter two "+(state.kind==="team"?"team IDs":"Lichess usernames")+".";
   }));
   document.querySelectorAll("[data-kind]").forEach(item=>{
     const active=item.dataset.kind===state.kind;
@@ -100,5 +100,5 @@
   });
   $("compare-a").value=state.a;
   $("compare-form").addEventListener("submit",event=>{event.preventDefault();compare();});
-  if(state.a){$("compare-message").textContent="First competitor prefilled. Enter the second competitor."; $("compare-b").focus();}
+  if(state.a){$("compare-message").textContent="The first team or player is filled in. Enter the second one."; $("compare-b").focus();}
 })();
