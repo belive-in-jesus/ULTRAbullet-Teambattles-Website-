@@ -116,7 +116,7 @@
 
   function performanceIndexList(rows, kind) {
     if (!Array.isArray(rows) || !rows.length) {
-      return '<p class="global-analytics-empty">No officially eligible Performance Index results are available yet.</p>';
+      return '<p class="global-analytics-empty">No Performance Index results are ready yet.</p>';
     }
     return rows.slice(0, 5).map(row => {
       const id = String(row.id || "");
@@ -125,7 +125,7 @@
       return '<a class="global-leader-row global-pi-leader-row" href="' + escapeHtml(profileUrl) + '">' +
         '<span class="global-leader-rank">#' + escapeHtml(row.rank ?? "—") + '</span>' +
         '<span class="global-leader-copy"><strong>' + title + '</strong><small>' +
-        number(row.battles) + ' ranked battles · Performance Index</small></span>' +
+        number(row.battles) + ' battles counted · Performance Index</small></span>' +
         '<strong class="global-leader-points">' + number(row.score) + '<small>/100</small></strong></a>';
     }).join("");
   }
@@ -168,13 +168,13 @@
     const months = Array.isArray(timeseries.months) ? timeseries.months : [];
     const seasons = Array.isArray(timeseries.seasons) ? timeseries.seasons : [];
     const chartData = [
-      ["global-battles-chart", months, "battle_count", "Number of eligible battles per UTC month", "battles"],
+      ["global-battles-chart", months, "battle_count", "Number of numbered battles per UTC month", "battles"],
       ["global-players-chart", months, "active_players", "Distinct active players per UTC month", "players"],
       ["global-teams-chart", months, "active_teams", "Distinct active teams per UTC month", "teams"],
       ["global-seasons-chart", seasons.map(row => ({
         ...row,
         label: "S" + row.season_number
-      })), "battle_count", "Recorded battles per fixed 50-battle season", "battles", 20]
+      })), "battle_count", "Recorded battles in each 50-battle season", "battles", 20]
     ];
     for (const [id, rows, field, label, unit, maxItems] of chartData) {
       const element = documentObject.getElementById(id);
@@ -193,7 +193,7 @@
     if (piPlayers) piPlayers.innerHTML = performanceIndexList(overview.performance_index?.players, "player");
 
     const note = documentObject.getElementById("global-analytics-method");
-    if (note) note.textContent = "Active competitors are counted once per UTC month when they have a recorded result. Participants per battle come from Lichess tournament entrant counts. Seasons use fixed blocks of 50 official battle numbers.";
+    if (note) note.textContent = "Each player or team is counted once per UTC month if they had a result. Participant totals come from the number of entrants shown on Lichess. Seasons use groups of 50 battle numbers.";
     return true;
   }
 
@@ -222,7 +222,7 @@
       const status = root.document.getElementById("global-analytics-updated");
       if (status) status.textContent = "GLOBAL ANALYTICS UNAVAILABLE";
       const method = root.document.getElementById("global-analytics-method");
-      if (method) method.textContent = "The dashboard analytics summary could not be loaded. Core leaderboard data remains available.";
+      if (method) method.textContent = "The extra dashboard stats could not be loaded. The main rankings are still available.";
     });
     if (root.document.readyState === "loading") {
       root.document.addEventListener("DOMContentLoaded", start, { once: true });
