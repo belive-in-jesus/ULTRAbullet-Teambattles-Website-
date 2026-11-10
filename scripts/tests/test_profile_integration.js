@@ -162,15 +162,15 @@ test("full player-profile startup renders every new analytics module", async () 
     teams: [{ id: "sample-team", name: "🏆 The House", battles_listed: 3, contribution_points: 120, avg_contribution: 40, last_seen: Date.parse("2026-10-30T12:00:00Z") }]
   });
 
-  assert.match(elements.get("profile-pi-card").innerHTML, /Historical PI development/);
+  assert.match(elements.get("profile-pi-card").innerHTML, /PI over time/);
   assert.match(elements.get("profile-pi-card").innerHTML, /Season PI/);
   assert.match(elements.get("profile-pi-card").innerHTML, /Career PI/);
-  assert.match(elements.get("profile-pi-card").innerHTML, /Career PI rank/);
+  assert.match(elements.get("profile-pi-card").innerHTML, /All-time PI place/);
   assert.match(elements.get("profile-pi-card").innerHTML, /#1/);
   assert.match(elements.get("profile-pi-card").innerHTML, /82.4/);
   assert.match(elements.get("profile-chart").innerHTML, /<svg/);
   elements.get("chart-mode-rank").listeners.click();
-  assert.match(elements.get("profile-chart").innerHTML, /Cumulative all-time rank history/);
+  assert.match(elements.get("profile-chart").innerHTML, /All-time place over time/);
   assert.match(elements.get("profile-chart").innerHTML, /After Battle 643/);
   assert.equal(elements.get("chart-mode-rank").attributes["aria-pressed"], "true");
   elements.get("chart-mode-score").listeners.click();
