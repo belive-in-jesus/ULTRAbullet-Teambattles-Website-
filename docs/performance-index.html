@@ -15,6 +15,7 @@
   <link href="css/performance-index.css" rel="stylesheet">
   <link href="css/navigation-hubs.css" rel="stylesheet">
   <link href="css/arena-design-system.css" rel="stylesheet">
+  <link href="css/site-footer.css" rel="stylesheet">
 </head>
 <body>
   <main class="shell pi-shell">
@@ -36,19 +37,19 @@
     </nav>
 
     <section class="pi-hero">
-      <span class="eyebrow">V2 STATISTICS · PERFORMANCE INDEX</span>
+      <span class="eyebrow">PERFORMANCE INDEX</span>
       <h1>Performance beyond <em>total points.</em></h1>
-      <p>The Performance Index (PI) compares results by normalizing each finish against the number of players or teams in that battle. It is a separate ranking and does not replace the established cumulative-points standings.</p>
+      <p>The Performance Index (PI) compares results from battles of different sizes. It gives a separate view and does not replace the normal points table.</p>
       <div class="pi-hero-stats">
-        <div><strong>0–100</strong><span>Index scale</span></div>
-        <div><strong>10</strong><span>Ranked battles to qualify</span></div>
-        <div><strong>4</strong><span>Weighted components</span></div>
+        <div><strong>0–100</strong><span>Score range</span></div>
+        <div><strong>10</strong><span>Battles needed for a full rank</span></div>
+        <div><strong>4</strong><span>Parts of the score</span></div>
       </div>
     </section>
 
     <section class="pi-panel" aria-labelledby="pi-ranking-title">
       <div class="pi-panel-heading">
-        <div><span class="eyebrow">ELIGIBLE COMPETITORS</span><h2 id="pi-ranking-title">Performance ranking</h2></div>
+        <div><span class="eyebrow">PLAYERS AND TEAMS</span><h2 id="pi-ranking-title">Performance ranking</h2></div>
         <span id="pi-count" class="pi-count">Loading…</span>
       </div>
       <div class="pi-controls">
@@ -73,18 +74,23 @@
     </section>
 
     <section class="pi-method">
-      <div><span class="eyebrow">HOW IT IS CALCULATED</span><h2>A transparent, weighted score.</h2><p>Each battle finish is converted to a 0–100 performance value: first place receives 100, last place receives 0, with the other positions spaced proportionally between them.</p></div>
+      <div><span class="eyebrow">HOW IT IS CALCULATED</span><h2>How the score works</h2><p>Each battle result is changed to a score from 0 to 100. First place gets 100, last place gets 0, and the other places fall between them.</p></div>
       <div class="pi-weights">
-        <div><span>Average performance</span><strong>40%</strong></div>
+        <div><span>Average result</span><strong>40%</strong></div>
         <div><span>Consistency</span><strong>25%</strong></div>
-        <div><span>Recent performance · last 10</span><strong>20%</strong></div>
-        <div><span>Participation · capped at 50 battles</span><strong>15%</strong></div>
+        <div><span>Recent results · last 10 battles</span><strong>20%</strong></div>
+        <div><span>Participation · up to 50 battles</span><strong>15%</strong></div>
       </div>
-      <p class="pi-method-note">Consistency rewards a stable normalized performance: it starts at 100 and decreases with the standard deviation of the competitor's results. Participation reaches its maximum contribution at 50 recorded battles. PI is descriptive, not an official Lichess rating.</p>
+      <p class="pi-method-note">The consistency score is higher when results stay similar from battle to battle. It starts at 100 and falls as results vary more. The participation score reaches its full value after 50 recorded battles. The PI is a statistic, not an official Lichess rating.</p>
     </section>
 
     <footer class="pi-footer"><span>ULTRAbullet Team Battles · Performance Index methodology</span><a href="./rankings.html">Back to rankings ↑</a></footer>
   </main>
   <script src="js/performance-index.js" defer></script>
+
+  <footer class="site-credit-footer" aria-label="Website information">
+    <p><span class="site-credit-title">Website made with AI-assisted vibecoding.</span><span class="site-credit-detail">Built for the ULTRAbullet Team Battles community.</span></p>
+    <p>Prefer the classic version without AI assistance? <a href="https://lichessbotacc.github.io/Gift-For-Nathanael/" target="_blank" rel="noopener noreferrer">Visit the original DarkOnCrack website</a>.</p>
+  </footer>
 </body>
 </html>
