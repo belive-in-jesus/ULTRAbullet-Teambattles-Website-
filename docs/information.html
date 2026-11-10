@@ -39,6 +39,7 @@
   <link href="css/v2-visual-system.css" rel="stylesheet">
   <link href="css/navigation-hubs.css" rel="stylesheet">
   <link href="css/arena-design-system.css" rel="stylesheet">
+  <link href="css/site-footer.css" rel="stylesheet">
 </head>
 <body class="page-information">
   <main class="shell info-main">
@@ -62,14 +63,14 @@
     <section class="info-hero">
       <span class="eyebrow">THE COMPETITIVE ULTRABULLET COMMUNITY</span>
       <h1>Understand the <em>leaderboard.</em></h1>
-      <p>This page explains which tournaments are included, how the rankings are grouped and what the statistics mean. The aim is to keep the results consistent and easy to verify.</p>
+      <p>This page explains which battles count, how the rankings work and what the stats mean. We want every result to be clear and easy to check.</p>
     </section>
 
     <section class="info-grid" aria-label="Leaderboard information">
       <article class="info-card">
         <span class="info-kicker">01 / Eligibility</span>
         <h2>Which battles count?</h2>
-        <p>The regular standings include completed, numbered ULTRAbullet Team Battles created by the configured tournament organiser. A tournament must match the regular battle-title pattern and have a finished Lichess status.</p>
+        <p>We count finished, numbered ULTRAbullet Team Battles created by the tournament organiser. A battle must use the regular title format and have a finished status on Lichess.</p>
         <ul>
           <li>Regular numbered Team Battles are included.</li>
           <li>Unnumbered and special events are excluded.</li>
@@ -80,7 +81,7 @@
       <article class="info-card">
         <span class="info-kicker">02 / Points</span>
         <h2>How are points counted?</h2>
-        <p>Points are accumulated from the published Lichess tournament results. Team standings use the team results; individual standings use each player's individual result. All eligible battles contribute to the all-time totals.</p>
+        <p>Points come from the results published on Lichess. Team rankings use team points; player rankings use each player's points. All counted battles add to the all-time totals.</p>
         <ul>
           <li><strong>Battles played:</strong> eligible tournaments with a recorded result.</li>
           <li><strong>Average points:</strong> points divided by recorded battles played.</li>
@@ -91,39 +92,39 @@
       <article class="info-card info-wide">
         <span class="info-kicker">03 / Ranking periods</span>
         <h2>All-time, monthly and seasonal rankings</h2>
-        <p>The same underlying results can be viewed across three time ranges. Monthly rankings use UTC calendar months. Seasons are tied to official battle numbers, not to how many records happen to be available.</p>
+        <p>You can view the same results over three time periods. Months use the UTC calendar. Seasons use the official battle numbers, even when some results are missing.</p>
         <div class="period-list">
-          <div class="period-item"><strong>All-time</strong><span>Every eligible numbered battle in the collected archive.</span></div>
-          <div class="period-item"><strong>Monthly</strong><span>Eligible battles grouped by calendar month in UTC.</span></div>
-          <div class="period-item"><strong>Seasonal</strong><span>Fixed blocks of 50 official battle numbers: Season 1 = 1–50, Season 2 = 51–100, and so on.</span></div>
+          <div class="period-item"><strong>All-time</strong><span>Every numbered battle in the archive.</span></div>
+          <div class="period-item"><strong>Monthly</strong><span>Battles grouped by month using UTC time.</span></div>
+          <div class="period-item"><strong>Seasonal</strong><span>Each season covers 50 battle numbers: Season 1 = 1–50, Season 2 = 51–100, and so on.</span></div>
         </div>
-        <div class="info-callout"><strong>Important:</strong> A missing official battle number does not shift later battles into a different season. Any gaps remain attached to their original number range.</div>
+        <div class="info-callout"><strong>Important:</strong> A missing battle number does not move later battles into another season. The gap stays in its original place.</div>
       </article>
 
       <article class="info-card">
         <span class="info-kicker">04 / Updates</span>
         <h2>When is the data refreshed?</h2>
-        <p>The leaderboard data is refreshed automatically once per day through GitHub Actions, with a scheduled run at 03:00 UTC. The homepage displays the timestamp of the latest successful data generation.</p>
+        <p>The data is updated automatically twice a day, at 06:15 and 18:15 Berlin time. The home page shows when the latest successful update took place.</p>
         <p style="margin-top:10px">The site is a public, static frontend. No Lichess API token is placed in the website files or exposed to visitors.</p>
       </article>
 
       <article class="info-card">
         <span class="info-kicker">05 / Data quality</span>
         <h2>How should gaps be understood?</h2>
-        <p>Only tournaments that can be discovered and whose results can be collected are available for the calculations. The current season view identifies missing official battle numbers where applicable. A missing record should not be interpreted as a zero-point result.</p>
+        <p>We can only show battles that we can find and whose results we can read. The current season view shows missing battle numbers when known. A missing result does not mean that a player or team scored zero points.</p>
       </article>
 
       <article class="info-card">
         <span class="info-kicker">06 / Profile analytics</span>
         <h2>How should profile charts be read?</h2>
-        <p>Player and team profiles include visual analysis of score progression, placement distribution, monthly points, battle activity and seasonal performance. The period selector filters the profile analytics; the score chart also offers its own recent-battle range.</p>
+        <p>Player and team profiles show points over time, finish places, monthly points, battle activity and season results. You can choose a time period, and the score chart can also show only recent battles.</p>
         <ul>
           <li><strong>Podium rate:</strong> top-three finishes divided by recorded finishes with a known placement.</li>
           <li><strong>Monthly points:</strong> points earned in eligible battles started during that UTC month.</li>
           <li><strong>Activity calendar:</strong> each square shows the number of recorded battles entered on that UTC date. It does not count days without a tournament as missed results.</li>
           <li><strong>Season analytics:</strong> fixed official blocks of 50 numbered battles. A competitor's number of battles entered may be lower than the season's total.</li>
         </ul>
-        <div class="info-callout"><strong>Data note:</strong> Missing or unavailable results are not treated as zero-point performances. The analytics use only the recorded eligible tournament history.</div>
+        <div class="info-callout"><strong>Data note:</strong> Missing results are not counted as zero points. Stats use only the results that are available in the archive.</div>
       </article>
 
       <article class="info-card">
@@ -131,16 +132,16 @@
         <h2>Explore individual battles and ranking development</h2>
         <p>Open <strong>Overview → Battle history</strong> and select a battle title to view its compact report. The report shows the recorded team and individual standings, participant count and a direct link to the original Lichess tournament. Detailed results are loaded only when a report is opened.</p>
         <p style="margin-top:10px">On a player or team profile, the <strong>Performance over time</strong> chart can switch between <strong>Score</strong> and <strong>All-time rank</strong>. Rank history shows the cumulative overall position at the last available numbered battle in each fixed 50-battle season. It is not the placement in an individual tournament; lower rank numbers indicate a higher position.</p>
-        <div class="info-callout"><strong>Data note:</strong> Battle reports and rank checkpoints are generated during a successful leaderboard refresh. A newly added view may remain unavailable until that refresh has completed.</div>
+        <div class="info-callout"><strong>Data note:</strong> Battle reports and rank history are created during a successful data update. A new report may not appear until the next update has finished.</div>
       </article>
 
       <article class="info-card info-wide">
         <span class="info-kicker">08 / Project</span>
         <h2>About this leaderboard</h2>
-        <p>This independent community dashboard brings recurring Lichess UltraBullet Team Battles together in one searchable archive. It is designed for exploring long-term team and player performance, not as an official Lichess rating or title system.</p>
-        <p style="margin-top:10px">Each competitor can also be opened on a dedicated profile page. Profiles summarize recorded results, career statistics, recent performance and individual battle history. Open a team or player from a leaderboard or the Hall of Fame to view its profile.</p>
-        <p style="margin-top:10px">For visual consistency, this site uses the first letter of each player or team name as its identity mark instead of Lichess profile or team flair. The mark is decorative only; names and Lichess links remain unchanged.</p>
-        <p style="margin-top:10px">The battle-result aggregation concept and original processing script are based on <a href="https://lichessbotacc.github.io/Gift-For-Nathanael/" target="_blank" rel="noopener noreferrer">DarkOnCrack's Gift For Nathanael</a>, used with permission. Tournament play and results remain on <a href="https://lichess.org/" target="_blank" rel="noopener noreferrer">Lichess.org</a>.</p>
+        <p>This is an independent community website for recurring Lichess UltraBullet Team Battles. It brings results together in one searchable archive. It is not an official Lichess rating or title system.</p>
+        <p style="margin-top:10px">Every team and player has a profile page with results, stats, recent form and battle history. Open a team or player from a leaderboard or the Hall of Fame to view its profile.</p>
+        <p style="margin-top:10px">The small symbol beside each name uses its first letter. It is only for display; names and Lichess links stay the same.</p>
+        <p style="margin-top:10px">The results script is based on <a href="https://lichessbotacc.github.io/Gift-For-Nathanael/" target="_blank" rel="noopener noreferrer">DarkOnCrack's Gift For Nathanael</a>, used with permission. Tournament play and results remain on <a href="https://lichess.org/" target="_blank" rel="noopener noreferrer">Lichess.org</a>.</p>
         <div class="info-callout">For the latest standings and the full tournament archive, return to the <a href="./index.html">Leaderboard</a>.</div>
       </article>
     </section>
@@ -149,5 +150,10 @@
       UltraBullet Team Battles · Community statistics dashboard · Rankings are calculated from recorded eligible tournament results.
     </footer>
   </main>
+
+  <footer class="site-credit-footer" aria-label="Website information">
+    <p><span class="site-credit-title">Website made with AI-assisted vibecoding.</span><span class="site-credit-detail">Built for the ULTRAbullet Team Battles community.</span></p>
+    <p>Prefer the classic version without AI assistance? <a href="https://lichessbotacc.github.io/Gift-For-Nathanael/" target="_blank" rel="noopener noreferrer">Visit the original DarkOnCrack website</a>.</p>
+  </footer>
 </body>
 </html>
