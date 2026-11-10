@@ -79,14 +79,14 @@ function playerRows(count) {
 
 test("older leaderboard snapshots show an unpublished-data notice", async () => {
   const { elements } = await startPage([{ username: "Legacy Player" }]);
-  assert.match(elements.get("pi-rows").innerHTML, /has not been published yet/);
+  assert.match(elements.get("pi-rows").innerHTML, /is not ready yet/);
 });
 
 test("Performance Index pagination renders every eligible competitor in 100-row pages", async () => {
   const { elements } = await startPage(playerRows(235));
   const get = id => elements.get(id);
 
-  assert.equal(get("pi-count").textContent, "235 eligible");
+  assert.equal(get("pi-count").textContent, "235 counted");
   assert.equal((get("pi-rows").innerHTML.match(/<tr>/g) || []).length, 100);
   assert.equal(get("pi-page-summary").textContent, "Showing 1–100 of 235");
   assert.equal(get("pi-page").textContent, "Page 1 of 3");
@@ -131,14 +131,14 @@ test("Performance Index search and competitor switch reset the page", async () =
   assert.equal(get("pi-page").textContent, "Page 2 of 3");
 
   get("pi-search").listeners.input({ target: { value: "Player234" } });
-  assert.equal(get("pi-count").textContent, "1 eligible");
+  assert.equal(get("pi-count").textContent, "1 counted");
   assert.equal(get("pi-page").textContent, "Page 1 of 1");
   assert.match(get("pi-rows").innerHTML, /Player234/);
   assert.doesNotMatch(get("pi-rows").innerHTML, /Provisional/);
 
   get("pi-search").listeners.input({ target: { value: "" } });
   teamButton.listeners.click();
-  assert.equal(get("pi-count").textContent, "1 eligible");
+  assert.equal(get("pi-count").textContent, "1 counted");
   assert.match(get("pi-rows").innerHTML, /Team A/);
   assert.equal(teamButton.attributes["aria-pressed"], "true");
 });
