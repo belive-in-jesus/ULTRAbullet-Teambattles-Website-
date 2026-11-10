@@ -21,19 +21,19 @@
     state.page = Math.max(1, Math.min(state.page, pageCount));
     const start = (state.page - 1) * state.pageSize;
     const visible = rows.slice(start, start + state.pageSize);
-    $("pi-count").textContent = rows.length + " eligible";
+    $("pi-count").textContent = rows.length + " counted";
     $("pi-page-summary").textContent = rows.length
       ? "Showing " + (start + 1).toLocaleString() + "–" + Math.min(start + state.pageSize, rows.length).toLocaleString() + " of " + rows.length.toLocaleString()
-      : "No eligible competitors";
+      : "No teams or players to show";
     $("pi-page").textContent = "Page " + state.page + " of " + pageCount;
     $("pi-prev").disabled = state.page <= 1;
     $("pi-next").disabled = state.page >= pageCount;
     if (!rows.length) {
       const hasPublishedIndex = all.some(row => Object.prototype.hasOwnProperty.call(row, "performance_index"));
       const message = !hasPublishedIndex
-        ? "The Performance Index has not been published yet. It will appear after the next successful full data refresh."
+        ? "The Performance Index is not ready yet. It will appear after the next full data update."
         : all.length
-          ? "No eligible competitors match this search."
+          ? "No teams or players match this search."
           : "No leaderboard entries are available yet.";
       $("pi-rows").innerHTML = '<tr><td colspan="8" class="pi-message">' + message + "</td></tr>";
       return;
@@ -61,7 +61,7 @@
     } catch (error) {
       console.error("Could not load Performance Index", error);
       $("pi-count").textContent = "Unavailable";
-      $("pi-rows").innerHTML = '<tr><td colspan="8" class="pi-message">The Performance Index data could not be loaded. Please try again later.</td></tr>';
+      $("pi-rows").innerHTML = '<tr><td colspan="8" class="pi-message">The Performance Index could not be loaded. Please try again later.</td></tr>';
     }
   }
 
