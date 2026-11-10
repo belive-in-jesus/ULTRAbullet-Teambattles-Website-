@@ -18,7 +18,7 @@ A standalone website for the recurring UltraBullet team battles organised by **N
 - Searchable battle archive linking back to the original Lichess tournaments
 - Information page explaining eligibility, ranking periods, points and data refreshes
 - V2 visual system with distinct dashboard, profile, Hall of Fame and editorial page layouts, responsive navigation and accessible interaction states
-- Daily automated refresh through GitHub Actions
+- Automatic refresh twice daily through GitHub Actions
 - Public, static frontend; no Lichess token is exposed to website visitors
 
 ## Repository layout
@@ -27,7 +27,7 @@ A standalone website for the recurring UltraBullet team battles organised by **N
 - `scripts/discover.py` — finds finished regular ULTRAbullet Team Battles with their official ordinal battle number
 - `scripts/fetch_worker.py` — fetches each tournament's individual and team results
 - `scripts/aggregate.py` — combines scores, calculates career and period statistics, and generates profile shards, the Hall of Fame, the global contributor leaderboard and compact dashboard analytics datasets
-- `.github/workflows/leaderboard.yml` — daily and manual update workflow
+- `.github/workflows/leaderboard.yml` — twice-daily and manual refresh workflow
 - `.github/workflows/validate.yml` — pull-request checks and aggregation tests
 - `scripts/tests/` — Python aggregation and dashboard-data tests plus Node.js regression tests for profile, dashboard, comparison and Performance Index behavior, chart rendering, DOM hooks and browser script syntax
 
@@ -37,6 +37,8 @@ A standalone website for the recurring UltraBullet team battles organised by **N
 2. Select **Deploy from a branch**.
 3. Choose branch `main` and folder `/docs`, then save.
 4. If this account uses GitHub Free, the repository must be **public** to use GitHub Pages. The published site is publicly accessible. See [GitHub Pages documentation](https://docs.github.com/en/pages/getting-started-with-github-pages/what-is-github-pages).
+
+After each successful data refresh, the leaderboard workflow requests a new GitHub Pages build. This extra request is needed because branch-based Pages builds are not automatically triggered by commits made with `GITHUB_TOKEN` ([GitHub documentation](https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site)).
 
 The expected project URL is:
 
@@ -50,7 +52,7 @@ The defaults are:
 - Lichess tournament creator: `Nathanael01`
 - Tournament name filter: `ultrabullet` (case-insensitive substring match)
 - Finished tournaments only
-- Scheduled refresh: daily at 03:00 UTC
+- Scheduled refresh: twice daily at 06:15 and 18:15 Europe/Berlin
 
 You can run the workflow manually from **Actions → UltraBullet Team Battles Leaderboard → Run workflow** and override the Lichess username or the standard tournament-name substring.
 
